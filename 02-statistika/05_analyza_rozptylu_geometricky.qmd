@@ -1,0 +1,249 @@
+# Rozklad rozptylu geometricky
+
+Mějme dvě domácnosti, kteří mají počet vozidel v rozsahu 0-10. V tabulce je označení domácnosti id a počet vozidel y. Naším cílem bude najít 
+**číslo (parametr) $b_0$**, takové které bude reprezentovat data $\mathbf{y}$. Základní model tedy bude mít tvar
+
+:::{.callout-note}
+parametr označujeme s indexem nula proto, abychom mohli model rozčířit o další čeny s parametry $b_1, b_2, ...$
+:::
+
+$$\mathbf{y} = b_0\cdot\mathbf{1}+\mathbf{\epsilon}$$
+
+Vysvětlení značení:
+
+- $\mathbf{y}$ -  vektor dat, který obsahuje počet vozidel pro každou domácnostech, 
+- $\mathbf{1}$ - vektor jedniček, protože chceme pro každou hodnoty $y_i$ stejnou hodnotu $b_0$, 
+- $\mathbf{\epsilon}$ vektor odchylek dat od modelu, který nám říká, jak moc se data od modelu liší. 
+
+
+Za *nejlepší* odhad parametru budeme považovat ten, který má **nejmenší velikost vektoru** $\mathbf{\epsilon}$.
+
+
+
+
+
+::: {.column-margin}
+### Pro pokročilé čtenáře
+
+Model stavíme pouze pro naše data, proto používáme značení $b_0$
+
+indexujeme nulou, abycho mohli rozšířit model o další vstupní proměnné s parametry $b_1, b_2, ...$. 
+
+Odhady parametrů pro populaci najderte v kapitle týkající se inference, specificky regresní analýzy. Tam budeme používat značení $\beta_0, \beta_1, ...$, pro populační parametry a $\hat{\beta}_0, \hat{\beta}_1, ...$ pro odhady populačních
+parametrů na základě dat.
+:::
+
+
+prakticky tedy v tabulce s načimi daty **y** přidáme sloupec **$b_0$**, který má obsahovat stejné (zatím neznámé) číslo pro obě domácnosti. Naším cílem je najít hodnotu čísla $b_0$, pro kterou bude vektor $b_0\mathbf{1}$ co nejblíže vektoru dat $\mathbf{y}$.
+
+:::{style="max-width: fit-content;"}
+|$\mathbf{y}$|$b_0\cdot\mathbf{1}$|
+|:--|:--|
+| 7|$b_0\cdot 1$|
+| 3|$b_0\cdot 1$|
+:::
+
+## Postup vizualizace
+
+1. Zobrazíme sloupec **y** jako **bod v rovině**.
+
+2. Sestrojíme model, kterým bude přímka generovaná vektorem $\mathbf{1}$matematicky vyjádřeno $p(b_0): b_0\cdot \mathbf{1}$, $b_0\in \mathbf{R}$.
+
+3. Na modelu $p(b_0)$ najdeme bod nejbliždí datům $d$ (kolmá projkekce bodu na přímku).
+
+4. Rozložíme vektor dat $y$ na dvě kolmé složky - složku vysvětlenou modelem a složku kolmou. 
+
+V tomto znázornění je vidět geometrický princip rozkladu dat $\|\mathbf{y}\|^2 = \|\mathbf{\bar{y}}\|^2 + \|\mathbf{e}\|^2$.
+
+::: {.panel-tabset}
+
+## 1. Data
+
+::: {layout-ncol=2}
+### Graf
+```{ojs}
+//| echo: false
+Plot.plot({
+// GLOBÁLNÍ STYL (pro čísla na osách a mřížku)
+  style: {
+    fontSize: "14px",      // Zvětší čísla na osách (0, 2, 4...)
+    fontFamily: "sans-serif"
+  },
+
+  x: {
+    domain: [0, 10],
+    label: "y₁ - 1. domácnost →",
+    labelAnchor: "right",  // Posune popisek na konec osy
+    ticks:[0,2,4,6,8,10],
+    labelOffset: 0,       // Posune popisek dál od osy, aby se nepřekrýval
+    fontSize: 16           // Specifické zvětšení jen pro název osy x
+  },
+  
+  y: {
+    domain: [0, 10],
+    label: "y₂ - 2. domácnost ↑",
+    ticks:[0,2,4,6,8,10],
+    labelAnchor: "top",   // Posune popisek na konec osy
+    labelOffset: 45,
+    fontSize: 16           // Specifické zvětšení jen pro název osy y
+  },   
+  aspectRatio: 1,   
+  marks: [
+    Plot.dot([{x:7, y:3}], {x:"x", y:"y", fill:"steelblue", r:10, stroke:"white", strokeWidth:2}),
+  ]
+})
+```
+### Data v grafu
+- Osy y₁ = počet vozidel v první domácnosti
+- Osy y₂ = počet vozidel ve druhé domácnosti
+- První domácnost má 7 vozidel a druhá domácnost má 3 vozidla =>
+- Data jsou reprezentována bodem [7, 3] 
+
+:::
+
+
+
+## 2. Model
+
+::: {layout-ncol=2}
+### Graf
+```{ojs}
+//| echo: false
+Plot.plot({
+  x: {domain:[0,10], label:"Osa y₁ (1. domácnost)", ticks:[0,2,4,6,8,10]},
+  y: {domain:[0,10], label:"Osa y₂ (2. domácnost)", ticks:[0,2,4,6,8,10]},
+  aspectRatio: 1,    
+  marks: [
+    Plot.line([[0,0],[10,10]], {stroke:"#bbb", strokeWidth:1.5, strokeDasharray:"5,4"}),
+    Plot.line([[0,0],[1.5,1.5]], {stroke:"#666", strokeWidth:2.5, markerEnd:"arrow"}),
+    Plot.text([{x:2.3, y:0.9}], {x:"x", y:"y", text:["jedničkový vektor 1"], fill:"#666", fontSize:11, textAnchor:"start"}),
+    Plot.dot([{x:7, y:3}], {x:"x", y:"y", fill:"steelblue", r:10, stroke:"white", strokeWidth:2}),
+    Plot.text([{x:7, y:3}], {x:"x", y:"y", text:["y = [7, 3]"], dx:12, dy:-14, fill:"steelblue", fontWeight:"bold", textAnchor:"start"})
+  ]
+})
+```
+
+###  Model 
+- model je přímka $p(b_0): b_0\cdot \mathbf{1}$ znázorněna šedou přímkou.
+- Jedničkový vektor $\mathbf{1}$ je znázorněn šipkou, která ukazuje směr přímky.
+- Data jsou stále reprezentována bodem [7, 3].
+:::
+
+## 3. Nejbliší bod na modelu
+::: {layout-ncol=2}
+### Graf
+```{ojs}
+//| echo: false
+Plot.plot({
+  x: {domain:[0,10], label:"Osa y₁ (1. domácnost)", ticks:[0,2,4,6,8,10]},
+  y: {domain:[0,10], label:"Osa y₂ (2. domácnost)", ticks:[0,2,4,6,8,10]},
+  aspectRatio: 1,    
+  marks: [
+    Plot.line([[0,0],[10,10]], {stroke:"#bbb", strokeWidth:1.5, strokeDasharray:"5,4"}),
+    Plot.line([[0,0],[1.5,1.5]], {stroke:"#666", strokeWidth:2.5, markerEnd:"arrow"}),
+    Plot.text([{x:2.3, y:0.9}], {x:"x", y:"y", text:["jedničkový vektor 1"], fill:"#666", fontSize:11, textAnchor:"start"}),
+    Plot.line([[0,0],[5,5]], {stroke:"#666", strokeWidth:2}),
+    Plot.line([[7,3],[5,5]], {stroke:"darkred", strokeWidth:2.5}),
+    Plot.text([{x:6.5, y:4.3}], {x:"x", y:"y", text:["e"], fill:"darkred", fontWeight:"bold", fontSize:14}),
+    Plot.dot([{x:5, y:5}], {x:"x", y:"y", fill:"#666", r:5}),
+    Plot.text([{x:5, y:5}], {x:"x", y:"y", text:["ŷ·1 = [5, 5]"], dx:-74, dy:-13, fill:"#666", fontSize:11}),
+    Plot.dot([{x:7, y:3}], {x:"x", y:"y", fill:"steelblue", r:10, stroke:"white", strokeWidth:2}),
+    Plot.text([{x:7, y:3}], {x:"x", y:"y", text:["y = [7, 3]"], dx:12, dy:-14, fill:"steelblue", fontWeight:"bold", textAnchor:"start"})
+  ]
+})
+```
+
+### Nejbliší bod na modelu 
+- Nejbližší bod na přímce k datům je [5, 5]
+- získá se jako **kolmá** projekce dat na model.
+- Vektor odchylek $e$ je znázorněn červenou úsečkou spojující data [7, 3] s projekcí [5, 5].
+- Tento vektor $e$ reprezentuje odchylku dat od modelu.
+:::
+
+## 4. Rozklad na složky 
+
+::: {layout-ncol=2}
+### Graf
+```{ojs}
+//| echo: false
+Plot.plot({
+  x: {domain:[0,10], label:"Osa y₁ (1. domácnost)", ticks:[0,2,4,6,8,10]},
+  y: {domain:[0,10], label:"Osa y₂ (2. domácnost)", ticks:[0,2,4,6,8,10]},
+  aspectRatio: 1,
+  marks: [
+    Plot.line([[0,0],[10,10]], {stroke:"#bbb", strokeWidth:1.5, strokeDasharray:"5,4"}),
+    Plot.line([[0,0],[1.5,1.5]], {stroke:"#666", strokeWidth:2.5, markerEnd:"arrow"}),
+    Plot.text([{x:2.3, y:0.9}], {x:"x", y:"y", text:["jedničkový vektor 1"], fill:"#666", fontSize:11, textAnchor:"start"}),
+    Plot.line([[0,0],[5,5]], {stroke:"#666", strokeWidth:2}),
+    Plot.line([[7,3],[5,5]], {stroke:"darkred", strokeWidth:2.5}),
+    Plot.text([{x:6.5, y:4.3}], {x:"x", y:"y", text:["e"], fill:"darkred", fontWeight:"bold", fontSize:14}),
+    Plot.dot([{x:5, y:5}], {x:"x", y:"y", fill:"#666", r:5}),
+    Plot.text([{x:5, y:5}], {x:"x", y:"y", text:["ŷ·1 = [5, 5]"], dx:-74, dy:-13, fill:"#666", fontSize:11}),
+    Plot.line([[0,0],[7,3]], {stroke:"steelblue", strokeWidth:2, markerEnd:"arrow"}),
+    Plot.text([{x:0.4, y:9.6}], {x:"x", y:"y", text:["‖y‖² = 58   ‖ȳ·1‖² = 50   ‖e‖² = 8   σ² = 4"], textAnchor:"start", fill:"#444", fontSize:11}),
+    Plot.dot([{x:7, y:3}], {x:"x", y:"y", fill:"steelblue", r:10, stroke:"white", strokeWidth:2}),
+    Plot.text([{x:7, y:3}], {x:"x", y:"y", text:["y = [7, 3]"], dx:12, dy:-14, fill:"steelblue", fontWeight:"bold", textAnchor:"start"})
+  ]
+})
+```
+### Rozklad na složky
+- Vektor dat $y$ je znázorněn modrou šipkou, která ukazuje od počátku k bodu [7, 3].
+- Vektor průměru $b_0\mathbf{1}$ je znázorněn šedou úsečkou od počátku k bodu [5, 5].
+- Vektor odchylek $e$ je znázorněn červenou úsečkou spojující data [7, 3] s projekcí [5, 5].
+- Vektor dat $\mathbf{y}$ je rozložen do dvou složek: složky vysvětlené modelem $b_0\mathbf{1}$ a složky odchylek $\mathbf{e}$.
+- V levém horním rohu jsou uvedeny velikosti vektorů ilustrující vztah $\|\mathbf{y}\|^2 = \|b_0\mathbf{1}\|^2 + \|\mathbf{e}\|^2$.
+:::
+
+:::
+
+Provedeme lineárně algebraické úpravy rovnice  
+\begin{align} 
+    b_0 \cdot\mathbf{1} &=\mathbf{y} \\
+    b_0 \cdot\mathbf{1}^T \mathbf{1} &=\mathbf{1}^T\mathbf{y} \\
+    b_0 &= (\mathbf{1}^T \mathbf{1})^{-1}\mathbf{1}^T\mathbf{y}
+  \end{align}
+
+
+V našem případě však 
+
+\begin{align}
+  \mathbf{1}^T \mathbf{1} &= (1,1) \cdot \begin{pmatrix} 1 \\ 1   \end{pmatrix} = 2 \\
+  \mathbf{1}^T\mathbf{y}  &= (1,1) \cdot \begin{pmatrix} y_1\\y_2 \end{pmatrix} =\sum y_i\\
+  b_0                       &= (\mathbf{1}^T \mathbf{1})^{-1} \cdot \mathbf{1}^T\mathbf{y} 
+                            = 2^{-1} \cdot \sum y_i 
+                            = \frac{\sum y_i}{2} \\
+                          &= \bar{y}
+  \end{align}
+
+
+Aritmetický **průměr** je tedy číslo, kterým musíme vynásobit vektor **1**, aby vektor $b_0\mathbf{1}$ byl co nejblíže vektoru dat **y**.
+
+Můžeme tedy sestrojit vektor odchylek našich dat od vektoru průměru 
+
+$$
+  \mathbf{e}=\mathbf{y}-b_0\mathbf{1}=\begin{pmatrix} 7\\3\end{pmatrix}-5\begin{pmatrix}1\\ 1\end{pmatrix}=\begin{pmatrix} 2\\ -2\end{pmatrix}
+$$
+
+Vektor $\mathbf{y}$ je tedy rozložen do vektoru do směru vektoru $\mathbf{1}$ a směru kolmého, takže platí vektorově 
+
+$$\mathbf{y}=b_0\mathbf{1}+\mathbf{e}$$
+
+Vektor dat jsme rozložili na dvě složky, složku průměru a složku odchylek.
+Zaměřme se na velikosti těchto vektorů:Pomocí Pythogorovy věty dostáváme rovnici 
+
+$$\|\mathbf{y}\|^2 = \|b_0\mathbf{1}\|^2 + \|\mathbf{e}\|^2$$
+
+$\|\mathbf{e}\|^2$ vyjadřuje celkovou odchylku dat od vekotru průměrů,  přepočítáno na jedno pozorování dostaneme veličiny zvanou **rozptyl** a označovanou jako $var$ nebo $\sigma^2$ a která se tedy rovná $= \frac{\|\mathbf{e}\|^2}{n}$
+
+$$
+  var=\sigma^2 = \frac{\sum (y_i - b_0)^2}{n}
+$$
+
+Protože tohle je velikost na druhou, "průměrnou odchylku" získáme jako odmocninu z rozptylu 
+
+$$
+  sd=\sqrt{\frac{\sum (y_i - b_0)^2}{n}}
+$$
+
+ 
+

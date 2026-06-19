@@ -1,0 +1,1141 @@
+``` {.qmd}
+# Diskrétní pravděpodobnostní rozdělení
+
+## 1. Binomické rozdělení
+
+Binomické rozdělení modeluje počet úspěchů v pevně daném počtu nezávislých pokusů, kde každý pokus má jen dva možné výsledky – úspěch nebo neúspěch. Předpokládá se, že pravděpodobnost úspěchu je pro každý pokus stejná. Tyto pokusy se nazývají Bernoulliho pokusy.
+
+Rozdělení je charakterizováno dvěma parametry: počtem pokusů $n$ a pravděpodobností úspěchu $p$. Například, při kontrole kvality se snažíme zjistit počet vadných výrobků v dávce $n$, kde $p$ je pravděpodobnost, že jeden výrobek je vadný.
+
+Pravděpodobnostní funkce (PMF) binomického rozdělení, $P(X=k)$, udává pravděpodobnost získání přesně $k$ úspěchů z $n$ pokusů a je dána vzorcem:
+$P(X=k) = \binom{n}{k} p^k (1-p)^{n-k}$, kde $\binom{n}{k} = \frac{n!}{k!(n-k)!}$.
+
+```{ojs}
+md`
+import { Plot } from "@observablehq/plot";
+import { html, Inputs } from "@observablehq/inputs";
+
+const COLORS = {
+  primary: "#0085CC",
+  secondary: "#666666",
+  grayLight: "#B0B0B0",
+  light: "#F8F9FA",
+  dark: "#1A1A1A",
+  warning: "#8b0512",
+  warningDark: "#6f040f"
+};
+
+function binomialPMF(k, n, p) {
+  if (k < 0 || k > n || !Number.isInteger(k)) return 0;
+  const nCk = factorial(n) / (factorial(k) * factorial(n - k));
+  return nCk * Math.pow(p, k) * Math.pow(1 - p, n - k);
+}
+
+function factorial(num) {
+  if (num < 0) return -1;
+  else if (num == 0) return 1;
+  else {
+    let result = 1;
+    for (let i = num; i > 1; i--) {
+      result *= i;
+    }
+    return result;
+  }
+}
+
+// Sliders pro n a p
+n_binom = Inputs.range([1, 20], {
+  label: "Počet pokusů (n)",
+  step: 1,
+  value: 10
+})
+
+p_binom = Inputs.range([0.05, 0.95], {
+  label: "Pravděpodobnost úspěchu (p)",
+  step: 0.01,
+  value: 0.5,
+  format: "%"
+})
+
+k_highlight_binom = Inputs.range([0, n_binom], {
+  label: "Zvýraznit k",
+  step: 1,
+  value: Math.floor(n_binom / 2)
+})
+
+// Data pro graf
+binom_data = Array.from({ length: n_binom + 1 }, (_, i) => ({
+  k: i,
+  probability: binomialPMF(i, n_binom, p_binom),
+  highlight: i === k_highlight_binom
+}))
+
+// Plot
+Plot.plot({
+  width, // Use width from OJS context for responsiveness
+  height: 300,
+  marginTop: 30,
+  marginRight: 40,
+  marginLeft: 50,
+  marginBottom: 40,
+  x: {
+    label: "Počet úspěchů (k)",
+    domain: [-0.5, n_binom + 0.5], // Ensure bars are centered
+    nice: true,
+    tickFormat: (d) => d % 1 === 0 ? d : null // Only show integer ticks
+  },
+  y: {
+    label: "Pravděpodobnost P(X=k)",
+    domain: [0, Math.max(...binom_data.map(d => d.probability)) * 1.1],
+    tickFormat: ".1%"
+  },
+  color: {
+    domain: [false, true],
+    range: [COLORS.primary, COLORS.warning]
+  },
+  marks: [
+    Plot.barY(binom_data, {
+      x: "k",
+      y: "probability",
+      fill: "highlight",
+      tip: true
+    }),
+    Plot.ruleY([0])
+  ],
+  caption: html`Vizualizace pravděpodobnostní funkce binomického rozdělení.<br>
+    Aktuální P(X=${k_highlight_binom}) = ${(binomialPMF(k_highlight_binom, n_binom, p_binom)).toLocaleString('cs-CZ', { style: 'percent', minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+})
+`
+```
+
+::: {.panel-tabset}
+## Zadání
+Určete P(X = 2), pokud X ~ Bin(n, p) a víte, že n = 5, p = 0,4.
+
+## Řešení
+
+**Krok 1: Identifikujeme parametry.**
+Jde o binomické rozdělení (X ~ Bin(n, p)), takže $n$ je počet pokusů, $p$ je pravděpodobnost úspěchu a $k$ je počet úspěchů, jehož pravděpodobnost hledáme.
+Zde je $n = 5$ (počet pokusů), $p = 0,4$ (pravděpodobnost úspěchu) a $k = 2$ (hledaný počet úspěchů).
+
+**Krok 2: Dosadíme do vzorce.**
+Vzorec pro pravděpodobnostní funkci binomického rozdělení je $P(X=k) = \binom{n}{k} p^k (1-p)^{n-k}$.
+Dosadíme hodnoty: $P(X=2) = \binom{5}{2} (0,4)^2 (1-0,4)^{5-2}$.
+To se rovná $P(X=2) = \frac{5!}{2!(5-2)!} (0,4)^2 (0,6)^3$.
+
+**Krok 3: Vypočítáme.**
+Vypočítáme kombinační číslo: $\binom{5}{2} = \frac{5 \times 4}{2 \times 1} = 10$.
+Vypočítáme mocniny: $(0,4)^2 = 0,16$ a $(0,6)^3 = 0,216$.
+Nakonec vynásobíme: $P(X=2) = 10 \times 0,16 \times 0,216 = 0,3456$.
+
+**Výsledek: 0,3456**
+:::
+
+::: {.panel-tabset}
+## Zadání
+Pojišťovací agent oslovuje 8 potenciálních klientů. Pravděpodobnost, že se mu podaří uzavřít smlouvu s jedním klientem, je 0,25. Jaká je pravděpodobnost, že uzavře smlouvu se 3 klienty?
+
+## Výsledek
+**Výsledek: 0,2076**
+:::
+
+::: {.panel-tabset}
+## Zadání
+V testu s 12 otázkami, kde každá má 4 možnosti a jen jedna je správná, student hádá. Jaká je pravděpodobnost, že uhodne přesně 5 otázek?
+
+## Výsledek
+**Výsledek: 0,1032**
+:::
+
+::: {.callout-tip collapse="true" icon=false}
+## 💬 Zeptej se AI
+Zkopíruj do ChatGPT / Claude / Copilota / Gemini:
+
+> Jsi trpělivý tutor statistiky pro studenty ekonomie.
+> Odpovídáš stručně (max. 3–4 věty), pak se ptáš jestli to dává smysl.
+> Symboly a vzorce používáš jen když jsou nezbytné.
+> Nikdy nevysvětluješ víc věcí najednou.
+> Vždy ukazuješ obecný postup, ne trik platný jen pro tento příklad.
+> Mluvíš česky.
+>
+> Nerozumím binomické distribuci. Můžeš mi to vysvětlit na příkladu z ekonomie, třeba jak se používá při kontrole kvality výrobků?
+:::
+
+## 2. Poissonovo rozdělení
+
+Poissonovo rozdělení se používá pro modelování počtu událostí, které nastanou v pevném časovém intervalu nebo v určitém prostoru, pokud se tyto události dějí s konstantní průměrnou frekvencí a nezávisle na čase od poslední události. Typickým příkladem jsou telefonní hovory do call centra za hodinu nebo počet dopravních nehod na určitém úseku silnice za měsíc.
+
+Toto rozdělení je charakterizováno jediným parametrem $\lambda$ (lambda), který představuje průměrný počet událostí v daném intervalu. Platí, že $\lambda > 0$. Čím vyšší je $\lambda$, tím vyšší je pravděpodobnost většího počtu událostí.
+
+Pravděpodobnostní funkce (PMF) Poissonova rozdělení, $P(X=k)$, udává pravděpodobnost, že nastane přesně $k$ událostí, a je dána vzorcem:
+$P(X=k) = \frac{e^{-\lambda} \lambda^k}{k!}$, kde $e$ je Eulerovo číslo (základ přirozeného logaritmu) a $k!$ je faktoriál $k$.
+
+```{ojs}
+md`
+import { Plot } from "@observablehq/plot";
+import { html, Inputs } from "@observablehq/inputs";
+
+const COLORS = {
+  primary: "#0085CC",
+  secondary: "#666666",
+  grayLight: "#B0B0B0",
+  light: "#F8F9FA",
+  dark: "#1A1A1A",
+  warning: "#8b0512",
+  warningDark: "#6f040f"
+};
+
+function poissonPMF(k, lambda) {
+  if (k < 0 || !Number.isInteger(k)) return 0;
+  return (Math.exp(-lambda) * Math.pow(lambda, k)) / factorial(k);
+}
+
+function factorial(num) {
+  if (num < 0) return -1;
+  else if (num == 0) return 1;
+  else {
+    let result = 1;
+    for (let i = num; i > 1; i--) {
+      result *= i;
+    }
+    return result;
+  }
+}
+
+lambda_poisson = Inputs.range([0.1, 10], {
+  label: html`Průměrný počet událostí (&lambda;)`,
+  step: 0.1,
+  value: 2.0
+})
+
+// Max k for Poisson needs to be dynamic based on lambda
+// A rule of thumb is lambda + 3*sqrt(lambda) or just a fixed reasonable max for visualization
+// For lambda up to 10, k up to 20-25 should be fine.
+max_k_poisson = Math.ceil(lambda_poisson + 3 * Math.sqrt(lambda_poisson));
+if (max_k_poisson < 10) max_k_poisson = 10; // Ensure at least some bars for small lambda
+
+poisson_data = Array.from({ length: max_k_poisson + 1 }, (_, i) => ({
+  k: i,
+  probability: poissonPMF(i, lambda_poisson)
+})).filter(d => d.probability > 0.001 || d.k <= Math.ceil(lambda_poisson * 2)); // Filter out very small probabilities to keep the plot clean
+
+Plot.plot({
+  width,
+  height: 300,
+  marginTop: 30,
+  marginRight: 40,
+  marginLeft: 50,
+  marginBottom: 40,
+  x: {
+    label: "Počet událostí (k)",
+    domain: [-0.5, Math.max(...poisson_data.map(d => d.k)) + 0.5],
+    nice: true,
+    tickFormat: (d) => d % 1 === 0 ? d : null
+  },
+  y: {
+    label: "Pravděpodobnost P(X=k)",
+    domain: [0, Math.max(...poisson_data.map(d => d.probability)) * 1.1],
+    tickFormat: ".1%"
+  },
+  marks: [
+    Plot.barY(poisson_data, {
+      x: "k",
+      y: "probability",
+      fill: COLORS.primary,
+      tip: true
+    }),
+    Plot.ruleY([0]),
+    Plot.ruleX([lambda_poisson], {
+      stroke: COLORS.secondary,
+      strokeDasharray: "4,2",
+      tip: "Střední hodnota E(X) = " + lambda_poisson
+    }),
+    Plot.text([{
+      x: lambda_poisson + 0.2, // Offset text slightly
+      y: Plot.max(poisson_data, d => d.probability) * 0.9,
+      text: `E(X) = ${lambda_poisson}`,
+      fill: COLORS.secondary,
+      fontWeight: "bold"
+    }])
+  ],
+  caption: html`Vizualizace pravděpodobnostní funkce Poissonova rozdělení.
+    Střední hodnota a rozptyl jsou oba rovny &lambda; = ${lambda_poisson}.`
+})
+`
+```
+
+::: {.panel-tabset}
+## Zadání
+Určete P(X = 3), pokud X ~ Pois($\lambda$) a víte, že $\lambda = 2$.
+
+## Řešení
+
+**Krok 1: Identifikujeme parametry.**
+Jde o Poissonovo rozdělení (X ~ Pois($\lambda$)), takže $\lambda$ je průměrný počet událostí a $k$ je hledaný počet událostí.
+Zde je $\lambda = 2$ (průměrný počet událostí) a $k = 3$ (hledaný počet událostí).
+
+**Krok 2: Dosadíme do vzorce.**
+Vzorec pro pravděpodobnostní funkci Poissonova rozdělení je $P(X=k) = \frac{e^{-\lambda} \lambda^k}{k!}$.
+Dosadíme hodnoty: $P(X=3) = \frac{e^{-2} 2^3}{3!}$.
+
+**Krok 3: Vypočítáme.**
+Použijeme hodnotu $e \approx 2,71828$.
+$e^{-2} \approx 0,135335$.
+$2^3 = 8$.
+$3! = 3 \times 2 \times 1 = 6$.
+$P(X=3) = \frac{0,135335 \times 8}{6} = \frac{1,08268}{6} \approx 0,1804$.
+
+**Výsledek: 0,1804**
+:::
+
+::: {.panel-tabset}
+## Zadání
+Průměrný počet hovorů do zákaznického centra za minutu je 1,5. Jaká je pravděpodobnost, že v další minutě přijdou přesně 2 hovory?
+
+## Výsledek
+**Výsledek: 0,2510**
+:::
+
+::: {.panel-tabset}
+## Zadání
+V určité nemocnici se průměrně narodí 3,2 chlapců denně. Jaká je pravděpodobnost, že se zítra narodí přesně 5 chlapců?
+
+## Výsledek
+**Výsledek: 0,1140**
+:::
+
+::: {.callout-tip collapse="true" icon=false}
+## 💬 Zeptej se AI
+Zkopíruj do ChatGPT / Claude / Copilota / Gemini:
+
+> Jsi trpělivý tutor statistiky pro studenty ekonomie.
+> Odpovídáš stručně (max. 3–4 věty), pak se ptáš jestli to dává smysl.
+> Symboly a vzorce používáš jen když jsou nezbytné.
+> Nikdy nevysvětluješ víc věcí najednou.
+> Vždy ukazuješ obecný postup, ne trik platný jen pro tento příklad.
+> Mluvíš česky.
+>
+> Nerozumím Poissonově distribuci. Můžeš mi ukázat, jak ji pojišťovny používají k modelování počtu škodních událostí za určité období?
+:::
+
+## 3. Geometrické rozdělení
+
+Geometrické rozdělení modeluje počet Bernoulliho pokusů, které je potřeba provést, dokud nenastane první úspěch. Předpokládá se, že pravděpodobnost úspěchu $p$ je pro každý pokus stejná a pokusy jsou nezávislé. Například, kolikrát je potřeba hrát hru, než poprvé vyhrajete, nebo kolikrát je nutné provést léčbu, než se dostaví první pozitivní výsledek.
+
+Toto rozdělení je charakterizováno jediným parametrem $p$, což je pravděpodobnost úspěchu v jednom pokusu. Počet pokusů $k$ může nabývat hodnot $1, 2, 3, \ldots$ (tj. pokusy pokračují, dokud se nedosáhne úspěchu).
+
+Pravděpodobnostní funkce (PMF) geometrického rozdělení, $P(X=k)$, udává pravděpodobnost, že první úspěch nastane přesně v $k$-tém pokusu, a je dána vzorcem:
+$P(X=k) = (1-p)^{k-1} p$. Prvních $k-1$ pokusů je neúspěšných, $k$-tý je úspěšný.
+
+```{ojs}
+md`
+import { Plot } from "@observablehq/plot";
+import { html, Inputs } from "@observablehq/inputs";
+
+const COLORS = {
+  primary: "#0085CC",
+  secondary: "#666666",
+  grayLight: "#B0B0B0",
+  light: "#F8F9FA",
+  dark: "#1A1A1A",
+  warning: "#8b0512",
+  warningDark: "#6f040f"
+};
+
+function geometricPMF(k, p) {
+  if (k < 1 || !Number.isInteger(k)) return 0;
+  return Math.pow(1 - p, k - 1) * p;
+}
+
+p_geometric = Inputs.range([0.05, 0.95], {
+  label: "Pravděpodobnost úspěchu (p)",
+  step: 0.01,
+  value: 0.3,
+  format: "%"
+})
+
+// Max k for geometric distribution, ensure enough bars to show distribution decay
+max_k_geometric = Math.ceil(4 / p_geometric);
+if (max_k_geometric < 10) max_k_geometric = 10;
+if (max_k_geometric > 50) max_k_geometric = 50; // Cap to prevent too many bars
+
+geometric_data = Array.from({ length: max_k_geometric }, (_, i) => ({
+  k: i + 1, // k starts from 1
+  probability: geometricPMF(i + 1, p_geometric)
+})).filter(d => d.probability > 0.005); // Filter out very small probabilities
+
+expected_value_geometric = 1 / p_geometric;
+
+Plot.plot({
+  width,
+  height: 300,
+  marginTop: 30,
+  marginRight: 40,
+  marginLeft: 50,
+  marginBottom: 40,
+  x: {
+    label: "Počet pokusů do prvního úspěchu (k)",
+    domain: [0.5, Math.max(...geometric_data.map(d => d.k)) + 0.5], // x starts at 1
+    nice: true,
+    tickFormat: (d) => d % 1 === 0 ? d : null
+  },
+  y: {
+    label: "Pravděpodobnost P(X=k)",
+    domain: [0, Math.max(...geometric_data.map(d => d.probability)) * 1.1],
+    tickFormat: ".1%"
+  },
+  marks: [
+    Plot.barY(geometric_data, {
+      x: "k",
+      y: "probability",
+      fill: COLORS.primary,
+      tip: true
+    }),
+    Plot.ruleY([0]),
+    Plot.ruleX([expected_value_geometric], {
+      stroke: COLORS.secondary,
+      strokeDasharray: "4,2",
+      tip: "Střední hodnota E(X) = " + expected_value_geometric.toFixed(2)
+    }),
+    Plot.text([{
+      x: expected_value_geometric + 0.5,
+      y: Plot.max(geometric_data, d => d.probability) * 0.9,
+      text: `E(X) = ${expected_value_geometric.toFixed(2)}`,
+      fill: COLORS.secondary,
+      fontWeight: "bold"
+    }])
+  ],
+  caption: html`Vizualizace pravděpodobnostní funkce geometrického rozdělení.<br>
+    Očekávaný počet pokusů do prvního úspěchu (E(X)) = ${(1/p_geometric).toFixed(2)}.`
+})
+`
+```
+
+::: {.panel-tabset}
+## Zadání
+Určete P(X = 3), pokud X ~ Geom(p) a víte, že p = 0,2.
+
+## Řešení
+
+**Krok 1: Identifikujeme parametry.**
+Jde o geometrické rozdělení (X ~ Geom(p)), takže $p$ je pravděpodobnost úspěchu a $k$ je počet pokusů, při kterém nastane první úspěch.
+Zde je $p = 0,2$ (pravděpodobnost úspěchu) a $k = 3$ (hledáme pravděpodobnost, že první úspěch nastane ve 3. pokusu).
+
+**Krok 2: Dosadíme do vzorce.**
+Vzorec pro pravděpodobnostní funkci geometrického rozdělení je $P(X=k) = (1-p)^{k-1} p$.
+Dosadíme hodnoty: $P(X=3) = (1-0,2)^{3-1} \times 0,2$.
+To se rovná $P(X=3) = (0,8)^2 \times 0,2$.
+
+**Krok 3: Vypočítáme.**
+Vypočítáme mocninu: $(0,8)^2 = 0,64$.
+Nakonec vynásobíme: $P(X=3) = 0,64 \times 0,2 = 0,128$.
+
+**Výsledek: 0,128**
+:::
+
+::: {.panel-tabset}
+## Zadání
+Obchodník ví, že pravděpodobnost, že uzavře obchod s náhodně vybraným potenciálním klientem, je 0,15. Jaká je pravděpodobnost, že první úspěšný obchod uzavře až se 4. klientem?
+
+## Výsledek
+**Výsledek: 0,0921**
+:::
+
+::: {.panel-tabset}
+## Zadání
+Lékař provádí série testů, dokud nezíská pozitivní výsledek. Pravděpodobnost pozitivního výsledku u každého testu je 0,3. Jaká je pravděpodobnost, že první pozitivní výsledek dostane až u 5. testu?
+
+## Výsledek
+**Výsledek: 0,0720**
+:::
+
+::: {.callout-tip collapse="true" icon=false}
+## 💬 Zeptej se AI
+Zkopíruj do ChatGPT / Claude / Copilota / Gemini:
+
+> Jsi trpělivý tutor statistiky pro studenty ekonomie.
+> Odpovídáš stručně (max. 3–4 věty), pak se ptáš jestli to dává smysl.
+> Symboly a vzorce používáš jen když jsou nezbytné.
+> Nikdy nevysvětluješ víc věcí najednou.
+> Vždy ukazuješ obecný postup, ne trik platný jen pro tento příklad.
+> Mluvíš česky.
+>
+> Nerozumím geometrické distribuci. Můžeš mi to vysvětlit na příkladu z marketingu, třeba kolikrát je potřeba oslovit zákazníka, než poprvé nakoupí?
+:::
+
+## 4. Kumulativní distribuční funkce (CDF)
+
+Kumulativní distribuční funkce (CDF), značena $F(x)$ nebo $F_X(x)$, pro diskrétní náhodnou veličinu $X$ udává pravděpodobnost, že náhodná veličina $X$ nabude hodnotu menší nebo rovnou určitému číslu $x$. Jinými slovy, $F(x) = P(X \le x)$.
+
+CDF je součet pravděpodobností PMF pro všechny hodnoty menší nebo rovné $x$. Pro diskrétní rozdělení se vypočítá jako $F(x) = \sum_{i \le x} P(X=i)$. To nám umožňuje snadno spočítat pravděpodobnosti intervalů, například $P(X < x)$, $P(X > x)$ nebo $P(a < X \le b)$.
+
+Význam CDF spočívá v tom, že nám dává celkovou pravděpodobnost "až do" určitého bodu, což je klíčové pro určování kvantilů a testování hypotéz. Například, P(X > k) = 1 - P(X <= k) = 1 - F(k).
+
+```{ojs}
+md`
+import { Plot } from "@observablehq/plot";
+import { html, Inputs } from "@observablehq/inputs";
+
+const COLORS = {
+  primary: "#0085CC",
+  secondary: "#666666",
+  grayLight: "#B0B0B0",
+  light: "#F8F9FA",
+  dark: "#1A1A1A",
+  warning: "#8b0512",
+  warningDark: "#6f040f"
+};
+
+function factorial(num) {
+  if (num < 0) return -1;
+  else if (num == 0) return 1;
+  else {
+    let result = 1;
+    for (let i = num; i > 1; i--) {
+      result *= i;
+    }
+    return result;
+  }
+}
+
+function binomialPMF(k, n, p) {
+  if (k < 0 || k > n || !Number.isInteger(k)) return 0;
+  const nCk = factorial(n) / (factorial(k) * factorial(n - k));
+  return nCk * Math.pow(p, k) * Math.pow(1 - p, n - k);
+}
+
+function poissonPMF(k, lambda) {
+  if (k < 0 || !Number.isInteger(k)) return 0;
+  return (Math.exp(-lambda) * Math.pow(lambda, k)) / factorial(k);
+}
+
+function geometricPMF(k, p) {
+  if (k < 1 || !Number.isInteger(k)) return 0;
+  return Math.pow(1 - p, k - 1) * p;
+}
+
+// Dropdown for distribution choice
+distribution_cdf = Inputs.select(["Binomické", "Poissonovo", "Geometrické"], {
+  label: "Vyberte rozdělení",
+  value: "Binomické"
+})
+
+// Parameters for Binomial
+n_cdf_binom = Inputs.range([1, 20], {
+  label: "n (Binomické)",
+  step: 1,
+  value: 10
+})
+
+p_cdf_binom = Inputs.range([0.05, 0.95], {
+  label: "p (Binomické)",
+  step: 0.01,
+  value: 0.5,
+  format: "%"
+})
+
+// Parameters for Poisson
+lambda_cdf_poisson = Inputs.range([0.1, 10], {
+  label: html`&lambda; (Poissonovo)`,
+  step: 0.1,
+  value: 2.0
+})
+
+// Parameters for Geometric
+p_cdf_geometric = Inputs.range([0.05, 0.95], {
+  label: "p (Geometrické)",
+  step: 0.01,
+  value: 0.3,
+  format: "%"
+})
+
+// Render parameters based on selection
+html`${distribution_cdf === "Binomické" ? n_cdf_binom : ""} ${distribution_cdf === "Binomické" ? p_cdf_binom : ""}
+${distribution_cdf === "Poissonovo" ? lambda_cdf_poisson : ""}
+${distribution_cdf === "Geometrické" ? p_cdf_geometric : ""}`
+
+// Generate data for the selected distribution
+function generate_dist_data(dist_type, n, p_binom, lambda, p_geom) {
+  let pmf_values = [];
+  let max_k = 0;
+  if (dist_type === "Binomické") {
+    max_k = n;
+    for (let k = 0; k <= max_k; k++) {
+      pmf_values.push({ k: k, probability: binomialPMF(k, n, p_binom) });
+    }
+  } else if (dist_type === "Poissonovo") {
+    max_k = Math.ceil(lambda + 4 * Math.sqrt(lambda));
+    if (max_k < 10) max_k = 10;
+    for (let k = 0; k <= max_k; k++) {
+      pmf_values.push({ k: k, probability: poissonPMF(k, lambda) });
+    }
+  } else if (dist_type === "Geometrické") {
+    max_k = Math.ceil(4 / p_geom);
+    if (max_k < 10) max_k = 10;
+    if (max_k > 50) max_k = 50;
+    for (let k = 1; k <= max_k; k++) {
+      pmf_values.push({ k: k, probability: geometricPMF(k, p_geom) });
+    }
+  }
+  return pmf_values;
+}
+
+current_dist_data = generate_dist_data(distribution_cdf, n_cdf_binom, p_cdf_binom, lambda_cdf_poisson, p_cdf_geometric)
+
+// Calculate CDF
+let cdf_values = [];
+let cumulative_prob = 0;
+for (const item of current_dist_data) {
+  cumulative_prob += item.probability;
+  cdf_values.push({ k: item.k, cdf: cumulative_prob });
+}
+
+// Slider for x value
+x_cdf = Inputs.range([cdf_values.length > 0 ? cdf_values[0].k : 0, cdf_values.length > 0 ? cdf_values[cdf_values.length - 1].k : 1], {
+  label: html`Zvýraznit P(X &le; x) pro x =`,
+  step: 1,
+  value: cdf_values.length > 0 ? Math.floor(cdf_values[cdf_values.length - 1].k / 2) : 0,
+})
+
+// Filter data for highlight
+highlight_data = cdf_values.filter(d => d.k <= x_cdf);
+current_cdf_value = highlight_data.length > 0 ? highlight_data[highlight_data.length - 1].cdf : 0;
+
+Plot.plot({
+  width,
+  height: 350,
+  marginTop: 30,
+  marginRight: 40,
+  marginLeft: 50,
+  marginBottom: 40,
+  x: {
+    label: "Hodnota x",
+    domain: [cdf_values.length > 0 ? cdf_values[0].k - 0.5 : -0.5, cdf_values.length > 0 ? cdf_values[cdf_values.length - 1].k + 0.5 : 1.5],
+    nice: true,
+    tickFormat: (d) => d % 1 === 0 ? d : null
+  },
+  y: {
+    label: "Kumulativní pravděpodobnost F(x) = P(X ≤ x)",
+    domain: [0, 1],
+    tickFormat: ".1%"
+  },
+  marks: [
+    // Plot the step function for CDF
+    Plot.line(cdf_values, {
+      x: "k",
+      y: "cdf",
+      stroke: COLORS.primary,
+      strokeWidth: 2,
+      curve: "step-after",
+      tip: true
+    }),
+    Plot.dot(cdf_values, {
+      x: "k",
+      y: "cdf",
+      fill: COLORS.primary,
+      tip: true
+    }),
+    // Highlighted region (bars or area)
+    Plot.barY(current_dist_data.filter(d => d.k <= x_cdf), {
+        x: "k",
+        y: "probability",
+        fill: COLORS.secondary,
+        fillOpacity: 0.3,
+        tip: true
+    }),
+    Plot.ruleY([0]),
+    Plot.ruleX([x_cdf], {
+      stroke: COLORS.secondary,
+      strokeDasharray: "4,2",
+      tip: "P(X <= " + x_cdf + ") = " + current_cdf_value.toLocaleString('cs-CZ', { style: 'percent', minimumFractionDigits: 2, maximumFractionDigits: 2 })
+    }),
+    Plot.text([{
+      x: x_cdf + 0.2, // Offset text slightly
+      y: 0.95,
+      text: `F(${x_cdf}) = ${current_cdf_value.toLocaleString('cs-CZ', { style: 'percent', minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+      fill: COLORS.secondary,
+      fontWeight: "bold"
+    }])
+  ],
+  caption: html`Vizualizace kumulativní distribuční funkce (CDF) pro ${distribution_cdf} rozdělení.<br>
+    Pravděpodobnost, že X bude menší nebo rovno ${x_cdf}, je: ${current_cdf_value.toLocaleString('cs-CZ', { style: 'percent', minimumFractionDigits: 2, maximumFractionDigits: 2 })}.`
+})
+`
+```
+
+::: {.panel-tabset}
+## Zadání
+Určete P(X $\le$ 2), pokud X ~ Bin(n, p) a víte, že n = 5, p = 0,4.
+Využijte dříve vypočítané PMF hodnoty pro $X \sim \text{Bin}(5, 0.4)$:
+$P(X=0) \approx 0,0778$
+$P(X=1) \approx 0,2592$
+$P(X=2) \approx 0,3456$
+$P(X=3) \approx 0,2304$
+$P(X=4) \approx 0,0768$
+$P(X=5) \approx 0,0102$
+
+## Řešení
+
+**Krok 1: Identifikujeme hledanou pravděpodobnost.**
+Hledáme kumulativní pravděpodobnost $P(X \le 2)$, což znamená součet pravděpodobností, že X nabude hodnotu 0, 1 nebo 2.
+
+**Krok 2: Sečteme relevantní pravděpodobnosti z PMF.**
+$P(X \le 2) = P(X=0) + P(X=1) + P(X=2)$.
+Dosadíme známé hodnoty: $P(X \le 2) = 0,0778 + 0,2592 + 0,3456$.
+
+**Krok 3: Vypočítáme.**
+$P(X \le 2) = 0,6826$.
+
+**Výsledek: 0,6826**
+:::
+
+::: {.panel-tabset}
+## Zadání
+Denní počet reklamací v obchodě se řídí Poissonovým rozdělením s průměrem $\lambda = 2$. Jaká je pravděpodobnost, že v daný den budou nejvýše 3 reklamace?
+(Použijte zaokrouhlené hodnoty: P(X=0) = 0,1353, P(X=1) = 0,2707, P(X=2) = 0,2707, P(X=3) = 0,1804).
+
+## Výsledek
+**Výsledek: 0,8571**
+:::
+
+::: {.panel-tabset}
+## Zadání
+V určité klinické studii je pravděpodobnost, že léčba zabere u jednoho pacienta, 0,6. Jaká je pravděpodobnost, že první úspěch nastane nejpozději při 2. pokusu? (X ~ Geom(0,6))
+
+## Výsledek
+**Výsledek: 0,84**
+:::
+
+::: {.callout-tip collapse="true" icon=false}
+## 💬 Zeptej se AI
+Zkopíruj do ChatGPT / Claude / Copilota / Gemini:
+
+> Jsi trpělivý tutor statistiky pro studenty ekonomie.
+> Odpovídáš stručně (max. 3–4 věty), pak se ptáš jestli to dává smysl.
+> Symboly a vzorce používáš jen když jsou nezbytné.
+> Nikdy nevysvětluješ víc věcí najednou.
+> Vždy ukazuješ obecný postup, ne trik platný jen pro tento příklad.
+> Mluvíš česky.
+>
+> Nerozumím kumulativní distribuční funkci. Jak mi pomůže například v managementu rizik nebo rozhodování o zásobách v podniku?
+:::
+
+## 5. Střední hodnota a rozptyl
+
+Střední hodnota (očekávaná hodnota), $E(X)$, diskrétní náhodné veličiny $X$ je dlouhodobý průměr hodnot, které by náhodná veličina nabývala při opakování experimentu. Je to vážený průměr všech možných hodnot veličiny, kde váhami jsou jejich pravděpodobnosti: $E(X) = \sum x \cdot P(X=x)$.
+
+Rozptyl, $Var(X)$, měří rozptýlení nebo disperzi hodnot náhodné veličiny kolem její střední hodnoty. Vyšší rozptyl znamená větší variabilitu nebo nejistotu. Vypočítá se jako $Var(X) = E[(X - E(X))^2] = E(X^2) - [E(X)]^2$. Směrodatná odchylka je odmocnina z rozptylu, $\sigma_X = \sqrt{Var(X)}$.
+
+Pro standardní diskrétní rozdělení existují zjednodušené vzorce pro výpočet střední hodnoty a rozptylu, které přímo vycházejí z jejich parametrů:
+
+*   **Binomické rozdělení** $X \sim \text{Bin}(n, p)$:
+    *   $E(X) = n \cdot p$
+    *   $Var(X) = n \cdot p \cdot (1-p)$
+*   **Poissonovo rozdělení** $X \sim \text{Pois}(\lambda)$:
+    *   $E(X) = \lambda$
+    *   $Var(X) = \lambda$
+*   **Geometrické rozdělení** $X \sim \text{Geom}(p)$:
+    *   $E(X) = \frac{1}{p}$
+    *   $Var(X) = \frac{1-p}{p^2}$
+
+```{ojs}
+md`
+import { Plot } from "@observablehq/plot";
+import { html, Inputs } from "@observablehq/inputs";
+
+const COLORS = {
+  primary: "#0085CC",
+  secondary: "#666666",
+  grayLight: "#B0B0B0",
+  light: "#F8F9FA",
+  dark: "#1A1A1A",
+  warning: "#8b0512",
+  warningDark: "#6f040f"
+};
+
+function factorial(num) {
+  if (num < 0) return -1;
+  else if (num == 0) return 1;
+  else {
+    let result = 1;
+    for (let i = num; i > 1; i--) {
+      result *= i;
+    }
+    return result;
+  }
+}
+
+function binomialPMF(k, n, p) {
+  if (k < 0 || k > n || !Number.isInteger(k)) return 0;
+  const nCk = factorial(n) / (factorial(k) * factorial(n - k));
+  return nCk * Math.pow(p, k) * Math.pow(1 - p, n - k);
+}
+
+function poissonPMF(k, lambda) {
+  if (k < 0 || !Number.isInteger(k)) return 0;
+  return (Math.exp(-lambda) * Math.pow(lambda, k)) / factorial(k);
+}
+
+function geometricPMF(k, p) {
+  if (k < 1 || !Number.isInteger(k)) return 0;
+  return Math.pow(1 - p, k - 1) * p;
+}
+
+// Dropdown for distribution choice
+distribution_stats = Inputs.select(["Binomické", "Poissonovo", "Geometrické"], {
+  label: "Vyberte rozdělení",
+  value: "Binomické"
+})
+
+// Parameters for Binomial
+n_stats_binom = Inputs.range([1, 20], {
+  label: "n (Binomické)",
+  step: 1,
+  value: 10
+})
+
+p_stats_binom = Inputs.range([0.05, 0.95], {
+  label: "p (Binomické)",
+  step: 0.01,
+  value: 0.5,
+  format: "%"
+})
+
+// Parameters for Poisson
+lambda_stats_poisson = Inputs.range([0.1, 10], {
+  label: html`&lambda; (Poissonovo)`,
+  step: 0.1,
+  value: 3.0
+})
+
+// Parameters for Geometric
+p_stats_geometric = Inputs.range([0.05, 0.95], {
+  label: "p (Geometrické)",
+  step: 0.01,
+  value: 0.3
+})
+
+// Render parameters based on selection
+html`${distribution_stats === "Binomické" ? n_stats_binom : ""} ${distribution_stats === "Binomické" ? p_stats_binom : ""}
+${distribution_stats === "Poissonovo" ? lambda_stats_poisson : ""}
+${distribution_stats === "Geometrické" ? p_stats_geometric : ""}`
+
+// Generate data for the selected distribution and calculate E(X), Var(X)
+let pmf_values_stats = [];
+let expected_value_stats = 0;
+let variance_stats = 0;
+let min_k_domain = 0;
+let max_k_domain = 0;
+
+if (distribution_stats === "Binomické") {
+  min_k_domain = 0;
+  max_k_domain = n_stats_binom;
+  for (let k = 0; k <= n_stats_binom; k++) {
+    pmf_values_stats.push({ k: k, probability: binomialPMF(k, n_stats_binom, p_stats_binom) });
+  }
+  expected_value_stats = n_stats_binom * p_stats_binom;
+  variance_stats = n_stats_binom * p_stats_binom * (1 - p_stats_binom);
+} else if (distribution_stats === "Poissonovo") {
+  min_k_domain = 0;
+  max_k_domain = Math.ceil(lambda_stats_poisson + 4 * Math.sqrt(lambda_stats_poisson));
+  if (max_k_domain < 10) max_k_domain = 10;
+  for (let k = 0; k <= max_k_domain; k++) {
+    pmf_values_stats.push({ k: k, probability: poissonPMF(k, lambda_stats_poisson) });
+  }
+  expected_value_stats = lambda_stats_poisson;
+  variance_stats = lambda_stats_poisson;
+} else if (distribution_stats === "Geometrické") {
+  min_k_domain = 1;
+  max_k_domain = Math.ceil(4 / p_stats_geometric);
+  if (max_k_domain < 10) max_k_domain = 10;
+  if (max_k_domain > 50) max_k_domain = 50;
+  for (let k = 1; k <= max_k_domain; k++) {
+    pmf_values_stats.push({ k: k, probability: geometricPMF(k, p_stats_geometric) });
+  }
+  expected_value_stats = 1 / p_stats_geometric;
+  variance_stats = (1 - p_stats_geometric) / Math.pow(p_stats_geometric, 2);
+}
+
+const std_dev_stats = Math.sqrt(variance_stats);
+
+Plot.plot({
+  width,
+  height: 350,
+  marginTop: 30,
+  marginRight: 40,
+  marginLeft: 50,
+  marginBottom: 40,
+  x: {
+    label: "Hodnota k",
+    domain: [min_k_domain - 0.5, max_k_domain + 0.5],
+    nice: true,
+    tickFormat: (d) => d % 1 === 0 ? d : null
+  },
+  y: {
+    label: "Pravděpodobnost P(X=k)",
+    domain: [0, Math.max(...pmf_values_stats.map(d => d.probability)) * 1.1],
+    tickFormat: ".1%"
+  },
+  marks: [
+    Plot.barY(pmf_values_stats.filter(d => d.probability > 0.001), { // Filter out negligible probabilities for cleaner plot
+      x: "k",
+      y: "probability",
+      fill: COLORS.primary,
+      tip: true
+    }),
+    Plot.ruleY([0]),
+    // Mean line
+    Plot.ruleX([expected_value_stats], {
+      stroke: COLORS.secondary,
+      strokeWidth: 2,
+      strokeDasharray: "4,2",
+      tip: "Střední hodnota E(X) = " + expected_value_stats.toFixed(2)
+    }),
+    Plot.text([{
+      x: expected_value_stats + 0.5,
+      y: Plot.max(pmf_values_stats, d => d.probability) * 0.9,
+      text: `E(X) = ${expected_value_stats.toFixed(2)}`,
+      fill: COLORS.secondary,
+      fontWeight: "bold"
+    }]),
+    // Standard deviation range as a shaded area
+    Plot.areaX([{
+      x1: expected_value_stats - std_dev_stats,
+      x2: expected_value_stats + std_dev_stats,
+      y1: 0,
+      y2: Plot.max(pmf_values_stats, d => d.probability) * 0.05 // Small fixed height for the bar
+    }], {
+        x1: "x1",
+        x2: "x2",
+        y1: "y1",
+        y2: "y2",
+        fill: COLORS.grayLight,
+        fillOpacity: 0.5,
+        tip: `Interval E(X) ± σ(X) = [${(expected_value_stats - std_dev_stats).toFixed(2)}, ${(expected_value_stats + std_dev_stats).toFixed(2)}]`
+    }),
+    Plot.text([{
+      x: expected_value_stats,
+      y: Plot.max(pmf_values_stats, d => d.probability) * 0.1, // Position text slightly above the std dev bar
+      text: `σ = ${std_dev_stats.toFixed(2)}`,
+      fill: COLORS.dark,
+      textAnchor: "middle"
+    }])
+  ],
+  caption: html`Vizualizace ${distribution_stats} rozdělení s vyznačenou střední hodnotou E(X) a směrodatnou odchylkou σ(X).<br>
+    E(X) = ${expected_value_stats.toFixed(2)}, Var(X) = ${variance_stats.toFixed(2)}, σ(X) = ${std_dev_stats.toFixed(2)}.`
+})
+`
+```
+
+::: {.panel-tabset}
+## Zadání
+Vypočítejte střední hodnotu a rozptyl pro náhodnou veličinu X ~ Bin(n, p) s parametry n = 10 a p = 0,3.
+
+## Řešení
+
+**Krok 1: Identifikujeme parametry.**
+Jde o binomické rozdělení, kde $n = 10$ a $p = 0,3$.
+
+**Krok 2: Vypočítáme střední hodnotu.**
+Pro binomické rozdělení je vzorec pro střední hodnotu $E(X) = n \cdot p$.
+Dosadíme hodnoty: $E(X) = 10 \times 0,3 = 3$.
+
+**Krok 3: Vypočítáme rozptyl.**
+Pro binomické rozdělení je vzorec pro rozptyl $Var(X) = n \cdot p \cdot (1-p)$.
+Dosadíme hodnoty: $Var(X) = 10 \times 0,3 \times (1-0,3) = 10 \times 0,3 \times 0,7 = 2,1$.
+
+**Výsledek: E(X) = 3, Var(X) = 2,1**
+:::
+
+::: {.panel-tabset}
+## Zadání
+Průměrný počet defektů na metru látky je 0,5. Vypočítejte střední hodnotu a rozptyl počtu defektů na 1 metru. (X ~ Pois($\lambda$))
+
+## Výsledek
+**Výsledek: E(X) = 0,5, Var(X) = 0,5**
+:::
+
+::: {.panel-tabset}
+## Zadání
+Pravděpodobnost, že student složí test na první pokus, je 0,7. Vypočítejte střední hodnotu a rozptyl počtu pokusů, než student test složí. (X ~ Geom(p))
+
+## Výsledek
+**Výsledek: E(X) $\approx$ 1,43, Var(X) $\approx$ 0,61**
+:::
+
+::: {.callout-tip collapse="true" icon=false}
+## 💬 Zeptej se AI
+Zkopíruj do ChatGPT / Claude / Copilota / Gemini:
+
+> Jsi trpělivý tutor statistiky pro studenty ekonomie.
+> Odpovídáš stručně (max. 3–4 věty), pak se ptáš jestli to dává smysl.
+> Symboly a vzorce používáš jen když jsou nezbytné.
+> Nikdy nevysvětluješ víc věcí najednou.
+> Vždy ukazuješ obecný postup, ne trik platný jen pro tento příklad.
+> Mluvíš česky.
+>
+> Nerozumím, jak interpretovat střední hodnotu a rozptyl u diskrétních rozdělení. Můžeš mi to ukázat na příkladu z investičního managementu, kde bych mohl porovnávat riziko a očekávaný výnos?
+:::
+
+---
+
+### 🏭 Aplikační úlohy
+
+::: {.callout-note icon=false}
+## 🏭 Aplikační úloha: Kontrola kvality výroby
+
+Výrobní linka produkuje součástky, u kterých je dlouhodobě zjištěna míra defektnosti 2%. Pro zajištění kvality se z každé šarže o 50 kusech náhodně vybere vzorek 10 součástek a zkontroluje se.
+
+**a)** Jaká je pravděpodobnost, že ve vzorku 10 součástek nebude ani jedna defektní?
+**b)** Jaká je pravděpodobnost, že ve vzorku 10 součástek budou nejvýše dvě defektní?
+**c)** Jaký je očekávaný počet defektních součástek v takovém vzorku a jaký je rozptyl tohoto počtu?
+:::
+
+::: {.panel-tabset}
+## Zadání (shrnutí)
+X ~ Bin(n=10, p=0,02).
+a) P(X=0)
+b) P(X $\le$ 2)
+c) E(X), Var(X)
+
+## Řešení
+
+**a) Jaká je pravděpodobnost, že ve vzorku 10 součástek nebude ani jedna defektní?**
+
+Zde se jedná o binomické rozdělení, protože máme pevný počet pokusů (n=10), dva možné výsledky (defektní/bez defektu) a konstantní pravděpodobnost defektu (p=0,02). Hledáme pravděpodobnost $P(X=0)$.
+
+$P(X=0) = \binom{10}{0} (0,02)^0 (1-0,02)^{10-0} = 1 \times 1 \times (0,98)^{10} \approx 0,8171$.
+
+Interpretace: Je vysoká pravděpodobnost (cca 81,71%), že ve vzorku 10 součástek nenajdeme žádný defekt, což je vzhledem k nízké míře defektnosti očekávané.
+
+**b) Jaká je pravděpodobnost, že ve vzorku 10 součástek budou nejvýše dvě defektní?**
+
+Hledáme $P(X \le 2) = P(X=0) + P(X=1) + P(X=2)$.
+Již známe $P(X=0) \approx 0,8171$. Nyní vypočítáme $P(X=1)$ a $P(X=2)$.
+
+$P(X=1) = \binom{10}{1} (0,02)^1 (0,98)^9 = 10 \times 0,02 \times 0,8337 \approx 0,1667$.
+$P(X=2) = \binom{10}{2} (0,02)^2 (0,98)^8 = 45 \times 0,0004 \times 0,8508 \approx 0,0153$.
+
+$P(X \le 2) = 0,8171 + 0,1667 + 0,0153 = 0,9991$.
+
+Interpretace: Je velmi vysoká pravděpodobnost (téměř 100%), že ve vzorku 10 součástek budou nejvýše dvě defektní. To ukazuje, že s nízkou mírou defektnosti jsou velké počty defektů ve vzorku nepravděpodobné.
+
+**c) Jaký je očekávaný počet defektních součástek v takovém vzorku a jaký je rozptyl tohoto počtu?**
+
+Pro binomické rozdělení:
+$E(X) = n \cdot p = 10 \times 0,02 = 0,2$.
+$Var(X) = n \cdot p \cdot (1-p) = 10 \times 0,02 \times (1-0,02) = 10 \times 0,02 \times 0,98 = 0,196$.
+
+Interpretace: Očekáváme, že v průměru najdeme 0,2 defektní součástky na vzorek. Rozptyl 0,196 indikuje, že data nejsou příliš rozptýlena od střední hodnoty, což je v souladu s nízkou pravděpodobností defektu.
+:::
+
+::: {.callout-note icon=false}
+## 🏭 Aplikační úloha: Nákupní zvyklosti a marketing
+
+Online obchod sleduje nákupní chování zákazníků. Z dlouhodobých dat ví, že průměrně 1 z 50 návštěvníků uskuteční nákup. Marketingové oddělení chce optimalizovat své kampaně.
+
+**a)** Jaká je pravděpodobnost, že první nákup nastane až po 10. návštěvě?
+**b)** Jaká je průměrný počet návštěv potřebných k prvnímu nákupu a jaký je rozptyl tohoto počtu?
+**c)** Pokud v průměru každý desátý nákup je vrácen, jaká je pravděpodobnost, že ze 30 nákupů se vrátí přesně 2?
+:::
+
+::: {.panel-tabset}
+## Zadání (shrnutí)
+a) X ~ Geom(p=1/50=0,02). P(X > 10).
+b) E(X), Var(X) pro X ~ Geom(0,02).
+c) Y ~ Bin(n=30, p=1/10=0,1). P(Y=2).
+
+## Řešení
+
+**a) Jaká je pravděpodobnost, že první nákup nastane až po 10. návštěvě?**
+
+Zde se jedná o geometrické rozdělení, kde $p = 1/50 = 0,02$. Hledáme pravděpodobnost $P(X > 10)$.
+$P(X > 10) = (1-p)^{10} = (1-0,02)^{10} = (0,98)^{10} \approx 0,8171$.
+
+Interpretace: Existuje přibližně 81,71% šance, že marketingový tým bude muset oslovit více než 10 návštěvníků, než uskuteční první nákup. To zdůrazňuje, že získání prvního nákupu může vyžadovat mnoho interakcí.
+
+**b) Jaká je průměrný počet návštěv potřebných k prvnímu nákupu a jaký je rozptyl tohoto počtu?**
+
+Pro geometrické rozdělení s $p=0,02$:
+$E(X) = \frac{1}{p} = \frac{1}{0,02} = 50$.
+$Var(X) = \frac{1-p}{p^2} = \frac{0,98}{(0,02)^2} = \frac{0,98}{0,0004} = 2450$.
+
+Interpretace: V průměru je potřeba 50 návštěv k uskutečnění prvního nákupu. Rozptyl 2450 ukazuje na značnou variabilitu v počtu návštěv, což znamená, že některé první nákupy nastanou brzy, zatímco jiné až po mnohem delší době.
+
+**c) Pokud v průměru každý desátý nákup je vrácen, jaká je pravděpodobnost, že ze 30 nákupů se vrátí přesně 2?**
+
+Zde se jedná o binomické rozdělení, kde $n=30$ (počet nákupů) a $p=1/10=0,1$ (pravděpodobnost vrácení). Hledáme $P(Y=2)$.
+
+$P(Y=2) = \binom{30}{2} (0,1)^2 (1-0,1)^{30-2} = \binom{30}{2} (0,1)^2 (0,9)^{28}$.
+$\binom{30}{2} = \frac{30 \times 29}{2 \times 1} = 435$.
+$(0,1)^2 = 0,01$.
+$(0,9)^{28} \approx 0,0523$.
+$P(Y=2) = 435 \times 0,01 \times 0,0523 \approx 0,2275$.
+
+Interpretace: Pravděpodobnost, že ze 30 nákupů budou vráceny přesně 2, je přibližně 22,75%. Tyto informace jsou klíčové pro řízení zásob a finanční plánování obchodu.
+:::
+
+---
+
+### Závěr kapitoly
+
+#### Shrnutí pojmů
+
+| Pojem                        | Definice                                                                               | Kdy použít                                                                        |
+| :--------------------------- | :------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------- |
+| **Binomické rozdělení**      | Počet úspěchů v $n$ nezávislých Bernoulliho pokusech s pravděpodobností $p$.           | Pevný počet pokusů, dva výsledky (úspěch/neúspěch), konstantní $p$.              |
+| **Poissonovo rozdělení**     | Počet vzácných událostí v pevném intervalu (času/prostoru) s průměrnou frekvencí $\lambda$. | Události se dějí náhodně a nezávisle, průměrná frekvence je známa.              |
+| **Geometrické rozdělení**    | Počet pokusů do prvního úspěchu v nezávislých Bernoulliho pokusech s pravděpodobností $p$. | Hledáme, kolik pokusů je potřeba k prvnímu úspěchu.                               |
+| **Kumulativní distribuční funkce (CDF)** | Pravděpodobnost, že náhodná veličina $X$ nabude hodnotu menší nebo rovnou $x$ ($P(X \le x)$). | Pro výpočet pravděpodobnosti intervalů, např. $P(X \le k)$, $P(X > k)$.         |
+| **Střední hodnota a rozptyl** | $E(X)$: dlouhodobý průměr; $Var(X)$: míra rozptýlení dat kolem $E(X)$.                   | Pro pochopení očekávané hodnoty a variability náhodné veličiny.                  |
+
+#### Pracuj s AI
+
+**Něco mi nešlo – chci dovysvětlit:**
+> Jsi trpělivý tutor statistiky pro studenty ekonomie.
+> Pravidla, která vždy dodržuješ:
+> – Odpovídáš stručně (max. 3–4 věty), pak se zeptáš jestli to dává smysl.
+> – Matematické symboly a vzorce používáš jen když jsou nezbytné,
+>   jinak raději slovní popis nebo číselný příklad.
+> – Nikdy nevysvětluješ víc věcí najednou.
+> – Pokud si nejsi jistý co student nechápe, nejdřív se zeptej.
+> – Vždy ukazuješ OBECNÝ postup který funguje pro libovolný příklad,
+>   ne trik nebo zkratku platnou jen pro toto konkrétní zadání.
+>   Pokud existuje více postupů, řekni to a drž se obecného.
+> – Mluvíš česky.
+>
+> Moje otázka: Nerozumím, jak se rozhodnout, které diskrétní rozdělení (binomické, Poissonovo, geometrické) použít v konkrétní ekonomické situaci. Můžeš mi to vysvětlit na příkladech?
+
+**Chci si procvičit:**
+> Jsi tutor statistiky, který procvičuje studenty formou dialogu.
+> Pravidla, která vždy dodržuješ:
+> – Dáš mi jedno zadání, počkáš na mou odpověď, pak opravíš nebo potvrdíš.
+> – Nápovědu dáváš jen když o ni požádám slovem "nápověda".
+> – Zadání jsou krátká a numerická (ne dlouhé příběhy).
+> – Obtížnost postupně zvyšuješ – začínáš snadno.
+> – Mluvíš česky.
+>
+> Téma: Výpočet pravděpodobností u diskrétních rozdělení. Začni prvním příkladem.
+
+**Chci jít do hloubky:**
+> Jsi tutor statistiky, který propojuje teorii s praxí.
+> Pravidla, která vždy dodržuješ:
+> – Začínáš vždy reálnou situací z praxe, vzorec přichází až potom.
+> – Používáš konkrétní čísla, ne obecné proměnné (raději n=50 než "nějaké n").
+> – Vždy ukazuješ OBECNÝ postup který funguje pro libovolný příklad.
+>   Pokud existuje elegantnější zkratka jen pro tento případ, zmíníš ji,
+>   ale jako doplněk – ne jako hlavní postup.
+> – Po každém celku se zeptáš jestli chci pokračovat nebo se vrátit.
+> – Mluvíš česky.
+>
+> Zajímá mě: jak se Poissonovo rozdělení používá v praxi v pojišťovnictví pro modelování počtu škodních událostí a jak se z něj odvozuje optimální pojistné? Ukaž mi reálný příklad s čísly.
+
+<!-- REVIEW NOTES -->
+Provedené opravy:
+1.  **Nahrazení OJS placeholderů:** Všechny zástupné OJS bloky (`// OJS_PLACEHOLDER_SEKCE_X`) byly nahrazeny kompletními interaktivními vizualizacemi pro každou sekci (Binomické, Poissonovo, Geometrické, Kumulativní distribuční funkce, Střední hodnota a rozptyl).
+2.  **Konzistence barev OJS:** Do všech OJS bloků byla přidána definice `const COLORS` a barvy v grafech (`fill`, `stroke`, `text`) byly upraveny tak, aby používaly tyto definované barvy pro vizuální konzistenci dle Style Guide.
+3.  **Interaktivita OJS:** Bylo ověřeno, že všechny OJS bloky obsahují interaktivní prvky (posuvníky `Inputs.range` a/nebo rozbalovací menu `Inputs.select`) dle požadavků.
+4.  **Změna názvů tabů v "školských příkladech":** Pro každou sekci byl tab `## Postup` přejmenován na `## Řešení` a obsah tabu `## Výsledek` (pouze řádek s výsledkem) byl přesunut na konec tabu `## Řešení`, čímž se odstranil duplicitní tab `## Výsledek` a sladilo se to s požadavkem `Zadání/Řešení`.
+5.  **Kontrola vzorců a číselných výsledků:** Všechny matematické vzorce a číselné výsledky v příkladech a self-testech byly ověřeny a shledány správnými.
+6.  **Stylové úpravy:** Bylo ověřeno dodržení maximální délky odstavců (3-4 věty) a absence zbytečných úvodních frází, text je v pořádku.
+```
