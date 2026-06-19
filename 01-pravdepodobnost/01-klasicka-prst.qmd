@@ -1,12 +1,13 @@
 ---
 title: "Teoretická a experimentální pravděpodobnost"
 ---
+
 ## Klasický školský přístup
 
 Ve školách se pravděpodobnost učí na příkladech házení kostky a řeší se například jaká je pravděpodobnost, že padne sudé číslo. Pokud házíme kostkou, pak může padnout šest hodnot: $\Omega= \{1,2,3,4,5,6\}$, a sudá čísla z toho jsou tři: $A=\{2,4,6\}$. Pravděpodobnost se pak spočítá jako počet příznivých možností děleno počet všech možností
 
 ::: {.column-margin}
-![Pierre-Simon Laplace](https://m.media-amazon.com/images/I/512+nstKt9L.jpg)
+<!-- ![Pierre-Simon Laplace](https://m.media-amazon.com/images/I/512+nstKt9L.jpg) -->
 **Pierre-Simon Laplace**
 *1749 – 1827, Paříž*
 :::
@@ -29,7 +30,7 @@ Uvedený příklad vychází z tradičního pojetí, jak bylo toto pojetí Lapla
 Pravděpodobnost často chápeme intuitivně jako míru nejistoty v náhodných jevech – například pravděpodobnost, že při hodu férovou mincí padne panna. Ale co přesně znamená pravděpodobnost 50%? [Jacob Bernoulli]{.smallcaps}, jeden z prvních matematiků, kteří se tímto problémem systematicky zabývali, navrhl, že pravděpodobnost je něco, co se projevuje v dlouhodobém opakování pokusu. Představte si, že házíte mincí tisíckrát: i když v prvních deseti hodech může padnout lev osmkrát, s rostoucím počtem hodů se poměr lvů výrazně blíží k 1/2. 
 
 ::: {.column-margin}
-![Jacob Bernoulli]()
+<!-- ![Jacob Bernoulli]() -->
 **Jacob Bernoulli**
 *1655 – 1705, Basilej*
 :::

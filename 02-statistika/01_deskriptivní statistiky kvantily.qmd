@@ -502,7 +502,7 @@ Důležité kvantily a odlehlé hodnoty  se často znázorňují do grafu, kter�
 ```{ojs}
 //| echo: false
 
-const data_base=[1,2,2,2,3,3,4,5,8,11]
+data_base=[1,2,2,2,3,3,4,5,8,11]
 
 // Funkce pro výpočet percentilu metodou R-Type 7 (1 + (n-1)p)
 function quantileR7(data, p) {

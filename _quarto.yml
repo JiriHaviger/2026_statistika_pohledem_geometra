@@ -15,26 +15,29 @@ book:
   date: "12/15/2025"
   chapters:
     - index.qmd
-    - part: "**Deskriptivní statistika**"
-      chapters:
-        - 02-statistika/01_deskriptivní statistiky kvantily.qmd
-        - 02-statistika/02_deskriptivní statistiky momenty.qmd
-        - 02-statistika/03_aritmetika dat.qmd
-        - 02-statistika/04_deskriptivy z tabulky.qmd
-        - 02-statistika/05_Analyza_rozptylu_geometricky.qmd
     - part: "**Pravděpodobnost**"
-      #chapters:
-      #  - 01-pravdepodobnost/01_klasicka-prst.qmd
-      #  - 01-pravdepodobnost/02_prst_pravidla.qmd
-      #  - 01-pravdepodobnost/03_prst_distribuce.qmd
-      #  - 01-pravdepodobnost/04_prst_diskretni.qmd
+      chapters:
+        - 01-pravdepodobnost/01-klasicka-prst.qmd
+        # - 01-pravdepodobnost/02_prst_pravidla.qmd
+        # - 01-pravdepodobnost/03_prst_distribuce.qmd
+        # - 01-pravdepodobnost/04_prst_diskretni.qmd
+#    - part: "**Deskriptivní statistika**"
+#      chapters:
+        #- 02-statistika/01_deskriptivní statistiky kvantily.qmd
+        # - 02-statistika/02_deskriptivní statistiky momenty.qmd
+        # - 02-statistika/03_aritmetika dat.qmd
+        # - 02-statistika/04_deskriptivy z tabulky.qmd
+        # - 02-statistika/05_analyza_rozptylu_geometricky.qmd
+        # - 02-statistika/06_diskretni_distribuce.qmd
+
+
 format:
   html:
     theme: 
       # https://bootswatch.com/
-      light: [sandstone,hag_custom.scss] #cosm, flatly, sandstone 
+      light: [cosmo,hag_custom.scss] #cosmo, flatly, sandstone 
       #cosmo, flatly, journal, lumen, paper, readable, sandstone, simplex, slate, spacelab, superhero, united, yeti
-      dark: [sandstone] 
+      dark: [cosmo, hag_custom.scss] 
       # light: [yeti, hag_custom.scss]
     code-fold: true
     code-tools: true
