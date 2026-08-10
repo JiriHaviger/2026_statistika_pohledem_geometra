@@ -1,0 +1,585 @@
+# Deskriptivní statistiky
+
+Představete si, že máte seznam studentů a u každého z nich výsledek test ze statistiky (údaje můžeme mít uložené například jako slopupec hodnot v excelu). **Deskriptivní statistiky** jsou čísla, která souhrně charakterizují **velikost** hodnot a jejich **rozložení** nějaké **proměnné**, v našem příkladu výsledků testu. Nejprve si pojďme ujasnit co se rozumí pod pojmem proměnná a jaké typy proměnných máme.
+
+
+## Proměnná 
+Proměnná je jakákoli **měřená** (zaznamenávaná) **veličina**, která **může nabývat různých hodnot**. Například čas průjezdu kola v motocyklové soutěži, počet nehod v kraji za měsíc, výdaje domácností na stravu, spokojenost s výukou, barva očí, pohlaví pacienta, ... Hodnoty kterých tyto veličiny mohou nabývat jsou různé a podle toho s nimi pak můžeme pracovat. Proto se proměnné rozdělují na následující typu, kterým se také říká **úroveň měření**
+
+**Nominální proměnná**: objekty jen pojmenováváme. Např. $\Omega = \{\text{muž, žena}\}$ nebo $\Omega = \{Královéhradecký, Pardubický, ...\}$ jako kraj rodiště studentů.Matematicky můžeme kategorie popsat pouze četností (např kolik je žen) a relativní četností (jaké je procentuální zastoupení žen).  Patří mezi **kvalitativní** proměnné, speciálním příadem je **dichotomická**, která má jen dva možné výsledky. 
+
+**Ordinální proměnná**: Kategorie už mají jasné pořadí. Např. známky ve škole, pocity spokojenosti (nízká, střední, vysoká) nebo pořadí v závodu. Zde už má smysl mluvit o tom, že hodnoty rostou a na ose x je uspořádat od nejmenší po největší. Patří také mezi **kvalitativní** proměnné. 
+
+**Kardinální diskrétní proměnná**: Na ose $x$ jsou skutečná čísla (počet dětí, počet padlých šestek). Rozestupy mezi nimi jsou matematicky definované. Stále jsou to ale izolované body – mezi 1 a 2 dětmi neexistuje žádná hodnota. 
+
+**Kardinální spojitá proměnná**: Body na ose $x$ se k sobě přiblíží natolik, že mezi jakýmikoliv dvěma hodnotami vždy najdeme nekonečně mnoho dalších. Tímto se budeme zabývat v jiné kapitole. 
+
+Obě kardinální porměnné patří mezi **kvantitativní**, alternativně se pro ně používají i označení **metrická** nebo **škála**. Někdy se dělí na **intervalové**, které nemají pevnou nulu (teplota ve stuních celsia, datum) a **poměrové**  které mají nulu definovanou (věk, plat, hmotnost, rychlost, ...). 
+
+## Deskriptivní statistiky obecně
+
+Když máme nějakou proměnnou, můžeme provádět její měření (nebo zaznamenávat její hodnoty), kterých však může mýt mnoho. Proto je vhodné těchto "mnoho" hodnot nějak popsat a k tomu slouží popisná neboli **deskriptivní statitika**. Jaké nástroje nám tedy nabízí? V zásadě dvoje: 
+
+- **míry polohy** určují **kde** na ose jsou data umístěna.
+- **míry variability** ukazují **jak** jsou data nahuštěna nebo naopak rozprostřena. 
+
+V grafu jsou původní data, data posunutá (+2) a data rozptýlená (.3). U posunu se jen změnila poloha těch dat ale vzájemné rozestupy zůstaly stejné. U vynásobení se změnily rozestupy i celkový rozsah.
+
+```{ojs}
+//| echo: false
+// 1. Příprava dat
+dataZdroj = [0, 1, 1.8, 2.3, 3, 3.5, 4, 5, 8, 10]
+
+transformData = (data, groupName, transformFn = d => d) => {
+  const transformed = data.map(d => transformFn(d));
+  const minVal = d3.min(transformed);
+  const maxVal = d3.max(transformed);
+  return transformed.map(d => ({ 
+    hodnota: d, 
+    skupina: groupName, 
+    isMinMax: (d === minVal || d === maxVal) // Nová proměnná pro rozlišení min/max
+  }));
+};
+
+minMaxLines = dataProGraf.reduce((acc, curr) => {
+  if (!acc[curr.skupina]) {
+    acc[curr.skupina] = { min: Infinity, max: -Infinity };
+  }
+  acc[curr.skupina].min = Math.min(acc[curr.skupina].min, curr.hodnota);
+  acc[curr.skupina].max = Math.max(acc[curr.skupina].max, curr.hodnota);
+  return acc;
+}, {});
+
+minMaxLinesArray = Object.keys(minMaxLines).map(key => ({
+  skupina: key,
+  x1: minMaxLines[key].min,
+  x2: minMaxLines[key].max
+}));
+dataProGraf = [
+  ...transformData(dataZdroj, "Data"),
+  ...transformData(dataZdroj, "Změna polohy (+5)", d => d + 5),
+  ...transformData(dataZdroj, "Změna variability (.3)", d => d * 3)
+];
+
+Plot.plot({
+  width: 800,
+  height: 250, // Trochu vyšší pro lepší přehled
+  grid: true,
+  marginLeft: 150, 
+  x: { domain: [0, 34], label: "Hodnota →" },
+  y: { 
+    domain: ["Data", "Změna polohy (+5)", "Změna variability (.3)"],
+    label: null,
+    inset: 20 
+  },  
+  marks: [
+    // Vodorovné linky pro každou skupinu
+    Plot.ruleY(["Data", "Změna polohy", "Změna variability"], {stroke: "lightgrey"}),
+    // Úsečky mezi min a max hodnotou
+Plot.link(minMaxLinesArray, {
+      x1: "x1", 
+      x2: "x2", 
+      y1: "skupina", 
+      y2: "skupina", 
+      stroke: "steelblue", 
+      strokeWidth: 4,
+      strokeOpacity: 0.6 // trošku průhlednosti, aby nezanikly tečky
+    }),
+    // Samotné body - nyní s podmíněnou barvou
+    Plot.dot(dataProGraf, {
+      x: "hodnota",
+      y: "skupina",
+      fill: d => d.isMinMax ? "steelblue" : "gray", // Podmíněná barva
+      stroke: "white",
+      r: 6
+    })
+  ]
+})
+```
+
+### Příklad {.unnumbered .unlisted}
+Abychom nemluvli jen teoreticky, pojďme si ukázat několik základních deskriptivních statistik na konkrétním a malém příkladu. Máme deset domácností a sledujeme, jaký mají počet motorových vozidel (automobilů, motocyklů, elektrokoloběžek). Získaná data po uspořádání od nejmenšího po největší jsou $\{1, 2, 2, 2, 3, 3, 4, 5, 8, 11\}$. Data jsou **kardinální poměrová**, nula je korektně definovaná. 
+
+První otázkou je, kolik aut má "normální" domácnost, kolik je minimum, maximum, případně jaký počet aut má dolních 25% domácností. Jinými slovy kde v našich datech leží střed, kde leží minimum, kde čtvrtina. Protože se ptáme otázkou **kde**, na jakém místě osy, nazývají se takovéto hodnoty **míry polohy**.
+
+Nejznámější mírou polohy je aritmetický **průměr $\bar{x}$**. Spočítáme ho tak, že sečteme všechny hodnoty a vydělíme je jejich počtem.  Protože však souvisí s dalšími momentovými charakteristikami, budeme se mu věnovat v jiné kapitole. 
+**Průměr (aritmetický průměr)**:
+   $$
+   m = \bar{x}= \frac{1 + 2 + 2 + 2 + 3 + 3 + 4 + 5 + 8 + 11}{10} = \frac{41}{10} = 4.1
+   $$
+
+Můžeme tedy říci, že průměrná domácnost má $4.1$ motorových vozidel
+
+## Míra založená na četnostech
+
+Mírou polohy založenou na četnostech je **Modus (mod)**, což je hodnota, která se v datovém souboru vyskytuje nejčastěji. V našem případě je to hodnota 2, která se vyskytuje třikrát. 
+
+$\{1, \mathbf{ 2, 2, 2}, 3, 3, 4, 5, 8, 11\}$, tedy $mds=2$. 
+
+Můžeme tedy říci, že nejčastěji má domácnost dvě motorová vozidla.
+
+::: {.callout-note}
+Modus ůžeme určit pro věechny typy proměnných, nominální, ordinální i kardinální. 
+:::
+
+
+## Sloupcový graf četností a histogram
+
+Předchozí data můžeme velmi snadno vizualizovat pomocí sloupcovho grafu 
+
+
+```{ojs}
+  //| screenshot: true
+  //| echo: false
+  //| 
+  // 1. Definice dat
+  data01 = [1, 2, 2, 2, 3, 3, 4, 5, 8, 11]
+
+  // 2. Vykreslení grafu pomocí Plot
+  Plot.plot({
+    marks: [
+      // rectY automaticky spočítá četnosti (binning není nutný pro diskrétní čísla)
+      Plot.rectY(data01, Plot.binX({y: "count"}, {thresholds: d3.range(0.5, 12.5, 1), fill: "steelblue"})),
+      // Přidání pravítka na nule pro lepší čitelnost
+      Plot.ruleY([0])
+    ],
+    x: {
+      label: "Hodnota",
+      ticks: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+    },
+    y: {
+      label: "Četnost",
+      grid: true,
+      ticks: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    },
+    style: {
+      fontSize: "14px",
+      background: "transparent"
+    }
+  })
+```
+
+Podobný graf můžeme vytvořit i pro proměnné, které jsou nominální. Ukázka je z oboru kvantitativní lingvistiky: v následujících textech necháme spočítat četnosti jednotlivých písmen a vložíme je do grafu uspořádané podle velikosti od největší rel.četnosti
+
+::: {.callout-note collapse="true"}
+  # použité texty 
+  **Švejk (Hašek)** *Tak nám zabili Ferdinanda, řekla posluhovačka panu Švejkovi, který opustiv před léty vojenskou službu, když byl definitivně prohlášen vojenskou lékařskou komisí za blba, živil se prodejem psů, ošklivých nečistokrevných oblud, kterým falšoval rodokmeny. Kromě tohoto zaměstnání byl stižen revmatismem a mazal si právě kolena opodeldokem. Kterýho Ferdinanda, paní Müllerová?*
+
+  **R.U.R. (Čapek)** *DOMIN: kromě toho dodáme za stejnou cenu patnáct tisíc kusů Robotů pro vykládání lodí. Značka: Roboti pro těžkou práci. Nakládací výkon jednoho Robota: dvě stě šedesát kilogramů za hodinu. Roboti pracují ve dne v noci. Vyžadují jen nepatrné náklady na stravu. Sulla, pošlete to!*
+
+  **Škola hrou (Komenský)** *Vznešení a urození, ctihodní a slovutní pánové, i všechno vzácné diváctvo! Mluvit ve škole o škole a pro školu je věc zvlášť případná. Poněvadž jsme se tedy tak slavnostně shromáždili ve škole, mluvme o škole a čiňme pro školu, cokoli můžeme. Ale co je to, co můžeme? Za prvé vylévati prosby...*
+:::
+
+
+```{ojs}
+// 1. Definice dat (bez složených závorek kolem celého bloku)
+texts = ({
+  "Švejk (Hašek)": "„Tak nám zabili Ferdinanda,“ řekla posluhovačka panu Švejkovi, který opustiv před léty vojenskou službu, když byl definitivně prohlášen vojenskou lékařskou komisí za blba, živil se prodejem psů, ošklivých nečistokrevných oblud, kterým falšoval rodokmeny. Kromě tohoto zaměstnání byl stižen revmatismem a mazal si právě kolena opodeldokem. „Kterýho Ferdinanda, paní Müllerová?“",
+  
+  "R.U.R. (Čapek)": "DOMIN: „kromě toho dodáme za stejnou cenu patnáct tisíc kusů Robotů pro vykládání lodí. Značka: Roboti pro těžkou práci. Nakládací výkon jednoho Robota: dvě stě šedesát kilogramů za hodinu. Roboti pracují ve dne v noci. Vyžadují jen nepatrné náklady na stravu.“ Sulla, pošlete to!",
+  
+  "Škola hrou (Komenský)": "„Vznešení a urození, ctihodní a slovutní pánové, i všechno vzácné diváctvo! Mluvit ve škole o škole a pro školu je věc zvlášť případná. Poněvadž jsme se tedy tak slavnostně shromáždili ve škole, mluvme o škole a čiňme pro školu, cokoli můžeme. Ale co je to, co můžeme? Za prvé vylévati prosby...“"
+})
+
+// 2. Funkce pro výpočet ABSOLUTNÍ četnosti
+function getLetterCounts(text) {
+  const cleaned = text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z]/g, "");
+  const counts = new Map();
+  for (const char of cleaned) counts.set(char, (counts.get(char) || 0) + 1);
+  
+  return Array.from(counts, ([letter, count]) => ({ 
+    letter: letter.toUpperCase(), 
+    count: count 
+  })).sort((a, b) => b.count - a.count);
+}
+
+// 3. Samostatné viewof pro výběr
+viewof selection = Inputs.select(Object.keys(texts), {label: "Vyberte text"})
+
+// 4. Samotný graf
+Plot.plot({
+  title: `Četnost písmen: ${selection}`,
+  x: { 
+    label: "Písmeno", 
+    domain: getLetterCounts(texts[selection]).map(d => d.letter) 
+  },
+  y: { 
+    label: "Počet výskytů", 
+    grid: true,
+    tickFormat: "d" // Odsud zmizí desetinná čísla, zůstanou jen celá (1, 2, 3...)
+  },
+  marks: [
+    Plot.barY(getLetterCounts(texts[selection]), {
+      x: "letter", 
+      y: "count", 
+      fill: "steelblue"
+    }),
+    Plot.ruleY([0])
+  ]
+})
+```
+
+Podobný způsob vizualizace můžeme provést i pro větší množství dat z proměnné kardinální. Tam může nastat problém, že každá hodnota je unikátní, takže vykreslení každé hodnoty by nám mnoho nepomohlo. Pro takovéto případy se hodnoty **agregují**, tedy slučují do několika **kategorií** (*bins*) a následně se vykresluje četnost v dané kategorii. V následujícím grafu si můžete vyzkoušt různá data (body u osy x) a různý počet kategorií a histogram vytvořený podle těchto kdategorií. 
+
+```{ojs}
+// 1. Generování dat na základě výběru
+data02 = {
+  let v;
+  const n = 500;
+  if (distType02 === "Normální") {
+    v = Array.from({length: n}, d3.randomNormal(0, 1));
+  } else if (distType02 === "Zešikmené") {
+    // Log-normální rozdělení je přirozeně zešikmené
+    v = Array.from({length: n}, d3.randomLogNormal(0, 0.5));
+  } else if (distType02 === "Uniformní") {
+    v = Array.from({length: n}, d3.randomUniform(-2, 2));
+  }
+  return v.map(d => ({val: d}));
+}
+
+// 2. Ovládací prvky
+viewof distType02 = Inputs.select(
+  ["Normální", "Zešikmené", "Uniformní"], 
+  {label: "Typ rozdělení"}
+)
+
+viewof binCount = Inputs.range([2, 200], {value: 20, step: 1, label: "Počet bins"})
+
+// 3. Graf
+Plot.plot({
+  height: 400,
+  grid: true,
+  marks: [
+    // Histogram (Density)
+    Plot.rectY(data02, Plot.binX({y: "count"}, {x: "val", thresholds: binCount, fill: "steelblue", fillOpacity: 0.7})),
+    
+  // dodgeY vytvoří "mrak" bodů, anchor: "bottom" je drží u spodní hrany
+    Plot.dot(data02, Plot.dodgeY({
+      x: "val", 
+      anchor: "bottom", 
+      padding: 0.5, // Tímto zvětšuješ/zmenšuješ rozestupy mezi body
+      r: 2, 
+      fill: "black",
+      fillOpacity: 0.4
+    })),
+    
+    Plot.ruleY([0])
+  ],
+  y: {
+    label: "Četnost / Hustota",
+    tickFormat: "d"
+  },
+  x: {
+    label: "Hodnota x"
+  }
+})
+```
+
+Pro málo kategorií nám graf příliš neřekne, pro příliš mnoho je pak nezachycuje trend v datech ale spíše odchylky od trendu. Proto se stanovilo několik pravidel, jak "optimálně" nastavit počet kategorií. Nejčastěji využívané je Sturgessovo pravidlo $k=\lfloor 1+\log_2(n)\rfloor$, kde uvedené závorky značí zaokrouhlení na celá čísla dolů. Toto pravilo je však někdy nahrazováno jinými, viz [@R-hist-bins]
+
+## Střední hodnota založená na uspořádání
+
+Mírou polohy založenou na uspořádání je **Medián (mdn)**, prostřední hodnota v uspořádaném datovém souboru, případně polovina z dvou prostředních hodnot, pokud máme sudý počet dat. V našem případě je medián mezi 3 a 3, $\{1, 2, 2, 2, \mathbf{ 3, 3}, 4, 5, 8, 11\}$ tedy $\text{mdn} = \frac{3 + 3}{2} = 3$.
+
+Můžeme tedy říci, že 50 % domácností má tři nebo méně aut. 
+
+::: {.callout-note}
+Medián i další kvantily můžeme určit pro typy proměnných, které mají alespoň uspořádání, tedy proměnné ordinální a kardinální. 
+:::
+
+
+Máme tedy tři možnosti jak určit střed, porovnání těchto tří možností jak určit střed našich dat (středí hodnoty) je v následujícím grafu
+
+```{ojs}
+//| echo: false
+data = [1, 2, 2, 2, 3, 3, 4, 5, 8, 11].map(d => ({ hodnota: d }))
+
+// Statistiky pro čáry a legendu
+stats = [
+  { label: "Modus", val: 2, color: "green", dash: "2,2", yOffset: 15 },
+  { label: "Medián", val: 3, color: "blue", dash: "2.2", yOffset: 35 },
+  { label: "Průměr", val: 4.1, color: "red", dash: "2.2", yOffset: 55 }
+]
+
+Plot.plot({
+  width: 600,
+  height: 200,
+  grid: true,
+  x: {  domain: [0, 12], 
+        ticks: d3.range(1, 12), 
+        label: "Hodnota →" },
+  y: {  axis: null, 
+        domain: [0, 3] }, 
+  marks: [
+    // Tečky nad sebou
+    Plot.dot(data, Plot.stackY({ x: "hodnota", fill: "gray", stroke: "white", r: 6 })),
+
+    // Svislé čáry na pozicích statistik
+    stats.map(s => Plot.ruleX([s.val], { stroke: s.color, strokeWidth: 1, strokeDasharray: s.dash })),
+
+    // Popisky v pravém horním rohu pod sebou
+    stats.map(s => 
+      Plot.text([0], { // [0] je zde jen zástupný, pozici určí frameAnchor
+        text: [`${s.label}: ${s.val}`],
+        frameAnchor: "top-right",
+        dx: -20,        // odsazení od pravého okraje
+        dy: s.yOffset,  // vertikální rozestup mezi popisky
+        fill: s.color,
+        // fontWeight: "bold",
+        fontSize: 14,
+        textAnchor: "end"
+      })
+    )
+  ]
+})
+```
+
+## Kvantily - další míry založené na uspořádání {.unnumbered .unlisted}
+
+Míra polohy však nemusí kazovat na střed jako **medián (mdn)**, ale také na krajní hodnoty:  **minimum (min)**, **maximum (max)**. Pokud chceme podrobnější dělení našich dat, pak můžeme využít i další kvantily. **Kvantil** je hodnota, "pod kterou" leží určité procento dat (přesněji jsou menší nebo stejné). Důležité kvantily mají svá spěcifická označení: **medián** pro polovinu, **kvartily** pro čtvrtiny, **decily** pro desetiny a **percentily** pro setiny. Proto platí že např medián = druhý kvartil = pátý decil = padesátý percentil. Postup výpočtu se může lišit, my uvedeme ten nejvíce používaný, který odpovídá funkci PERCENTIL.INC v MS EXCEL. Kvantil $p$ hledáme **v setříděném souboru** na pozici **$k=1+(n-1)\cdot p$** a to buď přímo, pokud $k$ je celé, nebo interpolací, pokud $k$ celé není. V druhém příapdě  číslo $k$ rozdělíme na celou část $c$ (index souseda vlevo) a desetinnou část $d$ (poměrná vzdálenost k sousedovi vpravo). Percentil je pak hodnota na spojnici těchto dvou sousedů: **$x_{c} + (x_{c+1}-x_c) \cdot d$**. Ukažme to na příkladu našich dat.
+
+::: {.callout-note collapse="true"}
+# Určete první kvartil a osmý decil {.unnumbered .unlisted}
+
+Pro první kvartil je $p=0.25$. Vypočeteme pořadí $k=1+(10-1)\cdot 0.25=3.25$, protože to není číslo celé, rozdělíme ho $3.25 = 3 + 0.25$. Požadovaný kvartil tedy hledáme mezi třetí a čtvrtou, $\{1,  2, \mathbf{ 2, 2}, 3, 3, 4, 5, 8, 11\}$. Můžeme použít vzorec $x_3+(x_4-x_3)\cdot 0.25$, ale protože $x_3=x_4=2$, tak hodnota prvního kvartilu je $Q_1=2$.
+
+Pro osmý decil popíšeme postup stručněji v bodech
+
+- osmý decil $\Longrightarrow p=0.8, n=10$ 
+- $k=1+(10-1)\cdot 0.8=8.2 \Longrightarrow 8.2 = 8 + 0.2$. 
+- $\{1, 2, 2, 2, 3, 3, 4, \mathbf{ 5, 8}, 11\}$ 
+- $x_8+(x_9-x_8)\cdot 0.2 \Longrightarrow 5+(8-5)\cdot0.2$
+- $D_8=5,6$.
+
+v grafu na vodorovné ose hodnoty, na svislé ose pořadí, ukázka lineární interpolace když na svislou osu vyneseme 8.2 a pomocí úsečky získáme hodnotu 5.6 v datech.
+ 
+```{ojs}
+//| echo: false
+
+// 1. Definice bodů
+body_data = [
+  { x: 4, y: 7, label: "x₇ = 4" },
+  { x: 5, y: 8, label: "x₈ = 5" },
+  { x: 8, y: 9, label: "x₉ = 8" }
+]
+// Cílové hodnoty
+target_y = 8.2
+target_x = 5.6
+Plot.plot({
+  width: 600,
+  height: 200,
+  grid: true,
+  // Rozsah osy X s trochou místa pro popisek x7
+  x: { domain: [3, 9], label: "Hodnota (osa x) →" },
+  y: { domain: [6.8, 9.2], label: "Pořadí (index) ⭡", ticks: [7, 8, 8.2, 9] },
+  marks: [
+    // Lomená čára propojující body x7 -> x8 -> x9
+    Plot.line(body_data, {x: "x", y: "y", stroke: "#ccc", strokeWidth: 1}),
+
+    // Svislá pomocná čára (průmět na osu X)
+    Plot.ruleX([target_x], {y1: 6.8, y2: target_y, stroke: "darkred", strokeDasharray: "4,4" }),
+    
+    // Vodorovná pomocná čára (zadání indexu 8.2)
+    Plot.ruleY([target_y], {x1: 3.5, x2: target_x, stroke: "grey", strokeDasharray: "4,4"}),
+    
+    // Body x7, x8 a x9 v grafu (v prostoru)
+    Plot.dot(body_data, {x: "x", y: "y", r: 5, fill: "gray", stroke: "white"}),
+    Plot.text(body_data, {x: "x", y: "y", text: "label", dy: -15, fontWeight: "bold"}),
+
+    // Cílový bod (8. decil) na spojnici
+    Plot.dot([{x: target_x, y: target_y}], {x: "x", y: "y", r: 5, fill: "darkred"}),
+    
+    // Původní data na ose x (šedá/modrá)
+    Plot.dot(body_data, {x: "x", y: 6.8, r: 8, fill: "steelblue", stroke: "white" }),
+    
+    // Zvýraznění výsledné hodnoty přímo na ose X (červená tečka a číslo)
+    Plot.dot( [{x: target_x, y: 6.8}], {x: "x", y: "y", r: 8, fill: "darkred", stroke: "white", strokeWidth: 2 }),
+    // Popisek u cílového bodu na spojnici 
+    Plot.text([{x: target_x, y: 6.8}], {x: "x", y: "y", text: ["osmý decil"], dy: 15, fontWeight: "bold", fill: "darkred"}),
+    // Plot.text([{x: target_x, y: 6.8}], { text: [target_x.toFixed(1)], fill: "darkred", fontWeight: "bold", dy: 20, fontSize: 14 })
+  ]
+})
+```
+:::
+
+Pokud využijeme vzorce pro celý rozsah dat, získáme **kvantilovou funkci** $q = Q(p)$, která popisuje empirircky (z dat) popisuje vztah hodnotou **$q$** nazývanou **kvantil, percentil, ...** a hodnotou **$p\in(0,1)$** nazývaný **hladina, (kumulativní) pravděpodobnost, percentuální podíl, ...**.  Z pohledu pravděpodobnosti je tedy $q$ taková hodnota, že pravděpodobnost že při náhodném výběru je vybrané hodnota x menší nebo rovna $q$ je rovna $p$.
+
+$$ Q(p)=q \Longleftrightarrow P(x\leq q)=p$$
+
+:::{.callout-note}
+Interpretačně nám odpovídá na otázky například *jaký plat má spodních 10% ve firmě?* ($p=0.10, q=...$) Nebo pro inverzní funkci *kolik procent osob ve firmě má plat menší než 40 000?* ($q=40000, p=...$)$ 
+:::
+
+```{ojs}
+//| echo: false
+{
+  const data = [1, 2, 2, 2, 3, 3, 4, 5, 8, 11];
+  const n = data.length;
+
+  // Vytvoření dvojic [p, hodnota] pro každý prvek
+  // index = (n-1)*p + 1  =>  p = (index - 1) / (n - 1)
+  const points = data.map((d, i) => [i / (n - 1), d]);
+
+  return Plot.plot({
+    width: width,
+    height: width * 0.8, // Snaha o čtvercový poměr
+    grid: true,
+    x: {
+      label: "p (kvantil)",
+      domain: [0, 1],
+      ticks: 10
+    },
+    y: {
+      label: "Hodnota",
+      domain: [0, 11],
+      ticks: 11
+    },
+    marks: [
+      // Spojnice (lineární interpolace)
+      Plot.line(points, {
+        x: d => d[0], 
+        y: d => d[1], 
+        stroke: "steelblue", 
+        strokeWidth: 3
+      }),
+      // Samotné body
+      Plot.dot(points, {
+        x: d => d[0], 
+        y: d => d[1], 
+        fill: "steelblue", 
+        r: 8
+      }),
+      // Pravítko na nule
+      Plot.ruleY([0])
+    ]
+  });
+}  
+```
+
+:::{.callout-note}
+Jiné přístupy se liší v tom, jak vypočtou $k$ (např. $k=(n+1)\cdot p$) případně jak pracují s desetinnou částí (například ji ignorují tedy percentil na pozici $k=6.3$ je vyjádřen hodnotou $x_6$). Podrobněji viz manuál R, [@R-stats]. 
+:::
+
+Doposud jsme se ptali, **kde** leží střed, minimum, čtvrtina, .... Druhou otázkou je, jak jsou data "nahuštěna" kolem střední hodnoty nebo naopak "rozprostřena". To se snaží popsat **míry variability**.
+
+## Míry variabiliy odvozená z kvantilů
+
+Základní idea vychází z uspořádaného souboru a pořadí jednotivých hodnot.  
+
+**Rozpětí** (*range*), někdy také **variační rozpětí**: rozdíl mezi největší a nejmenš hodnotou, **$range = max-min$**.  
+
+**Mezikvartilové rozpětí** (*inter-quartile-range, IQR*): rozdíl mezi třetím kvartilem a prvním kvartilem, **$IQR=Q_3-Q_1$**.
+
+::: {.callout-note}
+**Range** nám říká, kolik "prostoru" data zabírají. Pozor na to, že rozsah, min a max se nemusí shodovat z rozsahem škály. Například měřené hodnoty mohou mít maximální rozsah 0-20, ale data mohou obsahovat hodnoty 1-11 a tedy min=1 a max=11, range = 10.
+
+**IQR** nám říká, kolik prostoru si zabírá "střední polovina" hodnot,  tedy když ignorujeme čtvrtinu nejmenších a čtvrtinu největších hodnot. 
+:::
+
+V našem příkladu je maximální rozdíl mezi domácnostmi $10$ vozidel, v prostřední polovině je maximální rozdíl $3$ vozidla. 
+
+## Odlehlé hodnoty a box-plot
+
+Často je třeba stanovit, zda v souboru nejsou data, která  výzraně vybočují od středu. Ve statistice se nejčastěji používá rozsah $4\cdot \operatorname{IQR}$ pro hodnoty akceptovatelné - prostřední IQR máme dané kvartliy, na každou stranu přidáme ještě $1.5\cdot \operatorname{IQR}$ a získáme hranice, hradby. **Dolní hradbu** (*Lower fence, LF*) určíme jako $Q1-1.5\cdot \operatorname{IQR}$, **horní hradbu** (*Upper fence, UF*) jako $Q3+1.5\cdot
+IQR$. Z našich dat 
+
+\begin{align}
+    k_{0.25}      &= 1+(10-1)\cdot 0.25= 3.25\\
+    Q_1           &= x_3+(x_4-x_3)\cdot 0.25= 2\\
+    k_{0.75}      &= 1+(10-1)\cdot 0.25= 7.75\\
+    Q_3           &= x_7+(x_8-x_7)\cdot 0.75= 4+(5-4)\cdot 0.75= 4.75\\
+    IQR           &= 4.75-2= 2.75\\
+    \mathbf{LF}   &= Q_1 - 1,5 \cdot \operatorname{IQR} = 2 - 1.5 \cdot 2.75 = -2.125\\
+    \mathbf{UF}   &=Q_3 + 1.5 \cdot \operatorname{IQR} = 4.75 + 1.5 \cdot 2.75 = 8.875
+\end{align}
+
+ 
+
+V našich datech tedy nemáme žádné odlehlé hodnoty pod dolní hradbou ale jednu odlehlou hodnoty nad horní hradbou. 
+
+Důležité kvantily a odlehlé hodnoty  se často znázorňují do grafu, který se nazývá **box-plot**: obdélník ukazuje na 1Q, med a 3Q, levý "vous" ukazuje buď minimum, nebo dolní hradbu, pravý "vous" maximum nebo horní hradbu, červenou tečkou je znázorněna odlehlá hodnota. Můžete se setkat s různými variantami, ale tato je nejčastější. 
+
+```{ojs}
+//| echo: false
+
+const data_base=[1,2,2,2,3,3,4,5,8,11]
+
+// Funkce pro výpočet percentilu metodou R-Type 7 (1 + (n-1)p)
+function quantileR7(data, p) {
+  const sorted = data.slice().sort(d3.ascending);
+  const n = sorted.length;
+  if (n === 0) return undefined;
+  if (p <= 0) return sorted[0];
+  if (p >= 1) return sorted[n - 1];
+
+  // Teoretický index (rank - 1)
+  const h = (n - 1) * p;
+  const i = Math.floor(h);
+  const a = sorted[i];
+  const b = sorted[i + 1];
+
+  // Lineární interpolace
+  return a + (h - i) * (b - a);
+}
+
+// Výpočty statistik
+q1 = quantileR7(data_base, 0.25)
+q2 = quantileR7(data_base, 0.5)
+q3 = quantileR7(data_base, 0.75)
+
+iqr = q3 - q1
+lowerWhisker = Math.max(d3.min(data_base), q1 - 1.5 * iqr)
+upperWhisker = Math.min(d3.max(data_base), q3 + 1.5 * iqr)
+outliers = data_base.filter(d => d < lowerWhisker || d > upperWhisker)
+
+// Graf
+Plot.plot({
+  width: 600,
+  height: 200,
+  x: {domain: [0, 12], grid: true},
+  y: {domain: [-1, 3], axis: null},
+  marks: [
+    // Stackované body
+    Plot.dot(data_base.map(d => ({x: d})), Plot.stackY({
+      x: "x",
+      fill: "steelblue",
+      stroke: "white",
+      r: 6
+    })),
+    
+    // Boxplot (box)
+    Plot.rect([{}], {
+      x1: q1, x2: q3, y1: -0.3, y2: 0.3,
+      fill: "lightblue", stroke: "black", fillOpacity: 0.5
+    }),
+    
+    // Medián
+    Plot.ruleX([q2], {y1: -0.3, y2: 0.3, stroke: "black", strokeWidth: 2}),
+    
+    // Vousy (Linky)
+    Plot.link([{x1: q1, x2: lowerWhisker}], {x1: "x1", x2: "x2", y: 0, stroke: "black"}),
+    Plot.link([{x1: q3, x2: upperWhisker}], {x1: "x1", x2: "x2", y: 0, stroke: "black"}),
+    
+    // Konce vousů
+    Plot.ruleX([lowerWhisker, upperWhisker], {y1: -0.2, y2: 0.2, stroke: "black"}),
+    
+    // Odlehlé hodnoty (zobrazeny červeně)
+    Plot.dot(outliers.map(d => ({x: d})), {x: "x", y: 0, r: 4, fill: "red"})
+  ]
+})
+```
+
+## Klíčové poznatky {.unnumbered}
+
+|  | |
+|:---|:---| 
+|Typy proměnných |  nominální, ordinální, kardinální (intervalová, poměrová)|
+|co popisují míry | poloha (kde data jsou), variabilita (jak jsou rozložená)|
+|průměr |$\bar{x}=\frac{\sum x_i}{n}$|
+|modus |nejčetněješí hodnota|
+|medián |střední hodnota uspořádaného souboru|
+|kvantily|poloha určitého procenta dat, kvartily, percentily|
+|index kvantilu|$k=1+(n-1)p$|
+|kvantil|$q_p=x_c+(x_{c+1}-x_c)\cdot d$, kde $k=c+d$, celá část + desetinná část|
+|variabilita kvantilová|rozsah $range = max-min$, rozsah střední poloviny $IQR=Q_3-Q_1$|
+|odlehlé hodnoty|box plot, odlehlé hodnoty, hranice|

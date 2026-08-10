@@ -1,0 +1,272 @@
+# Od pravděpodobnosti výsledku k pravděpodobnostnímu rozdělení
+
+V předchozích kapitolách jsme se zabývali pravděpodobností jednotlivých výsledků náhodných pokusů. Nyní se podíváme na to, jak tyto jednotlivé pravděpodobnosti spojit do celkového obrazu všech možných výsledků a jejich pravděpodobností. K tomu nám slouží koncept, který nazýváme **pravděpodobnostní rozdělení** (nebo pravděpodobnostní **distribuce**).
+
+## Co je pravděpodobnostní rozdělení?
+
+Pravděpodobnostní rozdělení je způsob, jakým jsou pravděpodobnosti jednotlivých výsledků náhodného pokusu uspořádány a prezentovány. Máme v podstatě tři možnosti – pomocí tabulky, grafu nebo matematické funkce.
+
+### Základní příklad
+**Kostka**
+
+Máme kostku, na které jsou strany upraveny tak, aby jedna strana byla se čtyřkou, dvě s pětkou a tři s šestkou. Možnosti všech výsledků a jejich pravděpodobností můžeme popsat tabulkou 
+
+::: {#tbl-pravdepodobnost style="width: 50%; line-height: 0.5; margin: auto;"}
+| $k$ | $x_k$ | $P(x_k)$ |
+|:---:|:---:|:---:|
+| 1 | 4 | 1/6 |
+| 2 | 5 | 2/6 |
+| 3 | 6 | 3/6 |
+
+: Pravděpodobnostní rozdělení tabulkou
+:::
+
+
+Nebo ji můžeme znázornit graficky
+
+```{ojs}
+//| echo: false
+Plot.plot({
+  height: 200,
+  x: {
+    label: "Výsledek x(k)",
+    domain: [4, 5, 6],
+    padding: 0.4
+  },
+  y: {
+    label: "Pravděpodobnost P(k)",
+    grid: true,
+    domain: [0, 0.6]
+  },
+  marks: [
+    Plot.barY([
+      {k: 4, p: 1/6},
+      {k: 5, p: 2/6},
+      {k: 6, p: 3/6}
+    ], {x: "k", y: "p", fill: "steelblue"}),
+    Plot.ruleY([0])
+  ]
+})
+```
+
+
+### Od kategorií k číslům
+Ne každá „osa x“ je stejná. To, jak graf vypadá, závisí na povaze jevu, který modelujeme:
+
+**Nominální proměnná**: Objekty jen pojmenováváme. Např. $\Omega = \{\text{muž, žena}\}$ nebo $\Omega = \{A, B, C\}$. Na pořadí sloupců na ose $x$ nezáleží. Pokud sloupce prohodíme, informace zůstane stejná. Patří mezi **kvalitiativní** proměnné, speciálním příadem je **dichotomická**, která má jen dva možné výsledky.
+
+**Ordinální proměnná**: Kategorie už mají jasné pořadí. Např. známky ve škole, pocity spokojenosti (nízká, střední, vysoká) nebo pořadí v závodu. Zde už má smysl mluvit o tom, že hodnoty rostou a na ose x je uspořádat od nejmenší po největší. Patří také mezi **kvalitativní** proměnné. 
+
+**Kardinální diskrétní proměnná**: Na ose $x$ jsou skutečná čísla (počet dětí, počet padlých šestek). Rozestupy mezi nimi jsou matematicky definované. Stále jsou to ale izolované body – mezi 1 a 2 dětmi neexistuje žádná hodnota. 
+
+**Kardinální spojitá proměnná**: Body na ose $x$ se k sobě přiblíží natolik, že mezi jakýmikoliv dvěma hodnotami vždy najdeme nekonečně mnoho dalších. Tímto se budeme zabývat v jiné kapitole. 
+
+Obě kardinální porměnné patří mezi **kvantitativní**, alternativně se pro ně používají i označení **metrická** nebo **škála**. Někdy se dělí na **intervalové**, které nemají pevnou nulu (teplota ve stuních celsia) a **poměrové**  které mají nulu definovanou (věk, plat, hmotnost, rychlost, ...). 
+
+
+|typ | co lze určit | příkaldy | statistiky |
+|:---|:---|:---|:---|
+|Nominální | rovnost $A=B$, počet $|A|$ | (ne)úspěch, bydliště - kraj | četnost, relativní četnost|
+|Ordinální | porovnání $A<B$, $\max\{A,B\}$  | úroveň vzdělání, spokojenost |medián, percentily|
+|Kardinální intervalová | rozdíly $A-B$  | teplota, datum  |průměr, rozptyl|
+|kardinální pomerová | podíl $A/B$  | věk, příjem   |průměr, rozptyl, geom. průměr|
+
+
+```{ojs}
+//| echo: false
+
+// Definice společného stylu pro všechny grafy v tomto dokumentu
+commonStyle = ({
+  height: 250,        // Zvýšeno pro rezervu na popisky
+  marginTop: 20,      // Fixní okraje zajistí stejnou velikost kreslicí plochy
+  marginBottom: 40,
+  style: {
+    fontSize: "10px", // Menší písmo (standard je 12px)
+    fontFamily: "sans-serif"
+  }
+})
+
+
+data_nom = [
+  {kat: "A", p: 0.42}, {kat: "B", p: 0.18}, 
+  {kat: "AB", p: 0.07}, {kat: "0", p: 0.33}
+]
+
+Plot.plot({
+  ...commonStyle,
+  caption: "Nominální (sloupce)",
+  x: {label: "Krevní skupina"},
+  y: {label: "Pravděpodobnost", domain: [0, 0.5]},
+  marks: [
+    Plot.barY(data_nom, {x: "kat", y: "p", fill: "steelblue"}),
+    Plot.ruleY([0])
+  ]
+})
+```
+
+::: {layout-ncol=2}
+
+```{ojs}
+//| echo: false
+Plot.plot({
+  ...commonStyle,
+  caption: "Ordinální, kardinální (sloupce)",
+  x: {label: "Počet dětí"},
+  y: {label: "Pravděpodobnost / Hustota", domain: [0, 0.5]},
+  marks: [
+    Plot.barY(data_met, {x: "x", y: "p", fill: "steelblue", inset: 0.5}),
+    Plot.ruleY([0])
+  ]
+})
+```
+
+
+```{ojs}
+//| echo: false
+
+data_met = [
+  {x: 0, p: 0.20}, {x: 1, p: 0.45}, {x: 2, p: 0.25}, 
+  {x: 3, p: 0.08}, {x: 4, p: 0.02}
+]
+
+Plot.plot({
+  ...commonStyle,
+  caption: "Ordinální, kardinální (body)",
+  x: {label: "Počet dětí"},
+  y: {label: "Pravděpodobnost", domain: [0, 0.5]},
+  marks: [
+    Plot.dot(data_met, {x: "x", y: "p", fill: "steelblue", r: 4}),
+    Plot.ruleX(data_met, {x: "x", y1: 0, y2: "p", strokeDasharray: "2,2"}),
+    Plot.ruleY([0])
+  ]
+})
+```
+:::
+
+Pro kardinální proměnnou lze využít dva typy grafů 
+ 
+- sloupcový je vizuálně příjemnější, a pokud je  šířka sloupce 1, pak jeho plocha odpovídá pravěpodobnosti.
+
+- bodový je matematicky přesnější,  výhodný v situaci, kdy chceme zdůraznit že hodnoty mezi jednotlivými případy mají nulovou pravděpodobnost (např. počet dětí $p(1.3)=0$). 
+
+## Dvě tváře pravděpodobnosti: bod versus interval
+
+Zaměříme se nyní podrobněji na kardinální diskrétní proměnné. 
+
+**Pravděpodobnostní funkce**: Pohled na konkrétní bod
+
+Pravděpodobnostní funkce (probability mass function, PMF) označujovaná $p(x)=P(X=x)$ odpovídá na otázku: „Jaká je pravděpodobnost, že náhodná veličina nabyde přesně této hodnoty?“. Pokud házíme kostkou, $p(5)$ nám řekne, jaká je šance, že padne pětka. 
+
+**(Kumulativní) distribuční funkce**: Pohled na interval
+Kumulativní distribuční funkce (cummulative distribution function, CDF), označovaná $F(x)=P(X\leq x)$$ odpovídá na otázku: „Jaká je pravděpodobnost, že výsledek bude menší nebo roven $x$?“. Pokud házíme kostkou, $F(5)=P(X\leq 5)$ nám řekne, jaká je šance, že padne pětka nebo číslo menší. 
+
+## Grafické znázornění diskrétního rozdělení
+
+::: {layout-ncol=2}
+
+```{ojs}
+//| echo: false
+// Definice dat pro diskrétní rozdělení
+data_discrete = [
+  {x: 1, p: 0.1, F: 0.1},
+  {x: 2, p: 0.25, F: 0.35},
+  {x: 3, p: 0.4, F: 0.75},
+  {x: 4, p: 0.15, F: 0.9},
+  {x: 5, p: 0.1, F: 1.0}
+]
+
+// 1. Pravděpodobnostní funkce p(x)
+Plot.plot({
+  caption: "Pravděpodobnostní funkce f(x)",
+  ...commonStyle,
+  x: {label: "x", domain: [0, 6]},
+  y: {label: "f(x) = P(X=x)", grid: true, domain: [0, 1.1]},
+  marks: [
+    // 1. Nulová čára (f(x) = 0 všude)
+    Plot.ruleY([0], {stroke: "steelblue", strokeWidth: 2}),
+    
+    // 2. Prázdná kolečka na nulové čáře (označují "tady hodnota není")
+    // Nejdřív bílé kolečko, aby "přemazalo" čáru pod sebou
+    Plot.dot(data_discrete, {x: "x", y: 0, r: 4, fill: "white"}),
+
+    // Potom obrys kolečka v barvě čáry
+    Plot.dot(data_discrete, {x: "x", y: 0, r: 4, stroke: "steelblue", strokeWidth: 2}),
+    
+    // 3. Vertikální úsečky k nenulovým hodnotám
+    Plot.ruleX(data_discrete, {x: "x", y1: 0, y2: "p", stroke: "#ff9203ff", strokeDasharray: "2,2", strokeWidth: 1}),
+    
+    // 4. Plná kolečka nahoře (označují skutečnou hodnotu f(x))
+    Plot.dot(data_discrete, {x: "x", y: "p", r: 5, fill: "steelblue"})
+  ]
+})
+```
+
+```{ojs}
+//| echo: false
+// 
+// 2. Distribuční funkce F(x) s přesnou limitou a ocasy
+f_plot = Plot.plot({
+  caption: "(Kumulativní) distribuční funkce F(x)",
+  ...commonStyle,
+  x: {label: "x", domain: [0, 6]},
+  y: {label: "F(x) = P(X≤x)", grid: true, domain: [0, 1.1]},
+  marks: [
+    // --- OCASY ---
+    // Levý ocas: čára od 0 do 1, končí prázdným kolečkem v x=1
+    Plot.ruleY([0], {x1: 0, x2: 1, strokeWidth: 2.5, stroke: "steelblue"}),
+    Plot.dot([0], {x: 1, y: 0, fill: "white", stroke: "steelblue", r: 3.5}),
+
+    // Pravý ocas: čára od 5 do 6, začíná plným kolečkem v x=5
+    Plot.ruleY([1], {x1: 5, x2: 6, strokeWidth: 2.5, stroke: "steelblue"}),
+    Plot.dot([1], {x: 5, y: 1, fill: "steelblue", r: 4}),
+
+    // --- STŘEDNÍ ČÁST (data) ---
+    // Vodorovné schody
+    Plot.ruleY(data_discrete, {x1: "x", x2: d => d.x + 1, y: "F", strokeWidth: 2.5, stroke: "steelblue"}),
+    
+    // Prázdná kolečka (limita zprava) - dáváme je na konce všech vnitřních schodů
+    Plot.dot(data_discrete.filter(d => d.x < 5), {x: d => d.x + 1, y: "F", fill: "white", stroke: "steelblue", r: 3.5}),
+    
+    // Plná kolečka (funkční hodnota) - začátky všech schodů
+    Plot.dot(data_discrete, {x: "x", y: "F", fill: "steelblue", r: 4}),
+    
+    // Svislé pomocné čáry
+    Plot.ruleX(data_discrete, {
+      x: "x", 
+      y1: d => data_discrete.find(v => v.x === d.x-1)?.F || 0, 
+      y2: "F", 
+      strokeDasharray: "2,2", 
+      stroke: "#ff9203ff"
+    })
+  ]
+
+})
+```
+
+:::
+
+
+Zaměřte se na intevraly v kumulativní funkci - u každého bodu spojitost zprava. Důvodem je, že např $P(X\leq 3)=P(X\leq 3.55)$, protože mezi $3$ a $3.55$ nepřibyla žádná další možná hodnota  atudíž se nezměnila pravděpodobnost . Pokud se pohybujete na $p(x)$ zleva doprava, pak když narazíte na nenulovou hodnotu, pak se o tuto hodnotu zvedne graf $F(x). 
+
+Některé další vlastnosti:
+
+$$\lim_{x\to \pm\infty}p(x)=0, \sum_{x\in\mathbb{R}}p(x)=1$$
+
+$$\lim_{x\to-\infty}F(x)=0,\quad \lim_{x\to+\infty}F(x)=1$$
+
+---
+
+## Číselné charakteristiky 
+K popisu diskrétních rozdělení používáme charakteristiky, které nám říkají, kde se nachází „střed“ dat a jak moc jsou data rozptýlená.
+
+**Střední hodnota** ($\mu$ nebo průměr)
+Představuje očekávaný výsledek pokusu při velkém množství opakování.
+$$E(x) = \overline{x} = \sum x_{i} \cdot p(x_{i})$$
+
+**Rozptyl** ($Var$)
+Měří míru variability nebo „rozostření“ hodnot kolem střední hodnoty.
+$$D(x) = Var(x) = \sum (x_{i} - \overline{x})^{2} \cdot p(x_{i})$$
+
+**Medián** ($med$)
+Hodnota, která rozděluje soubor na dvě poloviny.
+$$P(X \leqslant med) = 0.5 \quad \text{nebo} \quad F(med) = 0.5$$

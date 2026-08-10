@@ -1,0 +1,187 @@
+/*-- scss:defaults --*/
+$primary: #0085CC;
+$secondary: #666666;     // Dark gray
+$gray-light: #B0B0B0;
+$light: #F8F9FA;         // Světlé pozadí
+$dark: #1A1A1A;          // Tmavý text
+$warning: #8b0512;
+$warning-dark: darken($warning, 10%);
+
+
+$font-size-base: 1rem;
+$headings-font-weight: 600;
+
+// Logo/brand v hlavičce
+.navbar-brand::before {
+  content: "📊";
+  font-size: 1.5rem;
+  margin-right: 0.5rem;
+}
+
+
+/*-- SCSS: Custom Environments --*/
+
+// Styl pro DEFINICE (využití Primary barvy)
+.definition-box {
+  display: block; // Ujistí se, že je na vlastním řádku
+  border: 1px solid $primary; // Rámeček kolem
+  border-left: 8px solid $primary; // Silnější levá hrana
+  background-color: $light; 
+  padding: 1rem;
+  margin: 1.5rem 0;
+  counter-increment: none !important;
+}
+
+// Styl pro PŘÍKLADY (využití Secondary barvy)
+.example-box {
+  padding: 1rem;
+  padding-left: 3rem; // Více odsazení zleva
+  margin: 1.5rem 0;
+  font-size: $font-size-base * 0.9;
+  counter-increment: none !important;
+}
+
+// Styl, aby nadpis v boxu byl vždy tučný
+.definition-box h3, .example-box h3 {
+  color: $dark;
+  font-weight: 700;
+  border-left: none; // Vypne defaultní čáru na h3 uvnitř boxu
+}
+
+/*-- SCSS: Custom Highlights --*/
+// Barevný akcent na nadpisech
+h1, h2, h3 {
+  color: $primary;
+  border-left: 4px solid $primary;
+  padding-left: 1rem;
+}
+
+// Zvýraznění (modré podsvícení celého testu)
+.highlight{
+  font-weight: bold;
+  color: $dark;
+  padding: 0.1rem 0.3rem;
+  border-radius: 3px;
+}
+
+// Zvýraznění 
+.highlight-key {
+  background: linear-gradient(120deg, rgba(0, 133, 204, 0.1) 0%, rgba(0, 133, 204, 0.2) 100%);
+  padding: 0.1rem 0.3rem;
+  border-radius: 3px;
+}
+
+// Zvýraznění pro Riziko/Varování
+.highlight-warning {
+  font-weight: bold;
+  color: $warning-dark;
+  padding: 0.1rem 0.3rem;
+  border-radius: 3px;
+}
+
+// Zvýraznění pro Definice/Pojmy 
+.highlight-term {
+padding: 0.25rem 0.5rem; 
+  display: inline-block; // Důležité: Umožní boxu obtékat text
+  border-radius: 4px; 
+  
+  // Pravá a Horní strana: Pouze barevné pozadí
+  background-color: lighten($primary, 40%); // Světlejší odstín primární barvy
+  
+  // Viditelná Levá Hranice (Primary barva)
+  border-left: 5px solid $primary; 
+  
+  // Viditelná Dolní Hranice (Secondary barva)
+  border-bottom: 2px solid $secondary;}
+
+/* ===============================================================*/
+/*-- SCSS: Custom callout --*/
+
+.callout {
+  // 1. Odstranění ikon a sjednocení odsazení
+  &::before, .callout-icon-container {
+    display: none !important;
+  }
+  .callout-header {
+    padding-left: 0.5rem !important;
+  }
+  // 2. Základní nastavení čáry pro všechna appearance
+  border-left-width: 5px  !important;
+  margin: 1rem 0;
+  &.callout-style-default {
+    //  border: 1px solid rgba($primary, 0.2); // Jemný rámeček kolem dokola
+    //  border-left: 5px solid $primary !important;
+    //  background-color: rgba($primary, 0.05) !important;
+    }  
+  &.callout-style-simple {
+    background-color: transparent !important;
+    border-top: none !important;    // Zruší horní okraj
+    border-right: none !important;  // Zruší pravý okraj
+    border-bottom: none !important; // Zruší dolní okraj
+    
+    .callout-header {
+      display: flex !important; // Vynutí nadpis
+      background-color: transparent !important;
+    }
+  }
+  &.callout-style-minimal {
+    background-color: transparent !important;
+    border-top: none !important;
+    border-right: none !important;
+    border-bottom: none !important;
+    
+    .callout-header {
+      display: none !important; // Skryje nadpis
+    }
+  }
+// TIP  ==================================================
+  &.callout-tip {
+    &.callout-style-simple {    }  
+    &.callout-style-minimal {    }
+  }
+  // WARNING ==================================================
+  &.callout-warning {
+    border-left-color: $warning-dark !important;
+    background-color: rgba($warning-dark, 0.1) !important;
+    
+    &.callout-style-minimal {
+      background-color: transparent !important;
+    }
+  }
+
+  // NOTE ==================================================
+  &.callout-note {
+    border-left-color: $primary !important;
+    background-color: $light !important;
+    
+    &.callout-style-minimal {
+      background-color: transparent !important;
+    }
+  }
+}
+/*-- scss:rules --*/
+
+// 1. Přepsání barvy levého pruhu pro každý typ calloutu
+.callout-tip {
+  border-left-color: $primary !important;
+}
+
+.callout-note {
+  border-left-color: $secondary !important;
+}
+
+.callout-warning {
+  border-left-color: $warning-dark !important;
+}
+
+.callout-tip .callout-icon-container {
+  color: $primary !important;
+}
+
+.callout-note .callout-icon-container {
+  color: $secondary !important;
+}
+
+.callout-warning .callout-icon-container {
+  color: $warning-dark !important;
+}

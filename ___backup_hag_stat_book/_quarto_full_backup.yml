@@ -1,0 +1,48 @@
+project:
+  type: book
+
+book:
+  title: "**Havi Notes** <br> 
+    Notes, ve kterém najdete interaktivní poznámky z oblastí <br>**mat**emat**ik*y, <br> **pr**avděpodobno**st**i, <br> **stat**istiky  a <br> **vizu**alizacím dat "
+  author: "Jirka Haviger"
+  date: "12/15/2025"
+
+  chapters:
+    - index.qmd
+    
+    - part: "**MATIK**árium"
+      chapters:
+        - 00-matematika/index.qmd
+
+    - part: "**PRST**árium"
+      chapters:
+        - 01-pravdepodobnost/index.qmd
+        - 01-pravdepodobnost/zakladni-pojmy.qmd
+        - 01-pravdepodobnost/klasicka-pravdepodobnost.qmd
+    
+    - part: "**STAT**árium"
+      chapters:
+        - 02-statistika/index.qmd
+        - 02-statistika/popisna-statistika.qmd
+    
+    - part: "**VIZU**árium"
+      chapters:
+        - 03-datova-veda/index.qmd
+    
+    - references.qmd
+
+format:
+  html:
+    theme: 
+      light: [cosmo, hag_custom.scss]
+    code-fold: true
+    code-tools: true
+    toc: true
+    citations-hover: true
+    citation-location: margin    
+
+bibliography: references.bib
+csl: https://www.zotero.org/styles/apa
+
+
+
