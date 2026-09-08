@@ -1,0 +1,24 @@
+
+# Kde se potkáš s pravděpodobností
+
+**Několik příkladů** na začátek : 
+
+Mám si vsadit na to, že FC barcelona prohraje příští zápas? 
+
+Mám zítra vyrazit na výlet do hor, abych při tom nezmoknul? 
+
+Mám se pojistit na cestu k moři, kdyby se něco stalo? 
+
+Mám nakoupit ve slevě při Black Friday, nebo je šance na výraznější zlevnění po vánocích?
+
+Ve všech těchto případech se rozhodujeme na základě nějakých údajů a snažíme se při tom minimalizovat riziko ztráty. **Pr**avděpodobno**st**  (zkráceně **prst**) je lidská snaha [číselně popsat]{.highlight}, jaká je šance na to, že nějaká situace nastane, abychom se mohli rozhodovat lépe. 
+
+
+
+
+
+
+
+
+
+ 

@@ -1,0 +1,58 @@
+# Úvodní poznámky {.unnumbered}
+
+Na této stránce se budou objevovat zdroje a materiály vhodné k pochopení základních i pokročilejších myšlenek z různých obastí. Stránky tedy nejsou rigorózní  učebnicí, jsou zaměřené na **vizualizaci základních myšlenek a ideí**, od které jsou přesné definice, věty a algorimty odvozené. 
+
+- **Pravděpodobnost**
+- **Statistika**
+
+::: {.callout-tip}
+styl používaný pro tipy
+:::
+
+::: {.callout-tip appearance="simple"}
+styl používaný pro tipy, verze "simple"
+:::
+
+::: {.callout-tip appearance="minimal"}
+styl používaný pro tipy, verze "minimal"
+:::
+
+::: {.callout-note}
+styl používaný pro poznámky
+:::
+
+::: {.callout-warning}
+styl používaný pro varování
+:::
+
+::: {.callout-important}
+Styl pro důležité informace
+:::
+
+::: {.callout-caution}
+Styl pro důležité informace
+:::
+
+
+::: {.callout-tip collapse="true"}
+## Řešení
+Výsledná pravděpodobnost je $P(A) = 0.5$, protože...
+:::
+
+::: {.callout-tip collapse="true" appearance="minimal"}
+## Řešení v minimal verzi
+Výsledná pravděpodobnost je $P(A) = 0.5$, protože...
+:::
+
+Autor čerpá inspiraci z různých zdrojů, z některých tu dobrou a z nkterých i tu, kterou zde používat nebudeme. Pro pochopení základních pojmů a ideí doporučuji také následující zdroje: 
+
+Na stránce **Betterexpleined** ukazuje [@azad_betterexplained]  vizuálně pěkně jednotlivé matematické koncepty od běžných operací s čísly přes maticový počet po komplexní čísla a používá velmi srozumitelnou angličtinu.
+
+Na stránce **stats.libretext** je volně dostupné větší množství materiálů o statistice a pravděpodobnosti. Doporučuji zejména [@grinstead2012introductory], který  má velmi pěkně vysvětlenou teorii pravděpodobnosti, zvláště markovovy řetězce. 
+
+další přibudou později ...
+
+J.Haviger, 2025
+
+*Tato stránka je založená na quarto book stylu s využitím plotly.* 
+
