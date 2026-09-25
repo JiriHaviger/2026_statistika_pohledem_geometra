@@ -181,3 +181,7 @@ cython_debug/
 .cursorindexingignore
 /.quarto/
 **/*.quarto_ipynb
+
+
+# Gemini API Key
+.env
