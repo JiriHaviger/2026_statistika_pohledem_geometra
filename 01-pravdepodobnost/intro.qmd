@@ -1,7 +1,7 @@
 
 # Kde se potkáš s pravděpodobností
 
-**Několik příkladů** na začátek : 
+## Několik příkladů z reálného světa na začátek 
 
 Mám si vsadit na to, že FC barcelona prohraje příští zápas? 
 

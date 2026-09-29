@@ -1,282 +1,12 @@
 import os
-os.environ["CREWAI_TELEMETRY_OPT_OUT"] = "true"
-os.environ["CREWAI_TRACING_ENABLED"] = "false"
-
 from pathlib import Path
-from dotenv import load_dotenv
-from crewai import Agent, Task, Crew, Process, LLM
-from crewai.tools import tool
+from crewai import Task, Crew, Process
 
-# ----------------- NASTAVENÍ -----------------
-load_dotenv()
-GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
-if not GEMINI_API_KEY:
-    raise RuntimeError("GEMINI_API_KEY není nastaven – doplň ho do souboru .env")
-#  načtení apikey ze souboru .env, který je v .gitignore, aby se necommitoval do repozitáře
-# na ntb je potřeba dodat 
-#   balíček python-dotenv (`pip install python-dotenv`)
-#   vytvořený soubor .env s obsahem: GEMINI_API_KEY="tvůj_api_key_z_Google_Cloud_Console"
-
-
-gemini_model = LLM(
-    model="gemini/gemini-2.5-flash", # Flash je na výpadky 503 mnohem méně náchylný než "Pro"
-    api_key=GEMINI_API_KEY,
-    max_retries=5,       # Pokud Google hodí 503, CrewAI to automaticky zkusí znovu (až 5x)
-)
-
-
-STYLE_GUIDE_PATH = "style_guide.md"
-
-# ----------------- NÁSTROJE -----------------
-@tool("Čtečka souborů")
-def read_file(file_path: str) -> str:
-    """Přečte obsah souboru z disku. Vstupem je přesná cesta k souboru."""
-    try:
-        with open(file_path, 'r', encoding='utf-8') as f:
-            return f.read()
-    except Exception as e:
-        return f"Chyba při čtení souboru {file_path}: {str(e)}"
-
-
-# =============================================================================
-# ŠABLONA STRUKTURY KAPITOLY  (Cognitive Load Theory)
-# Toto je pevná kostra – content agent ji VŽDY dodržuje.
-# Mění se pouze obsah (téma, pojmy, příklady), nikdy struktura.
-# =============================================================================
-
-CHAPTER_STRUCTURE = """
-## ZÁVAZNÁ STRUKTURA KAŽDÉ KAPITOLY (Cognitive Load Theory)
-
-# Pokyny pro začátek kapitoly:
-# Hned pod hlavní nadpis kapitoly (H1 / #) vlož motivační odstavec.
-# Tento odstavec nastíní reálný, praktický problém z oblasti ekonomiky, 
-# managementu nebo medicíny, který bez znalosti této kapitoly nelze efektivně vyřešit.
-# Odstavec musí studenta vtáhnout do děje a ukázat mu, PROČ se dané téma učí.
-# Rozsah: 3–5 vět. Žádné klišé typu "V této kapitole se podíváme...".
-
-Kapitola se skládá z maximálně 5 sekcí + závěrečného bloku.
-
-Každá sekce pokrývá JEDEN koncept. Kratší je lepší.
-
----
-
-### SEKCE  (opakuj max. 5×)
-
-```
-## N. Název sekce  ← jeden pojem / jeden krok
-
-[TEORIE – max. 3 krátké odstavce]
-Vzdušný text. Každý odstavec = jedna myšlenka. Bez zbytečných úvodů.
-Geometrická nebo intuitivní interpretace pojmu.
-
-[INTERAKTIVNÍ GRAFIKA – povinná, právě 1 na sekci]
-```{ojs}
-// Observable JS vizualizace ilustrující právě vysvětlený pojem.
-// Slider nebo dropdown pro interakci studenta.
-// Barvy VÝHRADNĚ z CSS proměnných Style Guide.
-```
-
-[ŠKOLSKÝ PŘÍKLAD – právě 1 na sekci]
-Krátké, čisté zadání ve tvaru:
-  "Určete P(X = k), pokud X ~ Bin(n, p) a víte, že n = 10, p = 0,3."
-
-::: {.panel-tabset}
-## Zadání
-Krátké čisté zadání. Jen čísla a co se hledá, žádný příběh.
-
-## Postup
-Groebner styl – každý krok má číslo a komentář proč, ne jen výpočet:
-
-**Krok 1: Identifikujeme parametry.**
-[co je n, p, k a proč]
-
-**Krok 2: Dosadíme do vzorce.**
-[vzorec s dosazenými hodnotami]
-
-**Krok 3: Vypočítáme.**
-[výpočet]
-
-**Výsledek: [hodnota tučně]**
-
-## Výsledek
-**Výsledek: [hodnota tučně]**
-Pouze finální číslo – pro rychlou kontrolu bez čtení postupu.
-:::
-
-[SELF-TEST PŘÍKLADY – právě 2 na sekci, BEZ postupu]
-
-::: {.panel-tabset}
-## Zadání
-Text pro samostatné procvičení (obměna školského příkladu).
-
-## Výsledek
-**Výsledek: [hodnota s jednotkou]**
-Žádný postup. Pouze finální číslo.
-:::
-
-[AI PROMPT – právě 1 na sekci, za self-testy]
-Prompt pro okamžité dovysvětlení právě probíraného pojmu.
-Musí být konkrétní – obsahuje název pojmu, kontext (ekonomie/medicína)
-a instrukci pro dialogický režim (AI čeká na odpověď studenta).
-
-::: {.callout-tip collapse="true" icon=false}
-## 💬 Zeptej se AI
-Zkopíruj do ChatGPT / Claude / Copilota / Gemini:
-
-> Jsi trpělivý tutor statistiky pro studenty ekonomie.
-> Odpovídáš stručně (max. 3–4 věty), pak se ptáš jestli to dává smysl.
-> Symboly a vzorce používáš jen když jsou nezbytné.
-> Nikdy nevysvětluješ víc věcí najednou.
-> Vždy ukazuješ obecný postup, ne trik platný jen pro tento příklad.
-> Mluvíš česky.
->
-> [Konkrétní otázka cílená na právě vysvětlený pojem –
-> agent doplní podle obsahu sekce, např.:
-> "Nerozumím proč u Poissonovy distribuce platí E(X) = λ = Var(X).
-> Můžeš mi to ukázat na příkladu z pojišťovnictví?"]
-:::
-```
-
----
-
-### APLIKAČNÍ ÚLOHY  (samostatný blok, JEDNOU za kapitolu, za všemi sekcemi)
-
-Tento blok obsahuje 2–3 delší úlohy z reálné praxe.
-Oblasti: ekonomika a management, nebo medicína a veřejné zdraví.
-Inspirace stylem: Elementary Linear Algebra (Anton), Grinstead & Snell.
-
-Každá aplikační úloha má:
-- **Kontext** (2–4 věty reálného příběhu, ne abstraktní zadání)
-- **Více dílčích otázek** označených a), b), c) – budují na sobě
-- Tabset Zadání / Řešení
-
-Příklady kontextů (agent vždy vymyslí nové, podobného duchu):
-- Výrobní linka: počet vadných kusů za směnu ~ Poisson(λ)
-- Klinická studie: pravděpodobnost vedlejšího účinku u n pacientů ~ Bin(n, p)
-- Pojišťovna: počet škodních událostí za rok, nastavení pojistného
-- Zákaznická linka: počet hovorů za hodinu, dimenzování kapacity
-
-Formát:
-
-::: {.callout-note icon=false}
-## 🏭 Aplikační úloha: [Název kontextu]
-
-[2–4 věty kontextu]
-
-**a)** ...
-**b)** ...
-**c)** ...
-:::
-
-::: {.panel-tabset}
-## Zadání (shrnutí)
-Stručné shrnutí všech otázek a), b), c).
-
-## Řešení
-Řešení každé podotázky zvlášť, s komentářem k interpretaci výsledku.
-:::
-
----
-
-### ZÁVĚR KAPITOLY  (vždy poslední blok)
-
-#### Shrnutí pojmů
-Tabulka: | Pojem | Definice | Kdy použít |
-(max. 5 řádků – jen klíčové pojmy kapitoly)
-
-#### Pracuj s AI
-
-Tři připravené prompty pro různé potřeby – student zkopíruje a vloží do
-ChatGPT / Claude / Copilota / jiného AI nástroje.
-
-Každý prompt začíná **systémovou rolí** která nastaví AI jako konkrétní typ tutora,
-pak teprve přichází samotná otázka. Student roli nekrátí ani neupravuje.
-
-**Něco mi nešlo – chci dovysvětlit:**
-> Jsi trpělivý tutor statistiky. Vysvětluješ studentům ekonomie.
-> Pravidla, která vždy dodržuješ:
-> – Odpovídáš stručně (max. 3–4 věty), pak se zeptáš jestli to dává smysl.
-> – Matematické symboly a vzorce používáš jen když jsou nezbytné,
->   jinak raději slovní popis nebo číselný příklad.
-> – Nikdy nevysvětluješ víc věcí najednou.
-> – Pokud si nejsi jistý co student nechápe, nejdřív se zeptej.
-> – Vždy ukazuješ OBECNÝ postup který funguje pro libovolný příklad,
->   ne trik nebo zkratku platnou jen pro toto konkrétní zadání.
->   Pokud existuje více postupů, řekni to a drž se obecného.
-> – Mluvíš česky.
->
-> Moje otázka: Nerozumím [konkrétní pojem z kapitoly].
-> Můžeš mi to vysvětlit na příkladu z [obor]?
-
-**Chci si procvičit:**
-> Jsi tutor statistiky, který procvičuje studenty formou dialogu.
-> Pravidla, která vždy dodržuješ:
-> – Dáš mi jedno zadání, počkáš na mou odpověď, pak opravíš nebo potvrdíš.
-> – Nápovědu dáváš jen když o ni požádám slovem "nápověda".
-> – Zadání jsou krátká a numerická (ne dlouhé příběhy).
-> – Obtížnost postupně zvyšuješ – začínáš snadno.
-> – Mluvíš česky.
->
-> Téma: [konkrétní pojem z kapitoly]. Začni prvním příkladem.
-
-**Chci jít do hloubky:**
-> Jsi tutor statistiky, který propojuje teorii s praxí.
-> Pravidla, která vždy dodržuješ:
-> – Začínáš vždy reálnou situací z praxe, vzorec přichází až potom.
-> – Používáš konkrétní čísla, ne obecné proměnné (raději n=50 než "nějaké n").
-> – Vždy ukazuješ OBECNÝ postup který funguje pro libovolný příklad.
->   Pokud existuje elegantnější zkratka jen pro tento případ, zmíníš ji,
->   ale jako doplněk – ne jako hlavní postup.
-> – Po každém celku se zeptáš jestli chci pokračovat nebo se vrátit.
-> – Mluvíš česky.
->
-> Zajímá mě: jak se [konkrétní pojem] používá v praxi v [obor]?
-> Ukaž mi reálný příklad s čísly.
-
-INSTRUKCE PRO AGENTA:
-- Nahraď všechny [hranaté závorky] konkrétním textem pro tuto kapitolu.
-- Systémové role (Jsi tutor...) NEMĚŇ – jsou záměrně obecné aby fungovaly
-  v jakémkoli AI nástroji (ChatGPT, Claude, Copilot, Gemini).
-- Ve výsledném .qmd nesmí zůstat žádný placeholder v [hranatých závorkách].
-"""
-
-
-# ----------------- AGENTI -----------------
-project_manager = Agent(
-    role="Projektový manažer a stylový strážce",
-    goal="Udržovat konzistentní styl, strukturu i barevné schéma celé učebnice.",
-    backstory="Jsi velmi pečlivý koordinátor vzdělávacího projektu.",
-    llm=gemini_model,
-    verbose=True
-)
-
-content_agent = Agent(
-    role="Autor statistiky a lineární algebry",
-    goal="Psát kvalitní obsah v češtině podle přesných pravidel.",
-    backstory=(
-        "Zkušený lektor statistiky. Tvůj styl je inspirován Grinstead & Snell "
-        "(Introductory Probability) a Anton (Elementary Linear Algebra): "
-        "jasné definice, krátké odstavce, reálné příklady z ekonomiky a medicíny."
-    ),
-    llm=gemini_model,
-    verbose=True
-)
-
-ojs_agent = Agent(
-    role="Specialista na Observable JS",
-    goal="Vytvářet interaktivní prvky s konzistentním barevným schématem.",
-    backstory="Expert na Observable JS a data vizualizace.",
-    llm=gemini_model,
-    verbose=True
-)
-
-reviewer_agent = Agent(
-    role="Recenzent a finální editor",
-    goal="Kontrolovat dodržení všech pravidel včetně barevné konzistence.",
-    backstory="Přísný matematik a editor.",
-    llm=gemini_model,
-    verbose=True
-)
+from crew.config import STYLE_GUIDE_PATH, gemini_model  # noqa: F401  (gemini_model použit přes agents)
+from crew.prompts import CHAPTER_STRUCTURE
+from crew.tools import read_file
+from crew.agents import project_manager, content_agent, ojs_agent, reviewer_agent
+from chapters import CHAPTERS
 
 
 # =============================================================================
@@ -376,16 +106,13 @@ def generate_chapter(style_guide: str, inputs: dict) -> None:
     2. ojs_agent      → OJS bloky pro každou sekci
     3. reviewer_agent → kontrola a finální verze
     """
-"""
-    Generuje kapitolu pouze v případě, že výsledný soubor ještě neexistuje.
-    """
     output_path = inputs['vystupni_soubor']
-    
+
     # --- BEZPEČNOSTNÍ ZÁMEK: Ochrana hotových kapitol ---
     if Path(output_path).exists():
         print(f"🛑 Kapitola '{inputs['tema']}' již existuje ({output_path}). SKÁČU JÍ, aby nedošlo k přepsání!")
         return  # Ukončí funkci dříve, než se vůbec spustí CrewAI
-        
+
     print(f"\n📝 Generuji kapitolu: {inputs['tema']}...")
 
     # ------------------------------------------------------------------
@@ -417,7 +144,7 @@ def generate_chapter(style_guide: str, inputs: dict) -> None:
         {inputs['nastroje']}
 
         PRAVIDLA, která NESMÍŠ porušit:
-        - Kapitolu začni VŽDY hned pod hlavním nadpisem chytlavým motivačním odstavcem(3–5 vět). Tento odstavec musí nastínit reálný problém z praxe (např. krachující výroba, epidemie, riskantní investice), který bez [klíčová slova] neumíme vyřešit. Musí jasně odpovědět na studentskou otázku: „K čemu mi to v životě bude?“.
+        - Kapitolu začni VŽDY hned pod hlavním nadpisem chytlavým motivačním odstavcem(3–5 vět). Tento odstavec musí nastínit reálný problém z praxe (např. krachující výroba, epidemie, riskantní investice), který bez [klíčová slova] neumíme vyřešit. Musí jasně odpovědět na studentskou otázku: „K čemu mi to v životě bude?".
         - Max. 5 sekcí. Pokud je pojmů více, spoj příbuzné do jedné sekce.
         - Každá sekce: [teorie] → [OJS placeholder] → [1 školský příklad tabset] → [2 self-testy tabset]
         - OJS bloky zatím vlož jako placeholder: ```{{ojs}}\n// OJS_PLACEHOLDER_SEKCE_N\n```
@@ -537,6 +264,118 @@ def generate_chapter(style_guide: str, inputs: dict) -> None:
 
 
 # =============================================================================
+# FÁZE 3: AUDIT EXISTUJÍCÍCH KAPITOL
+# =============================================================================
+
+# Obsahové kapitoly projektu – index.qmd, references.qmd a summary.qmd jsou vynechány
+AUDIT_FILES = [
+    "01-pravdepodobnost/01-klasicka-prst.qmd",
+    "01-pravdepodobnost/02_prst_pravidla.qmd",
+    "01-pravdepodobnost/03_prst_distribuce.qmd",
+    "01-pravdepodobnost/04_prst_diskretni.qmd",
+    "01-pravdepodobnost/intro.qmd",
+    "02-statistika/01_deskriptivní statistiky kvantily.qmd",
+    "02-statistika/02_deskriptivní statistiky momenty.qmd",
+    "02-statistika/03_aritmetika dat.qmd",
+    "02-statistika/04_deskriptivy z tabulky.qmd",
+    "02-statistika/05_analyza_rozptylu_geometricky.qmd",
+]
+
+AUDIT_REPORT_PATH = "docs_for_agents/audit_report.md"
+
+
+def audit_chapters() -> None:
+    """
+    Nechá reviewer_agent přečíst všechny obsahové kapitoly a vypsat:
+    - duplicitní témata nebo sekce,
+    - nesoulad názvu souboru s obsahem,
+    - chybějící nebo neúplné části.
+    Výsledek se zapíše do docs_for_agents/audit_report.md. Nic se nepřepisuje.
+    """
+    print("🔍 Spouštím audit kapitol...\n")
+
+    soubory_seznam = "\n".join(f"- `{f}`" for f in AUDIT_FILES)
+
+    # ------------------------------------------------------------------
+    # TASK 1: Přečíst a zmapovat všechny kapitoly
+    # ------------------------------------------------------------------
+    task_read = Task(
+        description=f"""
+        Přečti pomocí nástroje `read_file` všechny níže uvedené soubory.
+        Pro každý soubor si zaznamenej:
+        - název souboru,
+        - hlavní nadpis (H1),
+        - seznam sekcí (H2 nadpisy),
+        - stručný obsah každé sekce (1–2 věty).
+
+        Soubory ke čtení:
+        {soubory_seznam}
+
+        Výstupem je strukturovaný přehled všech kapitol – název souboru, nadpis, sekce, obsah.
+        Zatím nehodnoť, jen zaznamenej fakta.
+        """,
+        expected_output=(
+            "Strukturovaný přehled všech kapitol: pro každý soubor název, H1 nadpis, "
+            "seznam H2 sekcí a stručný popis obsahu každé sekce."
+        ),
+        agent=reviewer_agent,
+        tools=[read_file]
+    )
+
+    # ------------------------------------------------------------------
+    # TASK 2: Analyzovat a vypsat nálezy
+    # ------------------------------------------------------------------
+    task_audit = Task(
+        description=f"""
+        Na základě přehledu kapitol z předchozího kroku proveď důkladnou analýzu a vypiš konkrétní nálezy.
+
+        Hledej a popiš:
+
+        ## 1. Duplicity
+        Sekce nebo témata, která se opakují ve více kapitolách.
+        Pro každou duplicitu uveď: které soubory, které sekce, co přesně se opakuje.
+
+        ## 2. Nesoulad názvu souboru s obsahem
+        Případy, kdy název souboru nebo H1 nadpis neodpovídá skutečnému obsahu.
+        Navrhni lepší název.
+
+        ## 3. Chybějící nebo neúplné části
+        Kapitoly, kterým chybí očekávané části (příklady, vizualizace, závěr...).
+
+        ## 4. Doporučení
+        Ke každému nálezu navrhni konkrétní akci:
+        - přejmenovat soubor / nadpis,
+        - přesunout sekci z kapitoly X do kapitoly Y,
+        - smazat duplicitní sekci v souboru Z,
+        - doplnit chybějící část.
+
+        Výstupem je Markdown report. Buď konkrétní – uváděj přesné názvy souborů a sekcí.
+        Vyhni se obecným frázím jako "obsah je kvalitní" nebo "kapitola je dobře napsaná".
+        """,
+        expected_output=(
+            "Markdown audit report se sekcemi: Duplicity, Nesoulad názvů, Chybějící části, Doporučení. "
+            "Každý nález obsahuje konkrétní název souboru a sekce."
+        ),
+        agent=reviewer_agent,
+    )
+
+    crew_audit = Crew(
+        agents=[reviewer_agent],
+        tasks=[task_read, task_audit],
+        process=Process.sequential,
+        verbose=True,
+        max_rpm=10,
+    )
+    crew_audit.kickoff()
+
+    report = str(task_audit.output.raw)
+
+    with open(AUDIT_REPORT_PATH, "w", encoding="utf-8") as f:
+        f.write(report)
+    print(f"\n✅ Audit report uložen: {AUDIT_REPORT_PATH}")
+
+
+# =============================================================================
 # HLAVNÍ LOGIKA
 # =============================================================================
 
@@ -550,41 +389,11 @@ if __name__ == "__main__":
         style_guide = generate_style_guide()
 
     # Fáze 2: Kapitoly ke generování
-    # Přidávej další kapitoly jako položky seznamu.
-    # `aplikacni_oblasti` je nepovinné – výchozí hodnota je "ekonomika/management a medicína"
-    chapters = [
-        {
-            "tema": "Diskrétní pravděpodobnostní rozdělení",
-            "vystupni_soubor": "02-statistika/05_diskretni_distribuce.qmd",
-            "klicove_pojmy": """
-                1. Binomická distribuce – model opakovaných pokusů s dvěma výsledky
-                2. Poissonova distribuce – model vzácných událostí v čase nebo prostoru
-                3. Geometrická distribuce – model čekání na první úspěch
-                4. Kumulativní distribuční funkce (CDF) – výpočet P(X ≤ x)
-                5. Střední hodnota a rozptyl – interpretace parametrů rozdělení
-            """,
-            "zamereni_uloh": """
-                - Výpočet P(X = k) z PMF
-                - Výpočet P(X ≤ k) a P(X > k) z CDF
-                - Určení kvantilu: najdi k tak, aby P(X ≤ k) ≥ p
-                - Výpočet E(X) a Var(X) ze zadaných parametrů
-                - Rozhodnutí, které rozdělení použít v dané situaci
-            """,
-            "nastroje": "R (dbinom, dpois, dgeom, pbinom), Python (scipy.stats), Excel (BINOM.DIST)",
-            "aplikacni_oblasti": "pojišťovnictví/management výroby a epidemiologie/klinické studie",
-        },
-        # Příklad další kapitoly – odkomentuj a uprav:
-        # {
-        #     "tema": "Spojitá pravděpodobnostní rozdělení",
-        #     "vystupni_soubor": "02-statistika/06_spojita_rozdeleni.qmd",
-        #     "klicove_pojmy": "Normální rozdělení, Exponenciální rozdělení, ...",
-        #     "zamereni_uloh": "...",
-        #     "nastroje": "R, Python, Excel",
-        #     "aplikacni_oblasti": "finance/řízení zásob a medicína",
-        # },
-    ]
+    # Seznam kapitol je definován v chapters.py – přidávej je tam.
+    # for chapter_inputs in CHAPTERS:
+    #    generate_chapter(style_guide, chapter_inputs)
 
-    for chapter_inputs in chapters:
-        generate_chapter(style_guide, chapter_inputs)
+    # Fáze 3: Audit (odkomentuj pro spuštění, generování kapitol pak zakomentuj)
+    audit_chapters()
 
     print("\n🎉 Hotovo!")

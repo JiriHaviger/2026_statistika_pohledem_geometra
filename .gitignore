@@ -1,7 +1,16 @@
+# backup files
+*___backup_hag:stat_book
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
+
+
+
+# Quarto rendered output
+*.html
+*_book/
 
 # C extensions
 *.so
@@ -182,6 +191,10 @@ cython_debug/
 /.quarto/
 **/*.quarto_ipynb
 
+# AI Editors & Local tools
+.kilo/
+.vscode/
 
-# Gemini API Key
-.env
+# OS Specific
+.DS_Store
+Thumbs.db

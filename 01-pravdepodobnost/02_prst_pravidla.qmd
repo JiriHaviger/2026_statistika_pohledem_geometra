@@ -72,7 +72,7 @@ Pokud budeme pokračovat v příkladu **karty**: Pokdu zjišťujeme pravděpodob
 $$P(b|a)=\frac{P(a\cap b)}{P(a)}$$
 
 
-## nezávislost jevů
+## nezávislost jevů a pravděúpodobnost průniku jevů 
 
 Zajímá nás pravděpodobnost vytažeí srdcové karty. Vytáhneme z balíčku jednu kartu $a$ a zjistíme výsledek. Pak ji vložíme zpět, zamícháme a vytáhneme druhou $b$. Výsledek druhého pokusu jistě nezávisí nezávisí na tom, jaký yl výsledek prvního pokusu. Jinými slovy pravděpodobost $b$ bez znalosti $a$ je stejná, jako pravděpodobnost $b$ když víme, jak dopadlo $a$. Matematikcy zapsáno  
 $P(b)=P(b|a)$, dosadíme podmíněnou pravděpodobnost $P(b)=\frac{P(b\land a)}{P(a)}$ a upravíme do množinové notace
@@ -82,10 +82,6 @@ $$P(a\cap b) = P(a)\cdot P(b)$$
 Tento vztah se označuje jak **pravidlo součinu** pro slovní vyjádření **... a současně ...**
 
 Tato rovnice je používána jako definice [nezávislosti jevů]{.hihglight-term}. Pokud známe obě strany rovnice, pak lze tento vztah využít k testování nezávislosti dvou jevů. 
-
-## Pravděpodobnost průniku jevů
-
-Pravděpodobnost průniku máme odvozenou v předchozích odstavcích, takže rovnice budou stejné, jen interpretace zde bude jiná: 
 
 Pokud máme nezávislé jevy, pak 
 $$P(a\cap b) = P(a)\cdot P(b)$$

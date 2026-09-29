@@ -79,11 +79,7 @@ Plot.plot({
 ```
 
 
-## Ukazatele polohy: kvantily
-
-**Kvantil** je **hodnota, pod kterou leží určité procento dat**. Důležité kvantily mají svá spěcifická označení: **medián** pro polovinu, **kvartily** pro čtvrtiny, **decily** pro desetiny a **percentily** pro setiny. Proto  platí že např medián = druhý kvartil = pátý deci = padesátý percentil. 
-
-**Min** je nejmenší,  **max** největší hodnota v datech. 
+## Ukazatele polohy: kvantily z tabulky četností
 
 Pokud budeme hledat kvantily v tabulce, zaměříme se na sloupec *Kumulativní (Fᵢ)* ve kterém hledáme, kdy poprvé dosáhneme dané hodnoty.
 
@@ -94,23 +90,9 @@ Pokud budeme hledat kvantily v tabulce, zaměříme se na sloupec *Kumulativní 
 
 Různé způsoby výpočtu percentilů mohou vést k různým, ale podobným výsledkům. 
 
-## Kvantilové ukazatele variability: jak moc se zákazníci (ne)shodují?
+## Kvantilové ukazatele variability: z tabulky četností
 
-Když známe tyto body, můžeme popsat, jak moc jsou data "rozptýlená":
-
-4. **Rozpětí** (*range*): rozdíl mezi nejlepším a nejhorším $max-min$, v našich datech $range = 10 - 1 = 9$.
-5. **Mezikvartilové rozpětí** (*inter-quartile-range, IQR*): rozdíl mezi třemi čtvrtinami a jednou čtvrtinou, $Q_3-Q_1$, tedy $IQR = 9 - 6 = 3$. 
-
-::: {.callout-note}
-**Range** ani min,max se nemusí shodovat z rozsahem škály. Například škála 1-10 může mít v datech min=5 a max=7.
-
-**IQR** nám říká, v jakém rozmezí se pohybují hodnoty "střední poloviny",  tedy když ignorujeme čtvrtinu nejmenších a čtvrtinu největších hodnot. 
-:::
-
-
-## Aritmetický průměr a těžiště dat
-
-Nejznámější  hodnotou popisující soubor dat je bezesporu průměr, přesněji artimetický průměr. Ten lze vypočít tak, že sečteme všechny hodnoty a vydělíme je počtem hodnot, $\bar{x} = \frac{\sum (x_i)}{N}$. Pokud máme data v tabulce, pak tam některé hodnoty máme vícekrát, např u nás 
+Průměr z tabulky četností můžeme spočítat jako vážený průměr, kde každou hodnotu "vážíme" její četností $n_i$ nebo relativní četností $p_i$.
 
 $\bar{x} = \frac{1+1+2+2+2+3+\dots}{200}$, což můžeme lehce upravit pomocí součinu na 
 
@@ -120,7 +102,7 @@ $\bar{x} = \frac{1\cdot 2}{200}+\frac{2\cdot 3}{200}+\frac{3\cdot 5}{200}+\dots$
 
 $\bar{x} = 1\cdot \frac{2}{200}+2\cdot \frac{3}{200}+3\cdot\frac{5}{200}+\dots$
 
-Získali jsme tak vzorec který je uváděný jako **vážený průměr**, kde každou hodnotu "vážíme" její četností $n_i$ nebo relativní četností $p_i$:
+Získali jsme tak vzorec který je uváděný jako **vážený průměr**.
 
 $$\bar{x} = \frac{\sum x_i\cdot n_i}{N}=\sum x_i\cdot \frac{n_i}{N}=\sum x_i\cdot p_i$$
 

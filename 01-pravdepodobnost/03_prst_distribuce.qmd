@@ -72,6 +72,7 @@ Obě kardinální porměnné patří mezi **kvantitativní**, alternativně se p
 |kardinální pomerová | podíl $A/B$  | věk, příjem   |průměr, rozptyl, geom. průměr|
 
 
+:::: {.content-hidden}
 ```{ojs}
 //| echo: false
 
@@ -142,6 +143,7 @@ Plot.plot({
 })
 ```
 :::
+:::: 
 
 Pro kardinální proměnnou lze využít dva typy grafů 
  

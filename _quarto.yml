@@ -23,7 +23,7 @@ book:
         - 01-pravdepodobnost/04_prst_diskretni.qmd
     - part: "**Deskriptivní statistika**"
       chapters:
-        - 02-statistika/01_deskriptivní statistiky kvantily.qmd
+        - 02-statistika/01_typy promennych.qmd
         - 02-statistika/02_deskriptivní statistiky momenty.qmd
         - 02-statistika/03_aritmetika dat.qmd
         - 02-statistika/04_deskriptivy z tabulky.qmd
@@ -42,7 +42,7 @@ format:
     code-fold: true
     code-tools: true
     code-copy: true
-    self-contained: true
+    # self-contained: true
     toc: true
     citations-hover: true
     citation-location: margin  
