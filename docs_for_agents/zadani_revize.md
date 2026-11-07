@@ -1,6 +1,6 @@
 # Zadání pro agenta (v2): revize projektu „Statistika pohledem geometra"
 
-Tato verze vychází z prohlídky skutečného repozitáře (`_quarto.yml`, `crew/*`, `docs_for_agents/*`, `.gitignore`, `04_prst_diskretni.qmd`, `04_deskriptivy z tabulky.qmd`, `index.qmd`, `intro.qmd`). Nahrazuje první verzi, která vycházela jen z nahraných souborů.
+Tato verze vychází z prohlídky skutečného repozitáře (`_quarto.yml`, `crew/*`, `docs_for_agents/*`, `.gitignore`, `04_prst_diskretni.qmd`, `04_deskriptivy z tabulky.qmd`, `index.qmd`, `intro.qmd`).
 
 ## Rozhodnutí autora (7. 11. 2026)
 

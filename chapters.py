@@ -3,7 +3,7 @@
 # Pole 'aplikacni_oblasti' je nepovinné – výchozí hodnota je "ekonomika/management a medicína".
 #
 # Seznam je záměrně prázdný: téma „Diskrétní pravděpodobnostní rozdělení“ už pokrývá
-# kapitola 01-pravdepodobnost/04_prst_diskretni.qmd (rozhodnutí autora 7. 11. 2026).
+# kapitola 01-pravdepodobnost/04-prst-diskretni.qmd (rozhodnutí autora 7. 11. 2026).
 
 CHAPTERS = [
     # Vzor položky – zkopíruj, odkomentuj a uprav:

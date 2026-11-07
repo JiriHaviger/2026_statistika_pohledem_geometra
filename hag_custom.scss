@@ -61,6 +61,52 @@ figcaption, .figure-caption, .quarto-figure figcaption {
 }
 
 
+// Posuvníky a zaškrtávátka v barvě palety (místo výchozí jasně modré)
+input[type="range"], input[type="checkbox"], input[type="radio"] { accent-color: $jh-primary; }
+
+// Logo v postranním panelu: na telefonu a tabletu (panel je nahoře) nesmí zabírat celou obrazovku
+.sidebar-logo { max-width: 100%; height: auto; }
+@media (max-width: 991.98px) {
+  .sidebar-logo { max-height: 140px; width: auto; }
+}
+
+// Dlouhé vzorce se na úzké obrazovce posouvají do strany, nepřetékají mimo stránku
+mjx-container[display="true"] { overflow-x: auto; overflow-y: hidden; max-width: 100%; }
+
+// Záložky (panel-tabset) podle JHRules: bez rámečku kolem obsahu, aktivní záložka podtržená,
+// na telefonu se řádek záložek posouvá místo zalamování
+.panel-tabset {
+  > .nav-tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    border-bottom: 1px solid $jh-context-light;
+    .nav-link {
+      border: none;
+      white-space: nowrap;
+      padding: 0.5rem 0.9rem;
+      &.active {
+        background: transparent;
+        color: $jh-text;
+        border-bottom: 3px solid $primary;
+      }
+    }
+  }
+  > .tab-content {
+    border: none;
+    padding: 1rem 0 0;
+    // nadpisy uvnitř záložky nesmí být větší než v běžném textu kapitoly
+    :is(h2, h3, h4, h5) { font-size: 1.2rem; }
+  }
+}
+
+// Ovládací prvky OJS (Inputs): dostatečně velké pro dotyk, popisek nad prvkem
+.cell-output-display form,
+.observablehq form {
+  input[type="range"] { min-height: 44px; width: 100%; max-width: 100%; }
+  input[type="number"], input[type="text"], select { min-height: 44px; }
+  label { white-space: normal; }
+}
+
 /*-- SCSS: Custom Environments --*/
 
 // Styl pro DEFINICE
@@ -79,7 +125,6 @@ figcaption, .figure-caption, .quarto-figure figcaption {
   padding: 1rem;
   padding-left: 3rem; // Více odsazení zleva
   margin: 1.5rem 0;
-  font-size: $font-size-base * 0.9;
   counter-increment: none !important;
 }
 
@@ -87,12 +132,12 @@ figcaption, .figure-caption, .quarto-figure figcaption {
 .definition-box h3, .example-box h3 {
   color: $jh-text;
   font-weight: 700;
-  border-left: none; // Vypne defaultní čáru na h3 uvnitř boxu
 }
 
 /*-- SCSS: Custom Highlights --*/
-// Nadpisy: text neutrální (JHRules), barevná je jen levá čára
-h1, h2, h3 {
+// Nadpisy: text neutrální (JHRules), barevná je jen levá čára u H2 v obsahu stránky
+// (nezasahuje callouty, záložky ani boxy, takže nejsou potřeba výjimky)
+#quarto-document-content h2 {
   border-left: 4px solid $primary;
   padding-left: 1rem;
 }
@@ -142,11 +187,6 @@ h1, h2, h3 {
   // 2. Základní nastavení čáry pro všechna appearance
   border-left-width: 5px !important;
   margin: 1rem 0;
-  &.callout-style-default {
-    //  border: 1px solid rgba($primary, 0.2); // Jemný rámeček kolem dokola
-    //  border-left: 5px solid $primary !important;
-    //  background-color: rgba($primary, 0.05) !important;
-  }
   &.callout-style-simple {
     background-color: transparent !important;
     border-top: none !important;    // Zruší horní okraj

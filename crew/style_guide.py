@@ -309,7 +309,19 @@ def check_sources(text: str) -> list[str]:
     return problems
 
 
+def refresh(text: str) -> str:
+    """Bez LLM: ponechá LLM sekce (1–4, 7) a znovu vloží sekce 5 a 6 a hlavičku se sha256.
+    Hodí se po změně SCSS, kdy se nezměnil význam textů, jen zdrojové soubory."""
+    sections = split_sections(text)
+    return assemble({n: sections[n] for n in LLM_SECTIONS})
+
+
 if __name__ == "__main__":
+    if "--refresh" in sys.argv:   # python -m crew.style_guide --refresh
+        target = project_path("docs_for_agents/style_guide.md")
+        target.write_text(refresh(target.read_text(encoding="utf-8")), encoding="utf-8")
+        print(f"🔄 Sekce 5, 6 a hlavička obnoveny v {target}")
+        sys.argv.remove("--refresh")
     path = Path(sys.argv[1]) if len(sys.argv) > 1 else project_path("docs_for_agents/style_guide.md")
     content = path.read_text(encoding="utf-8")
     found = validate(content) + check_sources(content)

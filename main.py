@@ -30,7 +30,7 @@ from crew.paths import (
 # FÁZE 1: GENEROVÁNÍ STYLE GUIDE
 # =============================================================================
 
-STYLE_SAMPLE_CHAPTER = "02-statistika/02_deskriptivní statistiky momenty.qmd"
+STYLE_SAMPLE_CHAPTER = "02-statistika/02-deskriptivni-statistiky-momenty.qmd"
 
 
 def generate_style_guide() -> str:
@@ -101,121 +101,6 @@ def load_style_guide() -> str:
             "Přegeneruj ho: python main.py style --force"
         )
     return content
-
-
-# =============================================================================
-# FÁZE 2: AUDIT EXISTUJÍCÍCH KAPITOL
-# (generování kapitoly je v crew/chapter.py)
-# =============================================================================
-
-# Obsahové kapitoly projektu – index.qmd, references.qmd a summary.qmd jsou vynechány
-AUDIT_FILES = [
-    "01-pravdepodobnost/01-klasicka-prst.qmd",
-    "01-pravdepodobnost/02_prst_pravidla.qmd",
-    "01-pravdepodobnost/03_prst_distribuce.qmd",
-    "01-pravdepodobnost/04_prst_diskretni.qmd",
-    "01-pravdepodobnost/intro.qmd",
-    "02-statistika/01_deskriptivní statistiky kvantily.qmd",
-    "02-statistika/02_deskriptivní statistiky momenty.qmd",
-    "02-statistika/03_aritmetika dat.qmd",
-    "02-statistika/04_deskriptivy z tabulky.qmd",
-    "02-statistika/05_analyza_rozptylu_geometricky.qmd",
-]
-
-def audit_chapters() -> None:
-    """
-    Nechá reviewer_agent přečíst všechny obsahové kapitoly a vypsat:
-    - duplicitní témata nebo sekce,
-    - nesoulad názvu souboru s obsahem,
-    - chybějící nebo neúplné části.
-    Výsledek se zapíše do docs_for_agents/audit_report.md (přepíše stávající report;
-    zámek a potvrzení řeší příkaz `audit`). Kapitoly se nemění.
-    """
-    from crewai import Task, Crew, Process
-    from crew.agents import reviewer_agent
-    from crew.tools import read_file
-
-    print("🔍 Spouštím audit kapitol...\n")
-
-    soubory_seznam = "\n".join(f"- `{f}`" for f in AUDIT_FILES)
-
-    # ------------------------------------------------------------------
-    # TASK 1: Přečíst a zmapovat všechny kapitoly
-    # ------------------------------------------------------------------
-    task_read = Task(
-        description=f"""
-        Přečti pomocí nástroje `read_file` všechny níže uvedené soubory.
-        Pro každý soubor si zaznamenej:
-        - název souboru,
-        - hlavní nadpis (H1),
-        - seznam sekcí (H2 nadpisy),
-        - stručný obsah každé sekce (1–2 věty).
-
-        Soubory ke čtení:
-        {soubory_seznam}
-
-        Výstupem je strukturovaný přehled všech kapitol – název souboru, nadpis, sekce, obsah.
-        Zatím nehodnoť, jen zaznamenej fakta.
-        """,
-        expected_output=(
-            "Strukturovaný přehled všech kapitol: pro každý soubor název, H1 nadpis, "
-            "seznam H2 sekcí a stručný popis obsahu každé sekce."
-        ),
-        agent=reviewer_agent,
-        tools=[read_file]
-    )
-
-    # ------------------------------------------------------------------
-    # TASK 2: Analyzovat a vypsat nálezy
-    # ------------------------------------------------------------------
-    task_audit = Task(
-        description=f"""
-        Na základě přehledu kapitol z předchozího kroku proveď důkladnou analýzu a vypiš konkrétní nálezy.
-
-        Hledej a popiš:
-
-        ## 1. Duplicity
-        Sekce nebo témata, která se opakují ve více kapitolách.
-        Pro každou duplicitu uveď: které soubory, které sekce, co přesně se opakuje.
-
-        ## 2. Nesoulad názvu souboru s obsahem
-        Případy, kdy název souboru nebo H1 nadpis neodpovídá skutečnému obsahu.
-        Navrhni lepší název.
-
-        ## 3. Chybějící nebo neúplné části
-        Kapitoly, kterým chybí očekávané části (příklady, vizualizace, závěr...).
-
-        ## 4. Doporučení
-        Ke každému nálezu navrhni konkrétní akci:
-        - přejmenovat soubor / nadpis,
-        - přesunout sekci z kapitoly X do kapitoly Y,
-        - smazat duplicitní sekci v souboru Z,
-        - doplnit chybějící část.
-
-        Výstupem je Markdown report. Buď konkrétní – uváděj přesné názvy souborů a sekcí.
-        Vyhni se obecným frázím jako "obsah je kvalitní" nebo "kapitola je dobře napsaná".
-        """,
-        expected_output=(
-            "Markdown audit report se sekcemi: Duplicity, Nesoulad názvů, Chybějící části, Doporučení. "
-            "Každý nález obsahuje konkrétní název souboru a sekce."
-        ),
-        agent=reviewer_agent,
-    )
-
-    crew_audit = Crew(
-        agents=[reviewer_agent],
-        tasks=[task_read, task_audit],
-        process=Process.sequential,
-        verbose=True,
-        max_rpm=10,
-    )
-    crew_audit.kickoff()
-
-    report = str(task_audit.output.raw)
-
-    AUDIT_REPORT_PATH.parent.mkdir(parents=True, exist_ok=True)
-    AUDIT_REPORT_PATH.write_text(report, encoding="utf-8")
-    print(f"\n✅ Audit report uložen: {display_path(AUDIT_REPORT_PATH)}")
 
 
 # =============================================================================
@@ -332,6 +217,7 @@ def cmd_audit(args) -> int:
             return 1
         if not confirm_overwrite([AUDIT_REPORT_PATH]):
             return 1
+    from crew.audit import audit_chapters
     audit_chapters()
     return 0
 

@@ -3,8 +3,8 @@
   Sekce 5 a 6 vkládá Python (crew/style_guide.py), ostatní píše LLM.
   Datum: 2026-11-07
   Zdroje (sha256):
-    _quarto.yml: 1457f484998342eebbbef5de095557d8ba870f9d92e10fbfb24e0ea27536c547
-    hag_custom.scss: 8b90a1499bb82ed24e2931799dce01a337953fc38a25e9647d4889783698bfd4
+    _quarto.yml: c74feaf4035a964f97d22c947aeecf65562d25fb01013f725f70ca0afd5ba2e5
+    hag_custom.scss: d46d1ad3bc41f58b3d9669f964c38522b7df1e73f979dcc0ee516f469a386362
     jhrules.py: 15818ee72f2047b6e6e56c82a6a3b70695696f34962597a48878566828d7e392
     assets/jhrules.js: fc6dfc072963a1cc5fcf8f74800f73bc8313ac557703e8c735672487ccda0fe0
 -->

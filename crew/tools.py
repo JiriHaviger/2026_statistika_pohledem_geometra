@@ -12,7 +12,7 @@ FORBIDDEN_PARTS = {".env", ".git", ".venv"}
 @tool("Čtečka souborů")
 def read_file(file_path: str) -> str:
     """Přečte obsah souboru projektu. Vstupem je cesta relativní ke kořeni projektu,
-    např. `_quarto.yml` nebo `02-statistika/01_typy promennych.qmd`."""
+    např. `_quarto.yml` nebo `02-statistika/01-typy-promennych.qmd`."""
     try:
         path = project_path(file_path)
     except ValueError as e:

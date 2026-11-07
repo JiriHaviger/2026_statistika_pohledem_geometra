@@ -11,7 +11,7 @@ Vzory jdou prohlédnout: `quarto preview docs_for_agents/ojs_vzory.qmd`.
 ## 1. Posuvník a sloupcový graf
 
 Technika: ovládací prvek (`viewof`), data jako samostatná buňka, graf s vestavěnou `width`,
-sloupce v barvě `C.primary`, osa `band` pro celočíselné kategorie. Převzato z `04_prst_diskretni.qmd`.
+sloupce v barvě `C.primary`, osa `band` pro celočíselné kategorie. Převzato z `04-prst-diskretni.qmd`.
 
 ```{ojs}
 //| echo: false
@@ -40,7 +40,7 @@ Plot.plot({
 ## 2. Geometrický pohled: těžiště na houpačce
 
 Technika: data a odvozená hodnota (průměr) jako samostatné buňky, závaží jako body s plochou
-úměrnou četnosti, těžiště jako jediný akcentový prvek (`C.accent`). Převzato z `04_deskriptivy z tabulky.qmd`.
+úměrnou četnosti, těžiště jako jediný akcentový prvek (`C.accent`). Převzato z `04-deskriptivy-z-tabulky.qmd`.
 
 ```{ojs}
 //| echo: false

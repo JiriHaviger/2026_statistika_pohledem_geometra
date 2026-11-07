@@ -376,7 +376,9 @@ def ojs_description(inputs: dict, numbers: list[int], inline_names: list[str] | 
         - Barvy VÝHRADNĚ z objektu `C` (žádné hex ani pojmenované barvy). Akcent (`C.accent`)
           nejvýše na JEDEN prvek grafu, hlavní data `C.primary`, kontext `C.context` / `C.contextLight`.
         - Šířka grafu je vestavěná proměnná `width` (`Plot.plot({{width, …}})`), nikdy pevné číslo.
-          Výšku odvoď rozumně (cca 250 px, u úzkých grafů méně). Použij `style: plotStyle`.
+          Výšku odvoď rozumně (cca 250 px; na telefonu, `width < 500`, např. `height: width < 500 ? 200 : 250`).
+          Na úzkém zobrazení nepoužívej dlouhé popisky os ani víc než 5 hodnot na ose.
+          Použij `style: plotStyle`.
         - Bez horní a pravé osy, mřížka jen vodorovná pro čtení hodnot z osy y (`y: {{grid: true}}`),
           bez rámečku legendy, raději přímé popisky.
         - Popisky os česky a krátké. Ovládací prvky mají krátký `label`.
@@ -418,4 +420,34 @@ def review_description(inputs: dict, findings: list[str]) -> str:
         1. Nejdřív CELÁ opravená kapitola (čisté Quarto Markdown, bez obalujícího kódového bloku,
            bez jakýchkoli poznámek v textu).
         2. Pak samostatný řádek přesně `{REVIEW_MARKER}` a pod ním seznam provedených oprav.
+        """
+
+
+# =============================================================================
+# AUDIT (crew/audit.py)
+# =============================================================================
+
+def audit_description(outlines: str, findings: list[str]) -> str:
+    findings_text = "\n".join(f"- {f}" for f in findings) if findings else "- žádné"
+    return f"""
+        Máš osnovy kapitol učebnice (nadpisy a počty prvků spočítal program, kapitoly nečteš).
+        Posuď POUZE obsahové věci, které ze samotných osnov plynou:
+
+        ## Duplicity
+        Témata nebo sekce, které se zřejmě opakují ve více kapitolách (uveď soubory a nadpisy).
+
+        ## Návaznosti
+        Chybějící návaznost nebo špatné pořadí (pojem použit dřív, než je zaveden), podle pořadí kapitol.
+
+        ## Doporučení
+        Ke každému nálezu jedna konkrétní akce. Nic neměň a netvrď to, co z osnov nevyčteš
+        (nehádej obsah sekcí podle nadpisu; nejistotu napiš). Bez obecných frází.
+        Deterministické nálezy už program zjistil, neopakuj je:
+        {findings_text}
+
+        FORMÁT: čistý Markdown od prvního nadpisu `## Duplicity`, bez úvodní věty.
+
+        OSNOVY KAPITOL:
+
+        {outlines}
         """

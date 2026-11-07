@@ -14,22 +14,25 @@ book:
     logo-href: index.html
   subtitle: "Poznámky z oblastí statistiky, pravděpodobnosti, s důrazem na vizualizaci pojmů a interaktivitu"
   author: "Jirka Haviger"
-  date: "12/15/2025"
+  date: today
+  date-format: "D. M. YYYY"
+  repo-url: https://github.com/JiriHaviger/2026_statistika_pohledem_geometra
+  site-url: https://jirihaviger.github.io/2026_statistika_pohledem_geometra/
   chapters:
     - index.qmd
     - part: "**Pravděpodobnost**"
       chapters:
         - 01-pravdepodobnost/01-klasicka-prst.qmd
-        - 01-pravdepodobnost/02_prst_pravidla.qmd
-        - 01-pravdepodobnost/03_prst_distribuce.qmd
-        - 01-pravdepodobnost/04_prst_diskretni.qmd
+        - 01-pravdepodobnost/02-prst-pravidla.qmd
+        - 01-pravdepodobnost/03-prst-distribuce.qmd
+        - 01-pravdepodobnost/04-prst-diskretni.qmd
     - part: "**Deskriptivní statistika**"
       chapters:
-        - 02-statistika/01_typy promennych.qmd
-        - 02-statistika/02_deskriptivní statistiky momenty.qmd
-        - 02-statistika/03_aritmetika dat.qmd
-        - 02-statistika/04_deskriptivy z tabulky.qmd
-        - 02-statistika/05_analyza_rozptylu_geometricky.qmd
+        - 02-statistika/01-typy-promennych.qmd
+        - 02-statistika/02-deskriptivni-statistiky-momenty.qmd
+        - 02-statistika/03-aritmetika-dat.qmd
+        - 02-statistika/04-deskriptivy-z-tabulky.qmd
+        - 02-statistika/05-analyza-rozptylu-geometricky.qmd
 
 
 format:
@@ -47,11 +50,12 @@ format:
     toc: true
     citations-hover: true
     citation-location: margin  
-    mathjax: true 
-    include-after-body: [] 
+    mathjax: true
+    open-graph: true
+    twitter-card: true
 
 bibliography: references.bib
-csl: https://www.zotero.org/styles/apa 
+csl: apa.csl   # lokální kopie (dřív se stahoval ze sítě při každém renderu)
 
 
 

@@ -17,7 +17,8 @@ Starý název „Havi Notes“ se už nepoužívá.
   Příkazy: `style [--force]`, `chapter [--index N] [--force]`, `audit [--force]`. Bez `--force` zůstává zámek
   (existující soubor se nepřepíše), s `--force` se program zeptá na potvrzení. Cesty se skládají přes
   `crew/paths.py` (PROJECT_ROOT), takže příkazy fungují z libovolného adresáře.
-  Kontrola style guide bez API: `.venv\Scripts\python.exe -m crew.style_guide`.
+  Kontrola style guide bez API: `.venv\Scripts\python.exe -m crew.style_guide`; po změně SCSS nebo `_quarto.yml`
+  (jen zdroje, ne význam textů) obnoví sekce 5, 6 a hlavičku bez LLM: `-m crew.style_guide --refresh`.
   Postup generování kapitoly: autor (text) → ojs_agent (jen JSON, kód vkládá Python) → recenzent; mezi kroky
   kontroluje `crew/pipeline.py` (struktura, unikátní OJS proměnné, žádné hex barvy, srovnání před a po recenzi).
   Výsledek je `_drafts/<název>.qmd` a report `docs_for_agents/review/<slug>.md` (REVIEW NOTES, diff, render);
@@ -25,6 +26,8 @@ Starý název „Havi Notes“ se už nepoužívá.
   se nikdy nepřepíše.
   Mapa souborů generátoru:
   - `main.py` – příkazová řádka (style, chapter, audit).
+  - `crew/audit.py` – audit kapitol: seznam z `_quarto.yml`, osnovy a nálezy počítá Python, LLM jen duplicity a návaznosti
+    (bez API: `.venv\Scripts\python.exe -m crew.audit`).
   - `chapters.py` – seznam kapitol ke generování (edituje autor).
   - `crew/prompts.py` – JEDINÉ místo se specifikací kapitoly (počty, záložky, šablona) a se všemi zadáními agentů.
   - `crew/chapter.py` – průchod autor → OJS → recenzent, zápis draftu a reportu.
