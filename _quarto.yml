@@ -28,7 +28,6 @@ book:
         - 02-statistika/03_aritmetika dat.qmd
         - 02-statistika/04_deskriptivy z tabulky.qmd
         - 02-statistika/05_analyza_rozptylu_geometricky.qmd
-        #- 02-statistika/06_diskretni_distribuce.qmd
 
 
 format:

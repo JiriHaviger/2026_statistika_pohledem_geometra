@@ -1,10 +1,12 @@
 import os
+import shutil
 from pathlib import Path
 from crewai import Task, Crew, Process
 
-from crew.config import STYLE_GUIDE_PATH, gemini_model  # noqa: F401  (gemini_model použit přes agents)
+from crew.config import STYLE_GUIDE_PATH
 from crew.prompts import CHAPTER_STRUCTURE
 from crew.tools import read_file
+from crew import style_guide as sg
 from crew.agents import project_manager, content_agent, ojs_agent, reviewer_agent
 from chapters import CHAPTERS
 
@@ -13,23 +15,31 @@ from chapters import CHAPTERS
 # FÁZE 1: GENEROVÁNÍ STYLE GUIDE (pouze pokud neexistuje)
 # =============================================================================
 
+STYLE_SAMPLE_CHAPTER = "02-statistika/02_deskriptivní statistiky momenty.qmd"
+STYLE_GUIDE_BACKUP_PATH = "docs_for_agents/style_guide.backup.md"
+STYLE_GUIDE_RAW_PATH = "docs_for_agents/style_guide.raw.md"   # surový výstup LLM při chybě
+
+
 def generate_style_guide() -> str:
     """
-    Jednorázová analýza projektu → Style Guide.
-    Spustí se pouze pokud style_guide.md neexistuje.
+    Analýza projektu → Style Guide.
+    LLM píše sekce 1–4 a 7, sekce 5 (barvy) a 6 (struktura kapitoly) vkládá Python.
+    Výsledek se před uložením zkontroluje; při chybě se style_guide.md nepřepíše.
+    Existující style_guide.md se před přepsáním zkopíruje do style_guide.backup.md.
     """
-    print("📋 Style Guide nenalezen – spouštím analýzu projektu...")
+    print("📋 Generuji Style Guide – spouštím analýzu projektu...")
 
     task_style_guide = Task(
         description=f"""
-        Analyzuj stávající projekt a vytvoř závazný Style Guide.
+        Analyzuj stávající projekt „{sg.PROJECT_NAME}“ (Quarto kniha, česky) a napiš části
+        závazného Style Guide pro autory nových kapitol.
 
         Pomocí nástroje `read_file` prozkoumej:
         1. `_quarto.yml` – struktura, navigace, globální nastavení.
-        2. `hag_custom.scss` – barvy, CSS proměnné, custom třídy.
-        3. `02-statistika/01_deskriptivní statistiky kvantily.qmd` – ukázka stávajícího textu.
+        2. `hag_custom.scss` – barvy, proměnné, vlastní třídy, callouty.
+        3. `{STYLE_SAMPLE_CHAPTER}` – ukázka stávajícího textu a stylu.
 
-        Style Guide musí obsahovat tyto sekce:
+        Napiš PRÁVĚ tyto sekce, s přesně těmito nadpisy a v tomto pořadí:
 
         ## 1. Celkový styl
         Vzdušný styl, krátké odstavce, bezpatkové písmo, hierarchie H2/H3.
@@ -38,34 +48,29 @@ def generate_style_guide() -> str:
         Příprava pro přepínač CS/EN, konzistentní struktura v obou jazycích.
 
         ## 3. Dark / Light mode
-        Které CSS proměnné z hag_custom.scss používat v OJS a divech.
+        Fakta: `_quarto.yml` definuje světlé i tmavé téma, ale obě zatím používají stejný
+        základ (cosmo + hag_custom.scss), takže tmavý režim zatím není skutečně tmavý.
+        Popiš, jak psát divy a OJS grafy, aby fungovaly na světlém i tmavém pozadí
+        (barvy z proměnných motivu, ne napevno).
 
         ## 4. Responsive design
-        Pravidla pro OJS vizualizace na mobilech (max-width, viewBox).
-
-        ## 5. Barevné schéma pro OJS
-        Vypiš konkrétní hex hodnoty z hag_custom.scss jako konstanty pro OJS:
-        ```js
-        const COLORS = {{
-          primary: "#...",
-          secondary: "#...",
-          accent: "#...",
-          // atd.
-        }}
-        ```
-
-        ## 6. Struktura kapitoly
-        Zkopíruj BEZE ZMĚNY tento blok:
-
-        {CHAPTER_STRUCTURE}
+        Pravidla pro OJS vizualizace na mobilech (šířka z vestavěné proměnné `width`,
+        čitelné písmo, ovládací prvky vhodné pro dotyk).
 
         ## 7. Callout třídy
         Jak používat .callout-note, .callout-tip, .callout-warning v kontextu projektu.
+
+        Sekce 5 (barvy) a 6 (struktura kapitoly) NEPIŠ – doplní je program.
+
+        Formát výstupu:
+        - Začni přímo nadpisem `## 1. Celkový styl`. Žádná úvodní věta, žádný obalující kódový blok.
+        - Pokud uvnitř ukázky potřebuješ kódový blok (např. ```{{ojs}}), dej vnější ukázku
+          do ohrady ze ČTYŘ zpětných apostrofů (````markdown … ````).
+        - Projekt se jmenuje výhradně „{sg.PROJECT_NAME}“.
         """,
         expected_output=(
-            "Kompletní Style Guide v Markdown. "
-            "Sekce 6 obsahuje doslovnou kopii šablony struktury kapitoly. "
-            "Sekce 5 obsahuje skutečné hex hodnoty z hag_custom.scss."
+            "Markdown se sekcemi ## 1., ## 2., ## 3., ## 4. a ## 7. (v tomto pořadí), "
+            "bez úvodní věty a bez sekcí 5 a 6."
         ),
         agent=project_manager,
         tools=[read_file]
@@ -80,18 +85,40 @@ def generate_style_guide() -> str:
     )
     crew_init.kickoff()
 
-    style_guide_content = str(task_style_guide.output.raw)
+    raw_output = str(task_style_guide.output.raw)
 
-    with open(STYLE_GUIDE_PATH, "w", encoding="utf-8") as f:
-        f.write(style_guide_content)
+    try:
+        style_guide_content = sg.assemble(sg.parse_llm_sections(raw_output))
+        errors = sg.validate(style_guide_content)
+    except ValueError as e:
+        errors = [str(e)]
+    if errors:
+        Path(STYLE_GUIDE_RAW_PATH).write_text(raw_output, encoding="utf-8")
+        problems = "\n".join(f"  - {e}" for e in errors)
+        raise RuntimeError(
+            f"Style Guide neprošel kontrolou, {STYLE_GUIDE_PATH} zůstává beze změny.\n"
+            f"{problems}\nSurový výstup LLM: {STYLE_GUIDE_RAW_PATH}"
+        )
+
+    if Path(STYLE_GUIDE_PATH).exists():
+        shutil.copyfile(STYLE_GUIDE_PATH, STYLE_GUIDE_BACKUP_PATH)
+        print(f"💾 Původní Style Guide zálohován: {STYLE_GUIDE_BACKUP_PATH}")
+    Path(STYLE_GUIDE_PATH).write_text(style_guide_content, encoding="utf-8")
     print(f"✅ Style Guide uložen: {STYLE_GUIDE_PATH}")
     return style_guide_content
 
 
 def load_style_guide() -> str:
     print(f"✅ Style Guide nalezen – načítám z {STYLE_GUIDE_PATH}")
-    with open(STYLE_GUIDE_PATH, "r", encoding="utf-8") as f:
-        return f.read()
+    content = Path(STYLE_GUIDE_PATH).read_text(encoding="utf-8")
+    problems = sg.validate(content) + sg.check_sources(content)
+    if problems:
+        details = "\n".join(f"  - {p}" for p in problems)
+        raise RuntimeError(
+            f"Style Guide je zastaralý nebo poškozený:\n{details}\n"
+            "Přegeneruj ho (generate_style_guide). Přepínač --force přibude v bloku A3."
+        )
+    return content
 
 
 # =============================================================================

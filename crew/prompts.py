@@ -5,14 +5,16 @@
 # =============================================================================
 
 CHAPTER_STRUCTURE = """
-## ZÁVAZNÁ STRUKTURA KAŽDÉ KAPITOLY (Cognitive Load Theory)
+**ZÁVAZNÁ STRUKTURA KAŽDÉ KAPITOLY (Cognitive Load Theory)**
 
-# Pokyny pro začátek kapitoly:
-# Hned pod hlavní nadpis kapitoly (H1 / #) vlož motivační odstavec.
-# Tento odstavec nastíní reálný, praktický problém z oblasti ekonomiky, 
-# managementu nebo medicíny, který bez znalosti této kapitoly nelze efektivně vyřešit.
-# Odstavec musí studenta vtáhnout do děje a ukázat mu, PROČ se dané téma učí.
-# Rozsah: 3–5 vět. Žádné klišé typu "V této kapitole se podíváme...".
+> POKYN – začátek kapitoly:
+> Hned pod hlavní nadpis kapitoly (H1) vlož motivační odstavec.
+> Tento odstavec nastíní reálný, praktický problém z oblasti ekonomiky,
+> managementu nebo medicíny, který bez znalosti této kapitoly nelze efektivně vyřešit.
+> Odstavec musí studenta vtáhnout do děje a ukázat mu, PROČ se dané téma učí.
+> Rozsah: 3–5 vět. Žádné klišé typu "V této kapitole se podíváme...".
+
+Šablony ve vnější ohradě ze čtyř zpětných apostrofů (````) se kopírují BEZ této vnější ohrady.
 
 Kapitola se skládá z maximálně 5 sekcí + závěrečného bloku.
 
@@ -22,7 +24,7 @@ Každá sekce pokrývá JEDEN koncept. Kratší je lepší.
 
 ### SEKCE  (opakuj max. 5×)
 
-```
+````markdown
 ## N. Název sekce  ← jeden pojem / jeden krok
 
 [TEORIE – max. 3 krátké odstavce]
@@ -95,7 +97,7 @@ Zkopíruj do ChatGPT / Claude / Copilota / Gemini:
 > "Nerozumím proč u Poissonovy distribuce platí E(X) = λ = Var(X).
 > Můžeš mi to ukázat na příkladu z pojišťovnictví?"]
 :::
-```
+````
 
 ---
 
@@ -118,6 +120,7 @@ Příklady kontextů (agent vždy vymyslí nové, podobného duchu):
 
 Formát:
 
+````markdown
 ::: {.callout-note icon=false}
 ## 🏭 Aplikační úloha: [Název kontextu]
 
@@ -135,6 +138,7 @@ Stručné shrnutí všech otázek a), b), c).
 ## Řešení
 Řešení každé podotázky zvlášť, s komentářem k interpretaci výsledku.
 :::
+````
 
 ---
 

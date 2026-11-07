@@ -11,21 +11,34 @@ from crewai import LLM
 
 
 # ----------------- NASTAVENÍ -----------------
+# API klíč se načítá ze souboru .env v kořeni projektu (soubor je v .gitignore,
+# takže se nikdy necommituje). Obsah .env:
+#   ANTHROPIC_API_KEY=sk-ant-...
+# Klíč: platform.claude.com → Settings → API Keys (účtuje se zvlášť od předplatného Claude).
+# Instalace (do .venv): uv pip install --python .venv\Scripts\python.exe "crewai[anthropic]" python-dotenv
 load_dotenv()
-GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
-if not GEMINI_API_KEY:
-    raise RuntimeError("GEMINI_API_KEY není nastaven – doplň ho do souboru .env")
-#  načtení apikey ze souboru .env, který je v .gitignore, aby se necommitoval do repozitáře
-# na ntb je potřeba dodat
-#   balíček python-dotenv (`pip install python-dotenv`)
-#   vytvořený soubor .env s obsahem: GEMINI_API_KEY="tvůj_api_key_z_Google_Cloud_Console"
+ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY")
+if not ANTHROPIC_API_KEY:
+    raise RuntimeError("ANTHROPIC_API_KEY není nastaven – doplň ho do souboru .env")
 
+# Jediné místo, kde je název modelu.
+MODEL_NAME = "anthropic/claude-sonnet-5-5"
 
-gemini_model = LLM(
-    model="gemini/gemini-2.5-flash",  # Flash je na výpadky 503 mnohem méně náchylný než "Pro"
-    api_key=GEMINI_API_KEY,
-    max_retries=5,       # Pokud Google hodí 503, CrewAI to automaticky zkusí znovu (až 5x)
+llm_model = LLM(
+    model=MODEL_NAME,
+    api_key=ANTHROPIC_API_KEY,
+    max_tokens=64000,  # strop délky odpovědi; celá kapitola se musí vejít do jedné odpovědi
+    stream=True,       # při velkém max_tokens je streamování nutné (jinak hrozí timeout)
+    max_retries=5,     # při přetížení serveru CrewAI zkusí volání znovu (až 5×)
+    # temperature záměrně nenastavujeme – nové modely Claude ji odmítají
 )
+
+# Původní nastavení (Gemini) pro případný návrat:
+# llm_model = LLM(
+#     model="gemini/gemini-2.5-flash",
+#     api_key=os.environ.get("GEMINI_API_KEY"),
+#     max_retries=5,
+# )
 
 
 STYLE_GUIDE_PATH = "docs_for_agents/style_guide.md"

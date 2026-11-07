@@ -136,6 +136,10 @@ celerybeat.pid
 # SageMath parsed files
 *.sage.py
 
+# Generátor: záloha a surový výstup style guide (verze jsou v historii gitu)
+docs_for_agents/style_guide.backup.md
+docs_for_agents/style_guide.raw.md
+
 # Environments
 .env
 .venv

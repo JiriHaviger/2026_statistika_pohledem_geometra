@@ -1,22 +1,281 @@
+<!--
+  GENEROVÁNO automaticky (crew_agents.py, generate_style_guide). Needitovat ručně.
+  Sekce 5 a 6 vkládá Python (crew/style_guide.py), ostatní píše LLM.
+  Datum: 2026-11-07
+  Zdroje (sha256):
+    _quarto.yml: 9da063e7ec705f7d1ef052b5b3dab668cfda562d91a416f47e153745349cfcd7
+    hag_custom.scss: 94badb07f51809d0ca3ac61c377873c19a6003abd37d00c90abe0c1214cc4a13
+-->
+
+# Style Guide: Statistika pohledem geometra
+
+## 1. Celkový styl
+
+Učebnice **Statistika pohledem geometra** má vzdušný, pracovní a vizuální styl. Čtenář má pojmy nejdřív vidět a hrát si s nimi. Vzorce a odvození přicházejí až potom.
+
+### Písmo a vzhled
+
+- Základem je motiv Bootswatch **cosmo**. Ten používá bezpatkové písmo.
+- `hag_custom.scss` nepřepisuje rodinu písma. Autoři v kapitolách nenastavují vlastní `font-family`, ani v HTML, ani v CSS, ani v OJS.
+- Základní velikost je `$font-size-base: 1rem`. Nadpisy mají `$headings-font-weight: 600`.
+- Nadpisy H1, H2 a H3 jsou v primární modré (`$primary`, `#0085CC`) a mají vlevo 4px modrý pruh. Pruh a barvu nepřepisujeme lokálními styly.
+
+### Vzdušnost a odstavce
+
+- Odstavec má 2 až 5 vět a vyjadřuje jednu myšlenku.
+- Delší výklad dělíme otázkou, příkladem, vizualizací nebo calloutem. Dlouhé „zdi textu“ se nepíší.
+- Klíčový pojem se při prvním výskytu zvýrazní tučně (`**průměr**`). Anglický ekvivalent se uvede kurzívou v závorce nebo za čárkou, např. `***mean absolute deviance, MAD***` nebo `*sd (standard deviation)*`.
+- Důležité upozornění v řádku označíme třídou `.highlight-warning`. Důležitý pojem v řádku označíme třídou `.highlight-key` nebo `.highlight-term`. Zvýraznění nepřehánějte, stačí 1 až 2 na obrazovku.
+- Vzorce uvnitř textu píšeme jako `$\bar{x}$`. Klíčové vzorce dáváme na samostatný řádek jako `$$ … $$`. Víceřádková odvození píšeme v prostředí `align`.
+
+### Hierarchie nadpisů
+
+- **H1** je jen jeden na kapitolu, a to její název (např. `# Momentové statistiky`).
+- **H2** jsou hlavní části kapitoly, např. „Momentová míra polohy“ nebo „Momentové míry variability“.
+- **H3** jsou podčásti uvnitř H2, např. „Šikmost“ nebo „Špičatost“.
+- H4 a hlubší úrovně nepoužíváme. Pokud je potřebujete, rozdělte text jinak nebo použijte callout.
+- Nadpisy začínají velkým písmenem (i H3, např. „Šikmost“, ne „šikmost“). Jsou krátké, věcné a bez tečky na konci.
+- Nečíslovanou část označíme `{.unnumbered}`, jako např. „Klíčové poznatky“ na konci kapitoly.
+
+### Jazyk a jednotný pravopis
+
+- Píšeme česky (`lang: cs`), s vykáním nebo s neutrálním „my“ („Pojďme se podívat…“). Styl držíme jednotný v celé knize.
+- Před odevzdáním zkontrolujte překlepy a diakritiku. Ve stávajícím textu se občas vyskytují, např. „proměné“ nebo „viualizace“. Do nových kapitol je nepřenášejte.
+- Název projektu je vždy **Statistika pohledem geometra**. Žádné zkratky ani varianty.
+
+### Vizualizace jako součást výkladu
+
+- Každý nový pojem, pokud to jde, doprovází obrázek nebo interaktivní OJS graf. Graf má popisky os česky a v kódu se označuje `//| echo: false`.
+- Důležité grafy mají `//| label: fig-…` a popisek pod obrázkem. Ten patří do fenced divu `::: {#fig-…}` jako poslední odstavec.
+- Technická pravidla pro vzhled grafů najdete v sekcích 3 a 4.
+
+## 2. Dvojjazyčnost
+
+Kniha je zatím česky (`lang: cs` v `_quarto.yml`). Přepínač CS/EN zatím neexistuje. Nové kapitoly se ale musí psát tak, aby se anglická verze dala doplnit bez přestavby kapitoly.
+
+### Zásady
+
+- Česká a anglická verze mají **stejnou strukturu**. Mají stejný počet a pořadí nadpisů H2/H3, stejné obrázky, stejné callouty a stejné vzorce.
+- Texty nemají být ve dvou verzích odlišně dlouhé ani odlišně členěné. Pokud do jedné verze přidáte odstavec nebo callout, doplňte ho i do druhé.
+- Matematická notace je v obou jazycích stejná (`\bar{x}`, `sd`, `var`, `skew`, `kurt`). Většina zkratek je už anglická, takže se nemusí překládat.
+- Při prvním výskytu uvádějte české pojmy společně s anglickým ekvivalentem, např. `**směrodatná odchylka** (*standard deviation, sd*)`. Překladový slovník pojmů tím vzniká přímo v textu.
+- Identifikátory (`#sec-…`, `#fig-…`, `label:`) píšeme bez diakritiky a bez mezer, jazykově neutrálně, např. `#sec-momenty-polohy` nebo `fig-teziste-vizualizace`. Odkazy tak fungují v obou verzích.
+- Nové soubory pojmenovávejte bez diakritiky a bez mezer, např. `06_nazev_kapitoly.qmd`. Starší názvy s mezerami a diakritikou se kvůli přepínači zatím nepřejmenovávají.
+
+### Příprava textů v OJS grafech
+
+Všechny popisky v grafech (osy, legendy, tlačítka, `Inputs`) patří do jednoho slovníku na začátku buňky. V kódu pak nejsou žádné „volné“ české řetězce.
+
+````markdown
+```{ojs}
+//| echo: false
+lang = "cs"   // později bude hodnota z přepínače CS/EN
+
+t = ({
+  cs: { x: "Hodnota (poloha na páce) →", mean: "Těžiště (průměr)", n: "Počet bins" },
+  en: { x: "Value (position on the lever) →", mean: "Centre of mass (mean)", n: "Number of bins" }
+})[lang]
+
+viewof binCount = Inputs.range([2, 200], {value: 20, step: 1, label: t.n})
+```
+````
+
+### Příprava textu kapitoly
+
+Pro dlouhé pasáže připravujeme obsah do párových bloků. Každý blok má stejnou vnitřní strukturu:
+
+````markdown
+::: {.lang-cs}
+## Momentová míra polohy
+
+Slovo **moment** pochází z fyziky, kde popisuje situaci na páce.
+:::
+
+::: {.lang-en}
+## Moment-based measure of location
+
+The word **moment** comes from physics, where it describes a lever.
+:::
+````
+
+Třídy `.lang-cs` a `.lang-en` zatím nemají žádné pravidlo ve `hag_custom.scss`. Až se přepínač zavede, určí podle nich, co se zobrazí. Do té doby se vyplňuje jen česká verze. Anglický blok může zůstat prázdný nebo označený `TODO`, ale musí být připravený.
+
+## 3. Dark / Light mode
+
+### Současný stav
+
+`_quarto.yml` definuje světlé i tmavé téma:
+
+```yaml
+theme:
+  light: [cosmo, hag_custom.scss]
+  dark:  [cosmo, hag_custom.scss]
+```
+
+Obě témata používají stejný základ (`cosmo` a `hag_custom.scss`). Tmavý režim proto **zatím není skutečně tmavý**. Přepínač může existovat, ale paleta se téměř nezmění. Nové kapitoly se musí psát tak, aby fungovaly po doplnění skutečného tmavého motivu bez přepisování.
+
+### Základní pravidlo
+
+**Žádné napevno zadané barvy pozadí a textu.** Barvy se mají brát z proměnných motivu (Bootstrap CSS proměnné `--bs-*`, případně `currentColor`). Žádná z nich se při přepnutí režimu nemění na tvrdou hodnotu, vše se přepočítá samo.
+
+Některé stávající prvky tuto zásadu porušují. Například `.definition-box` má pevné `background-color: $light` a `.callout-note` má `background-color: $light !important`. Tmavý režim se z toho po aktivaci musí opravit v SCSS, ne v kapitolách. Autoři kapitol tedy používají tyto třídy, ale nepřidávají k nim vlastní barvy.
+
+### Zásady pro HTML a `div`
+
+- Používejte třídy z `hag_custom.scss` (`.definition-box`, `.example-box`, `.highlight-key`, callouty), ne inline styly.
+- Nepoužívejte `style="color: black"`, `style="background: #fff"`, `style="background: white"` ani podobné.
+- Pokud potřebujete vlastní barvu, píšete ji jako proměnnou nebo poloprůhledně: `style="border-left: 4px solid var(--bs-primary)"` nebo `background: rgba(0, 133, 204, 0.1)`. Poloprůhledné podbarvení funguje na světlém i tmavém pozadí.
+- Barvy textu nechte dědit z motivu. Barvu měňte jen u zvýraznění (`.highlight-*`).
+
+### Zásady pro OJS grafy (Observable Plot)
+
+Plot dědí barvu textu z okolí a pozadí nechává průhledné. Dovolí-li to kód, využijte toho.
+
+- Osy, popisky, rastr a pomocné čáry: `currentColor` s nižší průhledností (`strokeOpacity`, `fillOpacity`), ne `"black"`, `"#333"` ani `"#ccc"`.
+- Hlavní datové barvy a barvy zvýraznění: proměnné motivu, např. `"var(--bs-primary)"`. Barvy odvozujte z palety projektu podle sekce 5 (barvy), ne z náhodných názvů barev.
+- Texty v grafu (`Plot.text`): `fill: "currentColor"` místo `"black"`. Nepoužívejte `"white"`. Kontrastní obrys bodu má použít barvu pozadí: `stroke: "var(--bs-body-bg)"`.
+- Světlé výplně (`"#f0f0f0"`) nahraďte průhlednou výplní (`fill: "currentColor", fillOpacity: 0.1`).
+- Plot nastavte tak, aby pozadí grafu nebylo bílé: `style: { background: "transparent" }`.
+- Barvy, které jsou nyní v kapitolách natvrdo (`steelblue`, `darkred`, `black`, `#666`), ve stávajících kapitolách postupně nahradíme. V nových je nepoužívejte.
+
+````markdown
+```{ojs}
+//| echo: false
+Plot.plot({
+  width: width,
+  style: { background: "transparent", fontSize: "14px" },
+  marks: [
+    Plot.ruleY([0], { stroke: "currentColor", strokeOpacity: 0.5 }),
+    Plot.dot(data, {
+      x: "x", y: "y",
+      fill: "var(--bs-primary)",
+      stroke: "var(--bs-body-bg)",
+      r: 5
+    }),
+    Plot.text(data, {
+      x: "x", y: "y", text: "label",
+      fill: "currentColor", dy: 16
+    })
+  ]
+})
+```
+````
+
+### Kontrola před odevzdáním
+
+- Zkontrolujte, že graf i `div` jsou čitelné na světlém pozadí. Po zavedení skutečného tmavého motivu je zkontrolujte i na tmavém.
+- Hledejte v kódu slova `black`, `white`, `#fff`, `#000` a hexadecimální šedé tóny. Všechna by měla zmizet.
+- Obrázky exportované z jiných nástrojů (PNG, SVG) mají mít průhledné pozadí. Jinak se na tmavém pozadí objeví bílý obdélník.
+
+## 4. Responsive design
+
+Kniha se čte i na mobilu. Pravidla níže platí pro každou OJS vizualizaci.
+
+### Šířka z proměnné `width`
+
+OJS poskytuje vestavěnou reaktivní proměnnou `width`, tedy šířku dostupnou pro buňku. Používejte ji vždy místo pevné šířky.
+
+- Pevná šířka (`width: 500`, `width: 600`) se v nových kapitolách **nepoužívá**. Na úzkém displeji způsobí vodorovné posouvání nebo ořez.
+- Výška se odvozuje od šířky, aby se poměr stran udržel. Horní mez zabrání příliš velkým grafům na širokých monitorech.
+- Čtvercové grafy (např. vektory v rovině) mají `height` rovnou šířce: `height: Math.min(width, 500)`.
+- Šířku nezvětšujte nad rozumnou mez.
+- Příliš vysoké grafy (např. `height: 800`) se na mobilu nevejdou na obrazovku. Výšku odvoďte od šířky (`width * 0.9`) a omezte ji.
+
+````markdown
+```{ojs}
+//| echo: false
+w = Math.min(width, 640)
+h = Math.max(240, Math.min(w * 0.7, 480))
+isNarrow = width < 480
+
+Plot.plot({
+  width: w,
+  height: h,
+  marginLeft: isNarrow ? 40 : 60,
+  style: { background: "transparent", fontSize: isNarrow ? "12px" : "14px" },
+  x: { label: isNarrow ? "x" : "Hodnota x" },
+  marks: [ /* … */ ]
+})
+```
+````
+
+### Čitelné písmo
+
+- Minimální velikost písma v grafu je **12 px** na mobilu a 14 px na počítači. Nastavuje se přes `style: { fontSize: … }`.
+- Popisky os krátíme na úzkém displeji, viz `isNarrow` výše.
+- Dlouhé texty legendy neukládejte jako několik `Plot.text` s pevnými souřadnicemi v rohu grafu, protože se na úzkém displeji překrývají s daty. Používejte `frameAnchor` a krátké texty. Delší legendy raději napište pod graf jako odstavec nebo tabulku.
+- Pokud text v grafu zůstane příliš dlouhý, přesuňte jeho obsah do textu pod obrázkem, který se zalamuje sám.
+- Popisky bodů a čar se nesmí překrývat. U gustého grafu popisujte jen klíčové body.
+
+### Ovládací prvky vhodné pro dotyk
+
+- Ovládací prvky (`Inputs.range`, `Inputs.select`, `Inputs.radio`) musí být snadno ovladatelné prstem. Cílová plocha by měla mít zhruba 44 × 44 px.
+- Posuvník má mít rozumný krok (`step`). Celých čísel s krokem 1 na rozsahu 0 až 10 se na dotyku trefuje dobře, ale rozsah 2 až 200 s krokem 1 je pro prst nepřesný. U takových ovladačů zvažte větší krok.
+- Dáváme přednost `Inputs.select` nebo `Inputs.radio` s několika málo volbami před textovým zadáváním hodnot.
+- Ovládací prvky umístěte nad graf a nechte je pod sebou. Graf se tak při změně hodnoty neposouvá pod prstem.
+- Popisek každého prvku (`label`) je krátký. Na úzkém displeji se jinak zalomí a prvek se zmenší.
+- Nespoléhejte na interakce jen přes najetí myší (hover). Na mobilu nefungují. Informace musí být dostupná i bez hoveru, např. jako popisek v grafu nebo jako text pod ním.
+- Ovládací prvky držte blízko grafu, který ovládají. Při posunu na mobilu musí být vidět obojí.
+
+### Kontrola před odevzdáním
+
+- Otevřete kapitolu v úzkém okně prohlížeče (cca 360 px). Nic se nesmí ořezávat, překrývat ani posouvat do stran.
+- Zkontrolujte čitelnost popisků i legendy.
+- Zkontrolujte, že všechny ovladače lze ovládat prstem a že celá kapitola funguje i bez myši.
+- Vzorce `$$ … $$`, které se na úzkém displeji nevejdou, rozdělte na více řádků pomocí prostředí `align`.
+
+## 5. Barevné schéma pro OJS
+
+Hodnoty jsou automaticky převzaté z `hag_custom.scss` (sekce `scss:defaults`).
+Dočasné řešení: později je nahradí sdílený modul, který čte barvy přímo z CSS
+(viz `docs_for_agents/zadani_revize.md`, B2 a B3).
+
 ```js
-const COLORS = {
-  primary: "#0085CC",
-  secondary: "#666666",
-  grayLight: "#B0B0B0",
-  light: "#F8F9FA",
-  dark: "#1A1A1A",
-  warning: "#8b0512",
-  warningDark: "#6f040f" // Ztmaveno o 10% z $warning
-}
-``````
-## N. Název sekce ← jeden pojem / jeden krok
+COLORS = ({
+  primary:     "#0085CC",   // $primary
+  secondary:   "#666666",   // $secondary
+  grayLight:   "#B0B0B0",   // $gray-light
+  light:       "#F8F9FA",   // $light
+  dark:        "#1A1A1A",   // $dark
+  warning:     "#8B0512",   // $warning
+  warningDark: "#5A030C",   // $warning-dark
+})
+```
+
+## 6. Struktura kapitoly
+
+**ZÁVAZNÁ STRUKTURA KAŽDÉ KAPITOLY (Cognitive Load Theory)**
+
+> POKYN – začátek kapitoly:
+> Hned pod hlavní nadpis kapitoly (H1) vlož motivační odstavec.
+> Tento odstavec nastíní reálný, praktický problém z oblasti ekonomiky,
+> managementu nebo medicíny, který bez znalosti této kapitoly nelze efektivně vyřešit.
+> Odstavec musí studenta vtáhnout do děje a ukázat mu, PROČ se dané téma učí.
+> Rozsah: 3–5 vět. Žádné klišé typu "V této kapitole se podíváme...".
+
+Šablony ve vnější ohradě ze čtyř zpětných apostrofů (````) se kopírují BEZ této vnější ohrady.
+
+Kapitola se skládá z maximálně 5 sekcí + závěrečného bloku.
+
+Každá sekce pokrývá JEDEN koncept. Kratší je lepší.
+
+---
+
+### SEKCE  (opakuj max. 5×)
+
+````markdown
+## N. Název sekce  ← jeden pojem / jeden krok
 
 [TEORIE – max. 3 krátké odstavce]
 Vzdušný text. Každý odstavec = jedna myšlenka. Bez zbytečných úvodů.
 Geometrická nebo intuitivní interpretace pojmu.
 
 [INTERAKTIVNÍ GRAFIKA – povinná, právě 1 na sekci]
-``````
+```{ojs}
+// Observable JS vizualizace ilustrující právě vysvětlený pojem.
+// Slider nebo dropdown pro interakci studenta.
+// Barvy VÝHRADNĚ z CSS proměnných Style Guide.
+```
 
 [ŠKOLSKÝ PŘÍKLAD – právě 1 na sekci]
 Krátké, čisté zadání ve tvaru:
@@ -77,75 +336,11 @@ Zkopíruj do ChatGPT / Claude / Copilota / Gemini:
 > "Nerozumím proč u Poissonovy distribuce platí E(X) = λ = Var(X).
 > Můžeš mi to ukázat na příkladu z pojišťovnictví?"]
 :::
-```Následuje závazný Style Guide pro projekt Havi Notes.
+````
 
 ---
 
-## 1. Celkový styl
-
-Projekt Havi Notes se drží vzdušného a přehledného stylu, zaměřeného na snadnou čitelnost a efektivní předávání informací.
-
-*   **Odstavce**: Využívejte krátké odstavce. Každý odstavec by měl ideálně prezentovat jednu myšlenku nebo koncept. Vyhněte se zbytečným úvodům a dlouhým souvětím.
-*   **Písmo**: Celý projekt používá bezpatkové písmo pro moderní a čistý vzhled.
-*   **Hierarchie nadpisů**: Pro strukturování obsahu se používá jasná hierarchie nadpisů `H2` a `H3`.
-    *   `H1` je vyhrazen pro název knihy/kapitoly.
-    *   `H2` značí hlavní sekce kapitoly.
-    *   `H3` se používá pro podsekce v rámci H2.
-*   **Tučný text**: Používejte s rozvahou pro zdůraznění klíčových pojmů.
-*   **Vzdušnost**: Udržujte dostatečné mezery mezi odstavci, obrázky a kódem pro lepší vizuální oddělení a snížení kognitivní zátěže.
-
-## 2. Dvojjazyčnost
-
-Projekt je navržen s ohledem na budoucí podporu dvojjazyčnosti (Čeština/Angličtina).
-
-*   **Jazyk projektu**: Primárním jazykem je čeština (`lang: cs` v `_quarto.yml`).
-*   **Struktura**: Pro každou kapitolu zajistěte konzistentní strukturu a pořadí sekcí v obou jazykových verzích, pokud budou zavedeny. To usnadní budoucí implementaci přepínače jazyků.
-*   **Texty**: Veškerý text by měl být připraven k snadnému překladu. Vyhněte se idiomatickým výrazům, které nemají přímý ekvivalent v angličtině, nebo je objasněte.
-
-## 3. Dark / Light mode
-
-Pro projekt je definováno světlé téma (`light: [cosmo, hag_custom.scss]`). Pro zajištění konzistence je nutné správně využívat definované CSS proměnné.
-
-*   **Primární proměnné**:
-    *   `$light` (`#F8F9FA`): Používat pro světlé pozadí prvků (např. `.callout-note`, `.definition-box`).
-    *   `$dark` (`#1A1A1A`): Používat pro tmavý text (např. nadpisy v boxech, obecný text, pokud není definována jiná barva).
-*   **OJS a Divy**: Při tvorbě vlastních `<div>` prvků nebo při definování barev v Observable JS (OJS) vizualizacích, které nejsou přímo řízeny CSS, používejte konkrétní hex hodnoty z bodu 5. Pro budoucí podporu dark mode v OJS je potřeba buď implementovat logiku uvnitř OJS, která reaguje na systémové nastavení uživatele, nebo dynamicky měnit barvy na základě kontextu z Quarto. Prozatím se držte hex hodnot.
-
-## 4. Responsive design
-
-OJS vizualizace musí být optimalizovány pro zobrazení na různých zařízeních, včetně mobilních telefonů.
-
-*   **`max-width: 100%`**: Vždy zajistěte, aby šířka OJS grafiky nepřesáhla šířku rodičovského kontejneru. Místo pevného `width` v pixelech v OJS bloku preferujte `width: auto` nebo `max-width: 100%` v rodičovském CSS, pokud je to možné. Pokud je nutné specifikovat šířku přímo v OJS, zvažte `responsive: true` pro Observable Plot (pokud je k dispozici) nebo použití dynamického `width` na základě `window.innerWidth`.
-*   **`viewBox` pro SVG**: Pro komplexní SVG grafiky (které generuje i Observable Plot) je doporučeno správně nastavit atribut `viewBox`. To umožní SVG se škálovat bez deformace obsahu. Quarto a Observable Plot se o toto většinou postarají automaticky, ale při ručních úpravách na to myslete.
-*   **Interaktivní prvky**: Slidery a dropdowny v OJS by měly být dostatečně velké a přehledné pro dotykové ovládání na mobilních zařízeních.
-*   **Zjednodušení na mobilech**: Zvažte, zda některé složité vizualizace nemohou být pro mobilní zobrazení zjednodušeny nebo zda je nutné omezit množství zobrazovaných dat.
-
-## 5. Barevné schéma pro OJS
-
-Následující hex hodnoty z `hag_custom.scss` musí být používány jako konstanty v Observable JS vizualizacích pro zajištění konzistentního barevného schématu.
-
-
-
-## 6. Struktura kapitoly
-
-## ZÁVAZNÁ STRUKTURA KAŽDÉ KAPITOLY (Cognitive Load Theory)
-
-Kapitola se skládá z maximálně 5 sekcí + závěrečného bloku.
-Každá sekce pokrývá JEDEN koncept. Kratší je lepší.
-
----
-
-### SEKCE (opakuj max. 5×)
-
-{ojs}
-// Observable JS vizualizace ilustrující právě vysvětlený pojem.
-// Slider nebo dropdown pro interakci studenta.
-// Barvy VÝHRADNĚ z CSS proměnných Style Guide.
-
-
----
-
-### APLIKAČNÍ ÚLOHY (samostatný blok, JEDNOU za kapitolu, za všemi sekcemi)
+### APLIKAČNÍ ÚLOHY  (samostatný blok, JEDNOU za kapitolu, za všemi sekcemi)
 
 Tento blok obsahuje 2–3 delší úlohy z reálné praxe.
 Oblasti: ekonomika a management, nebo medicína a veřejné zdraví.
@@ -164,6 +359,7 @@ Příklady kontextů (agent vždy vymyslí nové, podobného duchu):
 
 Formát:
 
+````markdown
 ::: {.callout-note icon=false}
 ## 🏭 Aplikační úloha: [Název kontextu]
 
@@ -181,10 +377,11 @@ Stručné shrnutí všech otázek a), b), c).
 ## Řešení
 Řešení každé podotázky zvlášť, s komentářem k interpretaci výsledku.
 :::
+````
 
 ---
 
-### ZÁVĚR KAPITOLY (vždy poslední blok)
+### ZÁVĚR KAPITOLY  (vždy poslední blok)
 
 #### Shrnutí pojmů
 Tabulka: | Pojem | Definice | Kdy použít |
@@ -239,40 +436,72 @@ pak teprve přichází samotná otázka. Student roli nekrátí ani neupravuje.
 > Zajímá mě: jak se [konkrétní pojem] používá v praxi v [obor]?
 > Ukaž mi reálný příklad s čísly.
 
+INSTRUKCE PRO AGENTA:
+- Nahraď všechny [hranaté závorky] konkrétním textem pro tuto kapitolu.
+- Systémové role (Jsi tutor...) NEMĚŇ – jsou záměrně obecné aby fungovaly
+  v jakémkoli AI nástroji (ChatGPT, Claude, Copilot, Gemini).
+- Ve výsledném .qmd nesmí zůstat žádný placeholder v [hranatých závorkách].
+
 ## 7. Callout třídy
 
-Pro zvýraznění důležitých informací se používají Quarto callouty s vlastními styly definovanými v `hag_custom.scss`.
+Callouty používáme střídmě. Jeden callout by měl nést jednu myšlenku a text by měl být krátký. V nastavení projektu (`hag_custom.scss`) mají callouty tyto vlastnosti:
 
-*   **`::: {.callout-note}`**:
-    *   Používá se pro obecné poznámky, vysvětlení nebo dodatečné informace.
-    *   Vizualně má levý okraj v barvě `$secondary` (`#666666`) a pozadí v barvě `$light` (`#F8F9FA`).
-    *   Příklad použití:
-        ```markdown
-        ::: {.callout-note}
-        Toto je důležitá poznámka.
-        :::
-        ```
-*   **`::: {.callout-tip}`**:
-    *   Určeno pro tipy, rady nebo užitečné triky.
-    *   Vizualně má levý okraj v barvě `$primary` (`#0085CC`).
-    *   Může být použit s atributem `collapse="true"` pro skládací obsah a `icon=false` pro odstranění výchozí ikony, jak je vidět v šabloně pro AI prompt.
-    *   Příklad použití:
-        ```markdown
-        ::: {.callout-tip collapse="true" icon=false}
-        ## 💬 Zeptej se AI
-        Zde je tip pro práci s AI.
-        :::
-        ```
-*   **`::: {.callout-warning}`**:
-    *   Pro upozornění na potenciální problémy, chyby nebo důležité věci, které vyžadují pozornost.
-    *   Vizualně má levý okraj v barvě `$warning-dark` (`#6f040f`) a lehce tónované pozadí (`rgba($warning-dark, 0.1)`).
-    *   Příklad použití:
-        ```markdown
-        ::: {.callout-warning}
-        Pozor na zaokrouhlování v tomto kroku.
-        :::
-        ```
-*   **Atributy `collapse="true"` a `icon=false`**:
-    *   `collapse="true"`: Umožňuje sbalit/rozbalit obsah calloutu.
-    *   `icon=false`: Odstraní výchozí ikonu Quarto calloutu. V projektu jsou ikony potlačeny globálně v CSS pro konzistentní vzhled a nahrazeny případnými vlastními ikonami v nadpisu (např. 💬 nebo 🏭).
-*   **Styly `callout-style-simple` a `callout-style-minimal`**: Tyto styly jsou definovány v `hag_custom.scss` pro další vizuální úpravy calloutů, jako je odstranění rámečků nebo skrytí nadpisu. Používejte je podle potřeby pro jemnější kontrolu vzhledu.
+- **Ikony jsou skryté.** Význam callout musí být zřejmý z titulku a z barvy levého pruhu, ne z ikony.
+- Callout má vlevo 5px pruh. Barva pruhu závisí na typu.
+- Varianty vzhledu `simple` a `minimal` mají průhledné pozadí. U `minimal` se navíc skrývá nadpis.
+- Barvy pruhů a pozadí callout jsou součástí barevné palety (viz sekce 5). Autoři je v kapitolách nepřepisují. V SCSS jsou navíc dvě nesourodé definice barvy pruhu pro `.callout-note`, proto na jeho přesný odstín nespoléhejte.
+
+### `.callout-note`: poznámka, odvození, doplněk
+
+Pro vedlejší informace, které nejsou nutné k pochopení hlavní linie, a pro odvození. V projektu se používá ve dvou podobách:
+
+- **Rozbalovací** (`collapse="true"`) pro delší odvození a pro náročnější látku pro zájemce, např. „Odvození, že $\sum e_i=0$“ nebo „Směrodatná odchylka lineárně algebraicky“.
+- **Běžná (stále rozbalená)** pro krátký komentář nebo interpretaci, např. věta o tom, co znamená nulový součet odchylek.
+
+````markdown
+::: {.callout-note collapse="true"}
+# Odvození, že $\sum e_i=0$
+
+\begin{align}
+  \sum(x_i-\bar{x}) = \sum x_i - n\cdot\bar{x} = 0
+\end{align}
+:::
+
+:::{.callout-note}
+Nulový součet odchylek ukazuje, že průměr je opravdu těžiště.
+:::
+````
+
+Titulek píšeme jako nadpis `# …` na prvním řádku uvnitř callout. Je stručný a vystihuje obsah.
+
+### `.callout-tip`: tip, intuice, praktická rada
+
+Pro pomůcku, jak si pojem snáze zapamatovat nebo jak s ním pracovat v praxi. Dále pro nápad „zkuste si to“ u interaktivního grafu, nebo pro geometrickou intuici. Tip nesmí obsahovat informaci nezbytnou pro pochopení látky, protože čtenář ho může přeskočit. Používá se v modré (primární) barvě.
+
+````markdown
+::: {.callout-tip}
+# Zkuste si to
+Posuňte jezdce „Respondent 1“ a sledujte, jak se mění vektor odchylek.
+:::
+````
+
+### `.callout-warning`: varování, častá chyba, výjimka
+
+Pro situace, kdy hrozí chybná interpretace nebo chyba ve výpočtu. Například: „Součet odchylek je vždy nula, proto jej nelze použít jako míru variability.“ Nebo: rozdíl mezi dělením `n` a `n−1`. Warning používá tmavě červený pruh a lehce červené pozadí. Používá se jen pro skutečná upozornění, ne pro běžné důležité věci. Pro ty je `.highlight-key`.
+
+````markdown
+::: {.callout-warning}
+# Pozor na dělení
+V této kapitole dělíme rozptyl číslem $n$. Statistický software často dělí číslem $n-1$.
+:::
+````
+
+### Obecná pravidla
+
+- Typ callout vybíráme podle role: `note` je doplňující vysvětlení, `tip` je pomůcka, `warning` je past.
+- Používáme pouze tyto tři typy. Typy `.callout-important` a `.callout-caution` v projektu nejsou nastylované, proto je nepoužíváme.
+- Nevnořujeme callouty do sebe.
+- Do callout nedáváme velké interaktivní grafy. Pokud je graf součástí rozbalovacího odvození, zkontrolujte ho na mobilu (viz sekce 4).
+- Definice patří do `.definition-box` a příklady do `.example-box`. Callouty se k tomu nepoužívají.
+- Callouty nenahrazují běžný text. Maximálně 1 až 2 callouty na obrazovku.
+- Barvy do callout nepřidáváme ručně. Pozadí a pruh řeší `hag_custom.scss` (viz sekce 3 o dark/light módu).
