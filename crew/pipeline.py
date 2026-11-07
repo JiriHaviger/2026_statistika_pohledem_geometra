@@ -17,6 +17,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from crew.paths import DRAFTS_DIR, PROJECT_ROOT, project_path
+from crew.prompts import MAX_SECTIONS, REVIEW_MARKER   # limity a značky jsou ve specifikaci
 from crew.style_guide import next_fence_state
 
 # ----------------- Konstanty -----------------
@@ -30,10 +31,8 @@ DIV_CLOSE_RE = re.compile(r"^\s*:{3,}\s*$")
 # H2, které nejsou „obsahová sekce“ (aplikační úlohy, závěr)
 NON_CONTENT_H2_RE = re.compile(r"aplika[cč]n|záv[eě]r|shrnut", re.I)
 
-MAX_SECTIONS = 5
 MAX_LENGTH_DROP = 0.15          # recenzent smí text zkrátit nejvýše o 15 %
 ALLOWED_OJS_IMPORTS = {"../assets/jhrules.js"}
-REVIEW_MARKER = "=== REVIEW NOTES ==="
 
 SKIP_DIRS = {".venv", ".git", "_book", ".quarto", "_freeze", "node_modules", "__pycache__"}
 
@@ -303,6 +302,36 @@ def ojs_defined_names(code: str) -> list[str]:
     return names
 
 
+_INLINE_RE = re.compile(r"\$\{([^{}]+)\}")
+# Jména, která jsou v OJS vždy k dispozici (JavaScript a vestavěné proměnné Quarto/Observable)
+JS_BUILTINS = {
+    "Math", "Number", "String", "Array", "Object", "JSON", "Intl", "Date", "parseFloat", "parseInt",
+    "isNaN", "Infinity", "NaN", "d3", "Plot", "Inputs", "htl", "html", "md", "tex", "width", "DOM",
+    "Generators", "Mutable", "require", "FileAttachment", "true", "false", "null", "undefined",
+    "typeof", "new", "in", "of",
+}
+
+
+def inline_ojs_names(markdown: str) -> list[str]:
+    """Jména proměnných, které text používá v inline OJS `${…}`. Kód v zpětných apostrofech
+    (dokumentace) a bloky kódu se přeskakují. `${a+b}^2$` v matematice by se hlásilo omylem
+    (Pandoc ho bere jako matematiku); takový zápis je vzácný a nález je jen upozornění."""
+    names: set[str] = set()
+    open_fence = None
+    for line in markdown.splitlines():
+        before = open_fence
+        open_fence, is_fence = next_fence_state(open_fence, line)
+        if is_fence or before is not None:
+            continue
+        line = re.sub(r"`[^`]*`", "", line)
+        for match in _INLINE_RE.finditer(line):
+            expression = re.sub(r"\"[^\"]*\"|'[^']*'", "", match.group(1))
+            for name in re.findall(r"(?<![\w$.])([A-Za-z_$][\w$]*)", expression):
+                if name not in JS_BUILTINS:
+                    names.add(name)
+    return sorted(names)
+
+
 def check_chapter(markdown: str) -> list[str]:
     """Statické kontroly kapitoly. Vrací seznam nálezů (prázdný = v pořádku)."""
     problems: list[str] = []
@@ -338,6 +367,10 @@ def check_chapter(markdown: str) -> list[str]:
         if len(cells) > 1:
             problems.append(f"Proměnná „{name}“ je definována víckrát (OJS buňky {cells}); "
                             "názvy musí být v celé kapitole unikátní.")
+    undefined = [name for name in inline_ojs_names(markdown) if name not in owners]
+    if undefined:
+        problems.append(f"Text používá v ${{…}} proměnné {undefined}, které žádná OJS buňka nedefinuje "
+                        "(na stránce by se zobrazila chyba).")
 
     for number, block in enumerate(scan.ojs_blocks, start=1):
         for _names, source in _IMPORT_RE.findall(block.code):

@@ -13,224 +13,260 @@
 
 ## 1. Celkový styl
 
-Učebnice *Statistika pohledem geometra* má působit vzdušně a klidně. Čtenář má mít prostor přemýšlet nad obrázkem a nemá se prokousávat hustým textem. Interaktivní vizualizace a geometrický pohled mají přednost před dlouhým výkladem.
+Kniha má být vzdušná a čtivá. Čtenář se k ní vrací při studiu a nečte ji vcelku.
 
-**Odstavce a text**
+### Text a odstavce
 
-- Odstavec má obvykle 2–4 věty a vyjadřuje jednu myšlenku. Delší blok rozděl.
-- Mezi vysvětlením, vzorcem a grafem nech prázdný řádek. Vzorec nezačíná uprostřed věty, pokud to není nutné.
-- Piš česky, tykej čtenáři a používej činné tvary („spočítáme“, „podíváme se“). Vyhýbej se dlouhým souvětím.
-- Nový pojem zvýrazni tučně při prvním výskytu. Za český termín dej v závorce kurzívou anglický ekvivalent, např. **směrodatná odchylka** (*standard deviation, sd*).
-- Přes `.highlight-term` a `.definition-box` označuj jen skutečné definice. Jinak by zvýraznění ztratilo smysl.
-- Před odevzdáním text pročti kvůli překlepům. Ve starších kapitolách jich je dost a v nových se opakovat nemají.
-- Název projektu se píše vždy přesně „Statistika pohledem geometra“.
+- Odstavec má 2 až 4 věty a jednu myšlenku. Delší odstavec rozdělte.
+- Před vzorcem stojí věta, která říká, co bude vzorec vyjadřovat. Za vzorcem následuje slovní interpretace.
+- Nové pojmy se při prvním výskytu zvýrazní tučně (`**průměr**`). Anglický ekvivalent se uvede v závorce kurzívou (`*standard deviation*`).
+- Neodkazujte na „dřívější kapitolu“ bez odkazu. Používejte křížové odkazy Quarto (`@sec-...`, `@fig-...`).
+- Pište česky, v prvním pořadí oslovujte čtenáře („podíváme se“, „zkusme“). Dbejte na pravopis a diakritiku. Před odevzdáním text zkontrolujte.
 
-**Písmo**
+### Písmo a vzhled
 
-- Celá kniha používá bezpatkové písmo (Arial, Helvetica) a neproporcionální písmo jen pro kód. Fonty v kapitolách nepřepisuj.
-- Velikost písma ani řez nastavuj lokálně jen výjimečně. Typografii řídí `hag_custom.scss`.
-- Barvu textu a nadpisů nenastavuj ručně. Přebírá se z motivu.
+- Celá kniha používá bezpatkové písmo (Arial/Helvetica, nastavené v `hag_custom.scss`). Písmo v kapitolách ani v grafech nepřepisujte.
+- Barvy ani písmo nenastavujte inline (`style="..."`). Používejte připravené třídy: `.accent`, `.muted`, `.highlight`, `.highlight-key`, `.highlight-term`, `.highlight-warning`, `.definition-box`, `.example-box`.
+- Zvýraznění používejte střídmě. Na jednom odstavci by mělo být nejvýše jedno místo označené `.accent` nebo `.highlight-warning`.
+- Emoji se nepoužívají nikde: ani v nadpisech, ani v titulcích calloutů, ani v textu.
+- Popisky obrázků a grafů (`figcaption`) styluje šablona. Pište je jako úplnou větu a vysvětlete, co čtenář v grafu vidí.
 
-**Hierarchie nadpisů**
+### Hierarchie nadpisů
 
-| Úroveň | Použití |
+- H1 je název kapitoly. Je právě jeden na soubor.
+- H2 je sekce.
+- H3 je podsekce.
+- H4 a hlubší se nepoužívají. Potřebujete-li další úroveň, rozdělte sekci nebo použijte seznam či tučný lead-in.
+- Nadpisy mají vlevo barevnou čáru, kterou přidává šablona. Neprošpikujte je proto značkami ani barvami.
+- Nadpisy nečíslujte ručně.
+- Názvy nadpisů mají být krátké a věcné („Momentová míra polohy“, ne „Úvahy o tom, co je to průměr“).
+
+### Pohled geometra
+
+Kniha se jmenuje „Statistika pohledem geometra“. Každý nový pojem proto vysvětlete i geometricky:
+
+- jako těžiště nebo rovnováhu,
+- jako vzdálenost,
+- jako projekci,
+- jako plochu,
+- jako úhel.
+
+Doporučená posloupnost je: intuice a obrázek, geometrický význam, vzorec, interaktivní vizualizace. Vzorec nepřichází jako první.
+
+Vzorem je kapitola o momentových statistikách s houpačkou:
+
+| Pojem | Geometrický obraz |
 |:---|:---|
-| H1 (`#`) | Název kapitoly. Právě jeden na soubor. |
-| H2 (`##`) | Sekce kapitoly. |
-| H3 (`###`) | Podsekce uvnitř H2. |
-| H4 (`####`) | Výhradně v závěru kapitoly („Shrnutí pojmů“, „Pracuj s AI“), viz šablona v sekci 6. |
+| průměr | těžiště: páku podepřenou v průměru udržíme v rovnováze |
+| odchylka $e_i = x_i - \bar{x}$ | vzdálenost od bodu otáčení (rameno síly) |
+| součet odchylek je nula | záporná a kladná strana jsou v rovnováze |
+| průměr jako nejlepší jedno číslo | projekce vektoru dat na přímku daného jedničkovým vektorem |
+| vektor odchylek | kolmice k této přímce (pravý úhel) |
+| rozptyl a směrodatná odchylka | Pythagorova věta: $\|\mathbf{x}\|^2 = \|\bar{x}\mathbf{1}\|^2 + \|\mathbf{e}\|^2$ |
+| šikmost a špičatost | tvar histogramu, váha vzdálených bodů |
 
-- Úrovně nepřeskakuj (po H2 následuje H3, nikdy rovnou H4).
-- Nadpisy H1–H3 mají v motivu automaticky barevnou levou linku. Nenahrazuj ji vlastním ohraničením ani obrázkem.
-- Nadpisy začínají velkým písmenem a nekončí tečkou. Písmena v nich neformátuj ručně.
-- Titulek calloutu se píše jako nadpis druhé úrovně (`## Titulek`) na prvním řádku uvnitř calloutu. Podrobnosti jsou v sekci 7.
-- Nezačínej kapitolu H2 bez úvodního odstavce. Pod H1 vždy stručně řekni, o čem kapitola je a na co navazuje.
+Pravidla pro geometrické vysvětlení:
 
-**Obrázky a grafy**
+- Geometrický výklad je součástí hlavního textu. Hlubší nebo algebraické odvození dejte do sbaleného calloutu (`collapse="true"`), viz sekce 7.
+- Obrázek má být v textu nejpozději u prvního vzorce. Nesmí být až na konci kapitoly.
+- Pravý úhel, těžiště, projekci a podobné prvky v obrázku vždy popište slovy.
+- Vždy uveďte, co je na obrázku **to jedno, na co se dívat** (jediný zvýrazněný prvek na obrázek). Ostatní prvky jsou kontext.
 
-- Interaktivní vizualizace jsou standard. Jsou to OJS bloky s `//| echo: false` a štítkem `//| label: fig-...`.
-- Pod obrázek patří stručný popisek, který říká, co si čtenář má všimnout. Obrázek s popiskem zabal do divu `::: {#fig-...}`.
-- Na jeden obrázek zvýrazni jen jednu věc. Barvy bere graf z palety projektu (sekce 3 a 5).
+### Příklad rozvržení podsekce
 
-**Názvy souborů**
+````markdown
+## Rozptyl jako čtverec vzdálenosti
 
-- Nové soubory kapitol se jmenují ASCII kebab-case bez diakritiky a mezer, např. `06-spojita-rozdeleni.qmd`.
-- Starší názvy (např. `02_deskriptivní statistiky momenty.qmd`) se přejmenují později. Nepřejmenovávej je sám a ve stávajících kapitolách je nepřebírej jako vzor.
-- Každý nový soubor se přidá do `chapters:` v `_quarto.yml` pod správnou `part`.
+Vektor dat rozložíme na dvě složky: průměr a odchylky. Jsou na sebe kolmé.
+
+Díky pravému úhlu platí Pythagorova věta:
+
+$$\|\mathbf{x}\|^2 = \|\bar{x}\mathbf{1}\|^2 + \|\mathbf{e}\|^2$$
+
+Rozptyl je tedy čtverec délky vektoru odchylek, přepočtený na jedno pozorování.
+````
 
 ## 2. Dvojjazyčnost
 
-Kniha má dnes `lang: cs` a přepínač CS/EN zatím neexistuje. Nové kapitoly se ale píšou tak, aby se přepínač dal doplnit bez přepisování obsahu. Hlavní zásada je, že česká a anglická verze mají **stejnou strukturu**. Liší se jen jazyk textu.
+Kniha je dnes česky (`lang: cs` v `_quarto.yml`). Přepínač CS/EN zatím neexistuje. Nové kapitoly se ale píší tak, aby šly později snadno doplnit anglicky. Pravidla níže zajistí, že obě jazykové verze budou mít stejnou strukturu.
 
-**Struktura**
+### Strukturální pravidla
 
-- Každý logický blok textu (odstavec, definice, callout, popisek obrázku) existuje v obou jazycích na odpovídajícím místě a ve stejném pořadí.
-- Obě verze mají stejné nadpisy na stejných úrovních, stejný počet odstavců, stejné obrázky i stejné callouty.
-- Vzorce, data, kód a parametry grafů jsou společné a nekopírují se. Překládá se jen text kolem nich a popisky.
-- Nenechávej v kapitole pasáže, které existují jen v jednom jazyce, pokud to není záměr. Takovou pasáž označ poznámkou pro redakci.
-- Název projektu „Statistika pohledem geometra“ se nepřekládá.
+- Anglická verze má stejnou kostru jako česká: stejný počet a pořadí sekcí H2/H3, stejné callouty, stejné obrázky.
+- Identifikátory (`#sec-...`, `#fig-...`, `#tbl-...`, `label:` v OJS) jsou ASCII, anglicky nebo neutrálně, bez diakritiky a bez jazykové přípony. Odkaz `@fig-moments` tak funguje v obou verzích.
+- Každý překládaný blok je v samostatném divu s jazykovou třídou: `.lang-cs` a `.lang-en`. Děje se tak na úrovni celých sekcí nebo bloků, nikdy uprostřed věty.
+- Obě verze bloku mají stejné pořadí: nejdříve `.lang-cs`, pak `.lang-en`.
+- Vzorce a symboly ($\bar{x}$, $\sigma^2$, $z_i$) jsou společné a překládá se pouze okolní text. Jde-li o zkratky (*sd*, *var*, *MAD*), vysvětlete je v obou jazycích.
+- Při prvním výskytu pojmu uveďte český termín i anglický ekvivalent. Např.: **směrodatná odchylka** (*standard deviation*). Díky tomu je glosář přeložitelný.
 
-**Značení jazykových bloků**
-
-Texty v obou jazycích obal do divů s třídou `.lang-cs` a `.lang-en`. Přepínač později jeden z nich skryje. Mezi dva bloky vlož prázdný řádek.
+### Příklad bloku
 
 ````markdown
+## Momentová míra polohy {#sec-moment-location}
+
 ::: {.lang-cs}
-**Průměr** (*mean*) je těžiště dat. Když páku podepřeme v průměru, bude v rovnováze.
+**Průměr** je těžiště dat: páka podepřená v průměru je v rovnováze.
 :::
 
 ::: {.lang-en}
-The **mean** is the centre of mass of the data. If we support the lever at the mean, it balances.
+The **mean** is the centre of mass of the data: a lever supported at the mean balances.
 :::
 ````
 
-- Identifikátory (`#sec-...`, `#fig-...`, `label:`) musí být v dokumentu jedinečné. Vzorec názvu je `sec-moment-cs` a `sec-moment-en`, tedy stejný základ s příponou jazyka.
-- Křížové odkazy (`@fig-...`) pište vždy na identifikátor ve stejném jazyce.
+### Texty v OJS grafech
 
-**Terminologie**
-
-- Při prvním výskytu odborného pojmu uveď český termín a v závorce kurzívou anglický: **špičatost** (*kurtosis*), **těžké ocasy** (*heavy tails*).
-- Používej jen jeden český termín pro jeden anglický pojem v celé knize. Pokud váháš, dohledej, co používají již hotové kapitoly.
-- Zkratky u vzorců mají anglický původ (`sd`, `var`, `skew`, `kurt`). V obou jazycích zůstávají stejné.
-
-**Texty uvnitř OJS grafů**
-
-- Popisky os, legendy, texty v `Plot.text` a popisky ovládacích prvků nepiš natvrdo do volání grafu. Dej je do jednoho objektu se slovníkem textů, který půjde později napojit na přepínač.
-- Číselné formátování řeš tak, aby šlo přepnout (desetinná čárka v češtině, tečka v angličtině). Nepiš ručně `.toFixed()` s pevným řetězcem, pokud to jde obejít.
+- Popisky os, legendy a ovládacích prvků nepište přímo do kódu grafu. Soustřeďte je na začátek buňky do slovníku `T` s klíči `cs` a `en`.
+- Jazyk čtěte z `document.documentElement.lang` s výchozí hodnotou `"cs"`.
+- Čísla formátujte podle jazyka (`toLocaleString`). V češtině je desetinná čárka, v angličtině tečka.
+- Ve slovníku musí mít všechny klíče obě verze. Chybějící překlad nesmí zůstat prázdný.
 
 ````markdown
 ```{ojs}
 //| echo: false
-texty = ({
-  cs: { osaX: "Hodnota (poloha na páce) →", teziste: "Těžiště (průměr)" },
-  en: { osaX: "Value (position on the lever) →", teziste: "Centre of mass (mean)" }
-})
-jazyk = "cs"   // později se napojí na přepínač CS/EN
-t = texty[jazyk]
+lang = document.documentElement.lang || "cs"
+T = ({
+  cs: {x: "Hodnota (poloha na páce)", mean: "Těžiště (průměr)"},
+  en: {x: "Value (position on the lever)", mean: "Centre of mass (mean)"}
+})[lang]
+fmt = (v) => v.toLocaleString(lang, {maximumFractionDigits: 1})
 ```
 ````
 
-**Co zatím nedělat**
+### Další pravidla
 
-- Nevytvářej samostatné anglické soubory kapitol ani nepřidávej anglické položky do `_quarto.yml`. Přepínač se řeší centrálně a až později.
-- Nepřekládej strojově bez kontroly. Anglické texty musí projít redakcí stejně jako české.
+- Metadata kapitoly (title, popis) připravte v obou jazycích, až bude přepínač hotový.
+- Vyhněte se slovním hříčkám a idiomům, které nejdou přeložit. Pište jednoduše.
+- Nepoužívejte obrázky s vloženým textem. Popisky patří do `figcaption` nebo do OJS, aby je šlo přeložit.
+- Tabulky mají v obou jazycích stejné sloupce.
 
 ## 3. Dark / Light mode
 
-**Současný stav**
+### Současný stav
 
-- `_quarto.yml` definuje světlé i tmavé téma (`light` a `dark`), ale obě používají stejný základ: `cosmo` a `hag_custom.scss`. Tmavý režim proto zatím **není skutečně tmavý**.
-- Právě se ladí jen světlý režim. Tmavý přijde později.
-- Pozor na jednu věc: nic se nemá ladit „na oko“ jen pro světlé pozadí. Nové kapitoly se píšou tak, aby po doplnění tmavého motivu fungovaly bez úprav.
+`_quarto.yml` definuje světlé i tmavé téma. Obě ale používají stejný základ (cosmo + `hag_custom.scss`), takže tmavý režim zatím není skutečně tmavý. Právě se ladí jen světlý režim, tmavý přijde později.
 
-**Základní pravidlo: žádné napevno zadané barvy**
+Nové kapitoly se proto píší už teď tak, aby po zavedení tmavého tématu fungovaly bez přepisování. Rozhodující je jediné pravidlo: **barvy se berou z proměnných motivu, ne napevno.**
 
-Barvy v kapitolách (v divech, stylech i grafech) se **nikdy nepíšou napevno**. Nepoužívej hexadecimální kódy, `rgb(...)`, ani pojmenované barvy typu `steelblue`, `darkred`, `black`, `white`, `grey`. Takové barvy nereagují na změnu motivu. Najdeš je ve starších kapitolách a nejsou vzorem.
+### Barvy v textu a divech
 
-Barvy projektu tvoří paleta JHRules:
+- Barvy projektu tvoří paleta JHRules. V SCSS jsou to proměnné `$jh-*` v `hag_custom.scss`, v CSS jsou dostupné jako proměnné `--jh-*`. Konkrétní hodnoty najdete v sekci 5.
+- Do kapitol nikdy nepište hex kód, `rgb()` ani pojmenovanou barvu (`white`, `black`, `steelblue`, `darkred`, `red`, `#666`, `#ccc`).
+- V HTML divech a OJS prvcích používejte `var(--jh-text)`, `var(--jh-bg)`, `var(--jh-primary)`, `var(--jh-context)` a další `--jh-*`. Pro prosté pozadí a text lze použít i proměnné Bootstrapu `var(--bs-body-bg)` a `var(--bs-body-color)`.
+- Pozadí div nenastavujte bílé ani černé. Nechte ho průhledné nebo použijte `var(--jh-bg)`.
+- Inline styl `style="color: ..."` se nepoužívá. Pro zvýraznění slouží třídy `.accent`, `.muted`, `.highlight-*`.
+- Barvy mají pevné role:
+  - **primary** je hlavní data a prvky,
+  - **accent** je jediný prvek, na který se čtenář má dívat,
+  - **context** jsou osy, popisky a vedlejší data,
+  - **warning** je riziko a varování.
+- Barva nikdy nenese informaci sama. Rozlišujte i tvarem, čárkováním, popiskem nebo polohou, aby graf zůstal čitelný i na jiném pozadí a pro barvoslepé čtenáře.
 
-- V `hag_custom.scss` jsou to proměnné `$jh-*`. Ty se používají jen v SCSS, nikdy v `.qmd`.
-- Zároveň jsou dostupné jako CSS proměnné `--jh-*` (např. `--jh-text`, `--jh-bg`, `--jh-primary`, `--jh-accent`, `--jh-context`, `--jh-grid`, `--jh-warning`).
-- V OJS se berou z modulu `assets/jhrules.js`.
-- Konkrétní hodnoty a pravidla jejich použití jsou v sekci 5.
-
-**HTML a divy**
-
-- Vlastní `<div>` a inline styly barvu přebírají z CSS proměnných: `color: var(--jh-text)`, `background: var(--jh-bg)`, ohraničení z `var(--jh-primary)`. Pokud potřebuješ jemný podklad, použij průhlednost přes `color-mix` nebo přes `opacity`, nikoli novou pevnou barvu.
-- Pokud potřebuješ nový opakovaně použitý styl, neřeš ho v kapitole. Přidej třídu do `hag_custom.scss` a v kapitole použij jen třídu.
-- Nejdřív zkus existující třídy: `.definition-box`, `.example-box`, `.highlight`, `.highlight-key`, `.highlight-warning`, `.highlight-term`, `.accent`, `.muted`.
-- Nespoléhej na to, že pozadí je bílé. Nepoužívej bílý okraj kolem bodů ani bílé výplně „aby to vypadalo čistě“. Použij barvu pozadí z motivu.
-- Význam nikdy nenes pouze barvou. K barevnému rozlišení přidej popisek, tvar značky, styl čáry nebo text.
+### Příklad divu
 
 ````markdown
-::: {style="border-left: 4px solid var(--jh-primary); padding-left: 1rem; color: var(--jh-text);"}
-Takto se píše vlastní div. Barvy jdou z proměnných motivu, ne napevno.
+::: {.my-note style="color: var(--jh-text); border-left: 4px solid var(--jh-primary);"}
+Text, který se přizpůsobí motivu.
 :::
 ````
 
-**OJS grafy**
+Raději než inline styl přidejte do `hag_custom.scss` třídu a v ní používejte proměnné palety.
 
-- Barvy do grafu importuj z modulu a používej je místo textových názvů. Konkrétní klíče objektu `C` ověř přímo v `assets/jhrules.js`, nevymýšlej si vlastní.
-- Graf nesmí mít nastavené pevné pozadí. Průhledné pozadí a zděděná barva textu zajistí, že osy a popisky budou čitelné na světlém i tmavém podkladu.
-- Osy, mřížku a vedlejší prvky kresli barvami pro kontext a mřížku. Barvu pro zdůraznění použij jen na jednu věc, na kterou se má čtenář dívat.
+### Barvy v OJS grafech
+
+- Paleta se do OJS načítá z modulu `assets/jhrules.js`. Modul čte CSS proměnné `--jh-*` a vystavuje je jako objekt `C`.
+- Import patří do první `{ojs}` buňky kapitoly. Cesta je relativní k souboru kapitoly, např. z podsložky `02-statistika/` je to `../assets/jhrules.js`.
+- Do `Plot.plot` přidejte `style: plotStyle`. Nastaví průhledné pozadí, barvu textu a písmo podle motivu.
+- Do `fill`, `stroke` a `fill` textu dávejte jen hodnoty `C.*`.
+- Okraj kolem bodů (dříve `stroke: "white"`) mějte v barvě pozadí: `C.bg`.
+- Modul je skutečně spolehlivý jen tehdy, když barvy nekopírujete do vlastních konstant s hex hodnotou.
+- Více kategorií nekreslete duhou. Použijte `gradient(n)` z téhož modulu (plynulý přechod odstínů).
+- Pozor: `C` se čte při načtení stránky. Po zavedení tmavého tématu může být nutné stránku po přepnutí režimu znovu načíst. Do kapitol proto nepište vlastní detekci režimu.
 
 ````markdown
 ```{ojs}
 //| echo: false
-import {C} from "../assets/jhrules.js"
+import {C, gradient, plotStyle} from "../assets/jhrules.js"
 
 Plot.plot({
-  width,
-  style: { background: "transparent", color: "inherit", fontSize: "14px" },
+  style: plotStyle,
+  width: width,
   marks: [
-    Plot.ruleY([0]),
-    Plot.dot(data, { x: "x", y: "y", fill: C.primary }),
-    Plot.dot([vyber], { x: "x", y: "y", fill: C.accent, r: 8 })
+    Plot.ruleY([0], {stroke: C.context}),
+    Plot.dot(data, {x: "x", y: "y", fill: C.primary, stroke: C.bg}),
+    Plot.dot([highlight], {x: "x", y: "y", fill: C.accent, r: 8})
   ]
 })
 ```
 ````
 
-- Barvy proto vždy odkazuj přes `C.<název>` a nepiš je do každého volání zvlášť.
-- Pokud graf používá víc datových řad, rozliš je i stylem čáry (plná, čárkovaná, tečkovaná) a popiskem. Starší kapitoly rozlišují jen barvami a to nestačí.
-- Po doplnění tmavého motivu bude potřeba každý graf zkontrolovat v obou režimech. Piš ho tak, aby nezbyl žádný napevno zadaný odstín, který by se musel hledat a přepisovat.
+### Kontrolní seznam
+
+- V kódu OJS ani v textu není žádný napevno zapsaný barevný kód.
+- Pozadí grafů je průhledné (`plotStyle`).
+- Text v grafu používá `C.text` nebo `C.context`, nikdy čistě černou ani bílou.
+- Na obrázku je nejvýše jeden prvek v barvě `C.accent`.
+- Obrázek se ověří ve světlém režimu. Tmavý režim se zkontroluje, až bude hotový.
 
 ## 4. Responsive design
 
-Čtenáři otevírají knihu často na mobilu. Každá OJS vizualizace musí být čitelná a ovladatelná na úzké obrazovce, tedy od šířky přibližně 360 px.
+Čtenáři otevírají učebnici i na telefonu. Každá OJS vizualizace proto musí být čitelná a ovladatelná na úzké obrazovce.
 
-**Šířka a výška**
+### Šířka a rozměry
 
-- Šířku grafu bereme z vestavěné OJS proměnné `width`, která odpovídá šířce obsahu stránky. Díky tomu se graf přizpůsobí zařízení a po změně velikosti okna se překreslí.
-- Nepiš pevnou šířku (`width: 500`, `width: 600`), která na mobilu přeteče nebo se zmenší tak, že text zmizí. Pevné rozměry jsou ve starších kapitolách a nesmí se přebírat.
-- Výšku odvoď od šířky, např. `height: Math.round(width * 0.6)`, a omez ji shora i zdola. Pro čtvercové grafy (geometrické vizualizace) použij `Math.min(width, 500)` pro obě strany.
-- Extrémní výšky (několik set pixelů navíc) na mobilu nutí čtenáře dlouho rolovat. Graf se má vejít na obrazovku.
-- Text uvnitř grafu nesmí překrývat data. U úzkého grafu přesuň legendu pod graf, nebo ji vypiš do textu v HTML.
+- Šířka grafu vychází z vestavěné proměnné `width`. V `Plot.plot` použijte `width: width`.
+- Nepoužívejte pevné šířky typu `width: 600` nebo `width: 500`. Na mobilu by graf přetekl nebo by se horizontálně posouval.
+- Výšku odvoďte od šířky, aby se zachoval poměr stran. U čtvercových geometrických obrázků (vektory v rovině) volte `height: width`, ale s horním omezením, např. `Math.min(width, 500)`.
+- Graf, který potřebuje velkou výšku, nechte na mobilu nižší. Nepoužívejte fixní `height: 800`.
+- Dbejte na dostatečné okraje (`marginLeft`, `marginBottom`), aby se nepřekrývaly popisky os.
+- Při úzké šířce snižte počet značek na ose (`ticks`), případně popisky zkraťte.
 
-**Písmo**
+### Písmo a popisky
 
-- Velikost písma v grafu nesmí být menší než 12 px. Doporučená hodnota je 14 px (`style: {fontSize: "14px"}`).
-- Na úzké obrazovce zkrať popisky os a zmenši počet značek na ose (`ticks`), aby se nepřekrývaly.
-- Zvaž větší levý okraj (`marginLeft`), aby se vešly popisky osy y.
-- Dlouhé texty uvnitř grafu (jako výsledky výpočtů) piš pod graf do odstavce, ne přes `Plot.text` s pevnými souřadnicemi.
+- Písmo v grafu má mít nejméně 12 px, což nastavuje `plotStyle`. Menší písmo nepoužívejte.
+- Dlouhé popisky nepište jako `Plot.text` ve vnitřku grafu na pevné souřadnice. Na úzké šířce se překrývají.
+- Legendu s výsledky umístěte do rohu pomocí `frameAnchor`, nebo ještě lépe pod graf jako běžný text či tabulku.
+- Informace nesmí záviset jen na tooltipu nebo najetí myší. Na dotykovém zařízení neexistuje.
+- Popis grafu (`figcaption`) musí obsahovat hlavní sdělení, protože na mobilu mohou být detaily malé.
 
-**Ovládací prvky**
+### Ovládací prvky
 
-- Posuvníky, výběry a přepínače musí mít dostatečně velkou dotykovou plochu (alespoň zhruba 44 × 44 px). Nepřetěsnávej je k sobě.
-- Preferuj posuvníky s rozumným krokem (`step`) a málo hodnotami. Rozsah 0–200 s krokem 1 se na dotykovém displeji ovládá špatně.
-- Popisky ovládacích prvků drž krátké, aby se nezalamovaly přes celý řádek.
-- Ovládací prvky umísťuj nad graf, ne vedle něj. Čtenář je pak nepřekryje prstem a graf zůstane plně viditelný.
-- Informace nesmí být dostupná jen po najetí myší (`hover`, tooltip). Na dotykových zařízeních hover není. Důležitý údaj vždy vypiš v textu nebo v popisku.
-- Počet ovládacích prvků na jednu vizualizaci drž nízký. Jeden až dva jsou dobře, víc se na mobilu rychle stává nepřehledným.
+- Používejte `Inputs.range`, `Inputs.select`, `Inputs.radio`. Jsou dotykově použitelné.
+- Posuvníky mají být přes celou šířku textu. Pro dotyk je vhodné cílové políčko nejméně 44 px vysoké.
+- Ovládací prvky dávejte nad graf, ne vedle něj, a vždy s krátkým popiskem.
+- Posuvník s celými čísly má `step: 1`. Na mobilu se špatně nastavují desetinná čísla, proto volte rozumný krok.
+- Počet prvků omezte. Na telefonu mají dva až tři prvky nad grafem smysl, víc už ne.
+- Pro volbu z několika málo možností použijte `Inputs.radio`. Při delším seznamu `Inputs.select`.
+
+### Příklad
 
 ````markdown
 ```{ojs}
 //| echo: false
-import {C} from "../assets/jhrules.js"
+import {C, plotStyle} from "../assets/jhrules.js"
 
-viewof hodnota = Inputs.range([0, 10], {step: 1, value: 5, label: "Hodnota"})
+viewof x1 = Inputs.range([0, 10], {step: 1, value: 7, label: "Respondent 1"})
 
-{
-  const uzky = width < 480
-  const strana = Math.min(width, 500)
-  return Plot.plot({
-    width: strana,
-    height: strana,
-    style: { background: "transparent", color: "inherit", fontSize: uzky ? "12px" : "14px" },
-    x: { domain: [0, 10], label: "Osa x₁", ticks: uzky ? 5 : 10 },
-    y: { domain: [0, 10], label: "Osa x₂", ticks: uzky ? 5 : 10 },
-    marks: [
-      Plot.dot([{x: hodnota, y: hodnota}], { x: "x", y: "y", fill: C.accent, r: 6 })
-    ]
-  })
-}
+Plot.plot({
+  style: plotStyle,
+  width: width,
+  height: Math.min(width, 500),
+  marginLeft: 40,
+  x: {domain: [0, 10], label: "Osa x₁"},
+  y: {domain: [0, 10], label: "Osa x₂"},
+  marks: [
+    Plot.dot([{x: x1, y: 3}], {x: "x", y: "y", fill: C.primary, r: 6})
+  ]
+})
 ```
 ````
 
-**Kontrola před odevzdáním**
+### Kontrola před odevzdáním
 
-- Prohlédni kapitolu v úzkém okně prohlížeče (zhruba 360 px) a v režimu mobilního zařízení ve vývojářských nástrojích.
-- Ověř, že graf nepřetéká, texty se nepřekrývají, ovládací prvky jdou ovládat prstem a nic nevyžaduje hover.
+- Graf se při zúžení okna na přibližně 360 px nepřekrývá a nepřetéká.
+- Všechny popisky jsou čitelné bez přiblížení.
+- Ovládací prvky jdou nastavit prstem.
+- Graf nepoužívá pevnou šířku ani výšku.
+- Význam obrázku je zřejmý i z popisku pod ním.
 
 ## 5. Barevné schéma pro OJS
 
@@ -291,31 +327,34 @@ Python (matplotlib, plotly): `from jhrules import C, use_matplotlib, use_plotly`
 
 Šablony ve vnější ohradě ze čtyř zpětných apostrofů (````) se kopírují BEZ této vnější ohrady.
 
-Kapitola se skládá z maximálně 5 sekcí + závěrečného bloku.
-
+Kapitola se skládá z nejvýše 5 sekcí, bloku aplikačních úloh a závěru.
 Každá sekce pokrývá JEDEN koncept. Kratší je lepší.
 
 ---
 
-### SEKCE  (opakuj max. 5×)
+### SEKCE  (opakuj nejvýše 5×)
 
 ````markdown
 ## N. Název sekce  ← jeden pojem / jeden krok
 
 [TEORIE – max. 3 krátké odstavce]
 Vzdušný text. Každý odstavec = jedna myšlenka. Bez zbytečných úvodů.
-Geometrická nebo intuitivní interpretace pojmu.
+
+[GEOMETRICKÝ POHLED – povinný, 1 odstavec]
+Co pojem znamená geometricky: těžiště, vzdálenost, projekce, plocha, úhel, vektor …
+Vzor: průměr jako těžiště na houpačce. Graf v dalším bloku má tento pohled ukazovat.
+Výjimka jen tehdy, když pojem geometrický význam opravdu nemá: napiš jednu větu
+„Geometrický pohled: žádný, protože [důvod].“ a použij intuitivní interpretaci.
 
 [INTERAKTIVNÍ GRAFIKA – povinná, právě 1 na sekci]
+Vlož přesně tento blok, N nahraď číslem sekce (1, 2, 3 …). Graf doplní ojs_agent.
 ```{ojs}
-// Observable JS vizualizace ilustrující právě vysvětlený pojem.
-// Slider nebo dropdown pro interakci studenta.
-// Barvy VÝHRADNĚ z CSS proměnných Style Guide.
+// OJS_PLACEHOLDER_SEKCE_N
 ```
 
 [ŠKOLSKÝ PŘÍKLAD – právě 1 na sekci]
 Krátké, čisté zadání ve tvaru:
-  "Určete P(X = k), pokud X ~ Bin(n, p) a víte, že n = 10, p = 0,3."
+  "Určete [hledanou veličinu], pokud [zadané hodnoty]."
 
 ::: {.panel-tabset}
 ## Zadání
@@ -324,10 +363,10 @@ Krátké čisté zadání. Jen čísla a co se hledá, žádný příběh.
 ## Postup
 Groebner styl – každý krok má číslo a komentář proč, ne jen výpočet:
 
-**Krok 1: Identifikujeme parametry.**
-[co je n, p, k a proč]
+**Krok 1: Identifikujeme zadané veličiny.**
+[co je zadáno a proč na tom záleží]
 
-**Krok 2: Dosadíme do vzorce.**
+**Krok 2: Zvolíme postup a dosadíme.**
 [vzorec s dosazenými hodnotami]
 
 **Krok 3: Vypočítáme.**
@@ -357,7 +396,7 @@ Musí být konkrétní – obsahuje název pojmu, kontext (ekonomie/medicína)
 a instrukci pro dialogický režim (AI čeká na odpověď studenta).
 
 ::: {.callout-tip collapse="true" icon=false}
-## 💬 Zeptej se AI
+## Zeptej se AI
 Zkopíruj do ChatGPT / Claude / Copilota / Gemini:
 
 > Jsi trpělivý tutor statistiky pro studenty ekonomie.
@@ -367,10 +406,9 @@ Zkopíruj do ChatGPT / Claude / Copilota / Gemini:
 > Vždy ukazuješ obecný postup, ne trik platný jen pro tento příklad.
 > Mluvíš česky.
 >
-> [Konkrétní otázka cílená na právě vysvětlený pojem –
-> agent doplní podle obsahu sekce, např.:
-> "Nerozumím proč u Poissonovy distribuce platí E(X) = λ = Var(X).
-> Můžeš mi to ukázat na příkladu z pojišťovnictví?"]
+> [Konkrétní otázka cílená na právě vysvětlený pojem – agent doplní podle obsahu sekce
+> ve tvaru: "Nerozumím, proč [konkrétní tvrzení nebo krok z této sekce].
+> Můžeš mi to ukázat na příkladu z [obor]?"]
 :::
 ````
 
@@ -378,26 +416,27 @@ Zkopíruj do ChatGPT / Claude / Copilota / Gemini:
 
 ### APLIKAČNÍ ÚLOHY  (samostatný blok, JEDNOU za kapitolu, za všemi sekcemi)
 
-Tento blok obsahuje 2–3 delší úlohy z reálné praxe.
+Nadpis bloku je `## Aplikační úlohy`.
+Blok obsahuje 2–3 delší úlohy z reálné praxe.
 Oblasti: ekonomika a management, nebo medicína a veřejné zdraví.
 Inspirace stylem: Elementary Linear Algebra (Anton), Grinstead & Snell.
 
 Každá aplikační úloha má:
 - **Kontext** (2–4 věty reálného příběhu, ne abstraktní zadání)
 - **Více dílčích otázek** označených a), b), c) – budují na sobě
-- Tabset Zadání / Řešení
+- Tabset Zadání (shrnutí) / Řešení
 
-Příklady kontextů (agent vždy vymyslí nové, podobného duchu):
-- Výrobní linka: počet vadných kusů za směnu ~ Poisson(λ)
-- Klinická studie: pravděpodobnost vedlejšího účinku u n pacientů ~ Bin(n, p)
-- Pojišťovna: počet škodních událostí za rok, nastavení pojistného
-- Zákaznická linka: počet hovorů za hodinu, dimenzování kapacity
+Příklady kontextů (agent vždy vymyslí nové, podobného duchu; nezmiňuj názvy rozdělení ani vzorců):
+- Výrobní linka: kontrola kvality jedné směny a rozhodnutí o zásahu
+- Klinická studie: vyhodnocení účinku léčby u skupiny pacientů
+- Pojišťovna: škodní události a nastavení pojistného
+- Zákaznická linka: počet hovorů za hodinu a dimenzování kapacity
 
 Formát:
 
 ````markdown
 ::: {.callout-note icon=false}
-## 🏭 Aplikační úloha: [Název kontextu]
+## Aplikační úloha: [Název kontextu]
 
 [2–4 věty kontextu]
 
@@ -419,58 +458,9 @@ Stručné shrnutí všech otázek a), b), c).
 
 ### ZÁVĚR KAPITOLY  (vždy poslední blok)
 
-#### Shrnutí pojmů
-Tabulka: | Pojem | Definice | Kdy použít |
-(max. 5 řádků – jen klíčové pojmy kapitoly)
-
-#### Pracuj s AI
-
-Tři připravené prompty pro různé potřeby – student zkopíruje a vloží do
-ChatGPT / Claude / Copilota / jiného AI nástroje.
-
-Každý prompt začíná **systémovou rolí** která nastaví AI jako konkrétní typ tutora,
-pak teprve přichází samotná otázka. Student roli nekrátí ani neupravuje.
-
-**Něco mi nešlo – chci dovysvětlit:**
-> Jsi trpělivý tutor statistiky. Vysvětluješ studentům ekonomie.
-> Pravidla, která vždy dodržuješ:
-> – Odpovídáš stručně (max. 3–4 věty), pak se zeptáš jestli to dává smysl.
-> – Matematické symboly a vzorce používáš jen když jsou nezbytné,
->   jinak raději slovní popis nebo číselný příklad.
-> – Nikdy nevysvětluješ víc věcí najednou.
-> – Pokud si nejsi jistý co student nechápe, nejdřív se zeptej.
-> – Vždy ukazuješ OBECNÝ postup který funguje pro libovolný příklad,
->   ne trik nebo zkratku platnou jen pro toto konkrétní zadání.
->   Pokud existuje více postupů, řekni to a drž se obecného.
-> – Mluvíš česky.
->
-> Moje otázka: Nerozumím [konkrétní pojem z kapitoly].
-> Můžeš mi to vysvětlit na příkladu z [obor]?
-
-**Chci si procvičit:**
-> Jsi tutor statistiky, který procvičuje studenty formou dialogu.
-> Pravidla, která vždy dodržuješ:
-> – Dáš mi jedno zadání, počkáš na mou odpověď, pak opravíš nebo potvrdíš.
-> – Nápovědu dáváš jen když o ni požádám slovem "nápověda".
-> – Zadání jsou krátká a numerická (ne dlouhé příběhy).
-> – Obtížnost postupně zvyšuješ – začínáš snadno.
-> – Mluvíš česky.
->
-> Téma: [konkrétní pojem z kapitoly]. Začni prvním příkladem.
-
-**Chci jít do hloubky:**
-> Jsi tutor statistiky, který propojuje teorii s praxí.
-> Pravidla, která vždy dodržuješ:
-> – Začínáš vždy reálnou situací z praxe, vzorec přichází až potom.
-> – Používáš konkrétní čísla, ne obecné proměnné (raději n=50 než "nějaké n").
-> – Vždy ukazuješ OBECNÝ postup který funguje pro libovolný příklad.
->   Pokud existuje elegantnější zkratka jen pro tento případ, zmíníš ji,
->   ale jako doplněk – ne jako hlavní postup.
-> – Po každém celku se zeptáš jestli chci pokračovat nebo se vrátit.
-> – Mluvíš česky.
->
-> Zajímá mě: jak se [konkrétní pojem] používá v praxi v [obor]?
-> Ukaž mi reálný příklad s čísly.
+Nadpis bloku je `## Shrnutí pojmů`.
+Obsahuje tabulku: | Pojem | Definice | Kdy použít |
+(max. 5 řádků – jen klíčové pojmy kapitoly). Nic dalšího.
 
 INSTRUKCE PRO AGENTA:
 - Nahraď všechny [hranaté závorky] konkrétním textem pro tuto kapitolu.
@@ -480,75 +470,81 @@ INSTRUKCE PRO AGENTA:
 
 ## 7. Callout třídy
 
-Projekt používá tři typy calloutů: `.callout-note`, `.callout-tip` a `.callout-warning`. Jejich vzhled řídí `hag_custom.scss`, a proto nic v kapitole nestyluj ručně.
+Callouty slouží k oddělení doplňkového obsahu od hlavního výkladu. Projekt používá tři typy: `.callout-note`, `.callout-tip` a `.callout-warning`. Vzhled řídí `hag_custom.scss`: ikony jsou vypnuté a každý callout má silnější levou hranu. Barvy do callout nikdy nepřepisujte.
 
-**Společná pravidla**
+### Pravidla pro všechny callouty
 
-- Callout se zapisuje jako div se třídou: `::: {.callout-note}` a končí `:::`.
-- **Titulek se píše jako nadpis druhé úrovně (`## Titulek`) na prvním řádku uvnitř calloutu.** Takto to ukazuje šablona v sekci 6. Starší kapitoly používají `# Titulek`, což pro nové kapitoly neplatí.
-- Titulek je krátký a konkrétní („Odvození, že součet odchylek je nulový“). Nepoužívej obecné „Poznámka“.
-- Ikony jsou v projektu vypnuté. Význam calloutu tedy nese titulek a barevný pruh vlevo. Barva sama nestačí, protože `.callout-note` a `.callout-tip` mají podobný pruh. Typ calloutu proto vždy vyjádři i slovy v titulku nebo v prvním odstavci.
-- Callout je krátký. Dlouhé vysvětlení patří do běžného textu. Uvnitř calloutu zachovej styl z sekce 1 (krátké odstavce).
-- Callouty nezanořuj do sebe. Nepoužívej je k formátování celé kapitoly.
-- Nepoužívej H3 a nižší nadpisy uvnitř calloutu.
-- Nepiš do calloutu ručně nastavené barvy. Platí pravidlo ze sekce 3.
-
-**Varianty vzhledu**
-
-- Výchozí varianta (`default`) je standard.
-- Varianta `appearance="simple"` skryje rámeček, nechá jen pruh a titulek. Hodí se pro lehčí poznámky.
-- Varianta `appearance="minimal"` skryje titulek úplně. Použij ji jen tehdy, když se význam jasně vyplývá z textu a titulek by byl zbytečný. Titulek se v ní nezobrazí, ale přesto ho napiš kvůli konzistenci a dostupnosti.
-- Dlouhá odvození a doplňující výklad pro zájemce skládej přes `collapse="true"`. Čtenář tak nemusí text přeskakovat.
-
-**`.callout-note` – poznámka**
-
-Použij pro doplňující informaci, shrnutí myšlenky nebo odvození, které není nutné číst ihned. Typicky:
-
-- doplňující výklad nebo souvislost s jiným tématem,
-- odvození vzorce nebo geometrický pohled „pro zájemce“ (sbalený `collapse="true"`),
-- shrnutí důsledku právě odvozeného výsledku.
-
-**`.callout-tip` – tip**
-
-Použij pro praktickou radu, trik nebo pomoc k lepšímu porozumění:
-
-- jak si pojem představit nebo na co se v grafu dívat,
-- tip na interakci s vizualizací („Posuň jezdec a sleduj, jak se mění odchylky“),
-- doporučení postupu při výpočtu.
-
-**`.callout-warning` – varování**
-
-Použij střídmě, jen pro skutečné riziko chyby:
-
-- častá chyba v interpretaci nebo ve výpočtu (např. záměna rozptylu a směrodatné odchylky),
-- podmínky, za kterých metoda neplatí,
-- pozor na rozdíl mezi dvěma podobnými pojmy.
-
-Varování se vyznačuje samostatnou výraznou barvou. Kdyby ho bylo v kapitole příliš, přestane být vidět. Doporučení je nejvýše jedno až dvě varování na kapitolu.
-
-**Příklady zápisu**
+- Titulek se píše jako nadpis druhé úrovně (`## Titulek`) na prvním řádku uvnitř calloutu. Stejně se píší i záložky a shodně se šablonou v sekci 6.
+- Titulky jsou bez emoji. Atribut `title=` ani nadpis `# Titulek` se v nových kapitolách nepoužívá.
+- Titulek je krátký a věcný, nejvýše několik slov.
+- Uvnitř calloutu nepoužívejte další nadpisy. Ostatní text je běžný odstavec.
+- Callouty neskládejte do sebe a nepoužívejte je jako dekoraci. Na jednu obrazovku patří nejvýše jeden.
+- Dlouhý obsah (odvození, algebraický výklad) dejte do sbaleného calloutu: `collapse="true"`.
 
 ````markdown
 ::: {.callout-note collapse="true"}
 ## Odvození, že součet odchylek je nulový
 
-Krátký úvod a pak vlastní odvození.
-:::
-
-::: {.callout-tip}
-## Jak číst graf
-
-Posuň jezdec a sleduj, jak se mění vektor odchylek.
-:::
-
-::: {.callout-warning}
-## Pozor na záměnu pojmů
-
-Rozptyl je ve čtvercích původní jednotky. Směrodatná odchylka je ve stejné jednotce jako data.
+Zde je postup odvození...
 :::
 ````
 
-**Co callouty nenahrazují**
+### `.callout-note` (poznámka)
 
-- Definice patří do `.definition-box`, příklady do `.example-box`.
-- Callout není náhrada za nadpis. Pokud by měl obsah vlastní téma, udělej z něj podsekci H3.
+Použijte pro doplňující myšlenku, interpretaci nebo odvození, které navazuje na hlavní text, ale nepatří do něj.
+
+- Typický obsah: geometrický význam právě odvozeného vzorce, poznámka o značení, volitelné odvození.
+- Pro náročnější nebo nepovinný obsah používejte sbalenou variantu (`collapse="true"`).
+- Krátká poznámka bez titulku je možná, ale titulek je preferovaný.
+
+````markdown
+::: {.callout-note}
+## Význam nulového součtu
+
+Součet odchylek je nulový, protože průměr je těžiště. Záporná a kladná strana jsou v rovnováze.
+:::
+````
+
+### `.callout-tip` (tip)
+
+Použijte pro praktickou radu, zkratku nebo doporučený postup. Čtenáři má usnadnit práci.
+
+- Typický obsah: jak si pojem zapamatovat, jak ho ověřit v interaktivním grafu, kdy použít který vzorec.
+- Tip je krátký a konkrétní, bez teorie.
+- Vyzvěte čtenáře k jedné akci, např. „Posuňte posuvník a sledujte, jak se mění vektor odchylek.“
+
+````markdown
+::: {.callout-tip}
+## Vyzkoušejte
+
+Změňte hodnotu respondenta 2 a sledujte, že vektor odchylek zůstává kolmý k přímce průměru.
+:::
+````
+
+### `.callout-warning` (varování)
+
+Použijte pro místa, kde se čtenář snadno splete: častá chyba, výjimka z pravidla, nebezpečné zjednodušení.
+
+- Používejte ho střídmě, jinak varování ztratí váhu. Doporučení: nejvýše jedno na kapitolu nebo sekci.
+- Obsah má říct, co je chyba, proč vzniká a jak se jí vyhnout.
+- Varování neslouží pro obecné zajímavosti. Ty patří do `.callout-note`.
+
+````markdown
+::: {.callout-warning}
+## Pozor na dělení
+
+Rozptyl dělíme počtem pozorování $n$ (popisná statistika). Výběrový rozptyl by se dělil $n-1$.
+:::
+````
+
+### Jak vybrat správný typ
+
+| Chci čtenáři sdělit | Typ |
+|:---|:---|
+| doplňující souvislost, interpretaci nebo odvození | `.callout-note` |
+| praktickou radu nebo vyzvat k vyzkoušení | `.callout-tip` |
+| upozornit na častou chybu nebo úskalí | `.callout-warning` |
+| definici pojmu | `.definition-box` (ne callout) |
+| řešený příklad | `.example-box` (ne callout) |
+
+Definice a příklady mají vlastní třídy. Nepoužívejte pro ně callouty.

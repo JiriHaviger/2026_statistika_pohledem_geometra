@@ -17,7 +17,8 @@ from crew.paths import PROJECT_ROOT
 # takže se nikdy necommituje). Obsah .env:
 #   ANTHROPIC_API_KEY=sk-ant-...
 # Klíč: platform.claude.com → Settings → API Keys (účtuje se zvlášť od předplatného Claude).
-# Instalace (do .venv): uv pip install --python .venv\Scripts\python.exe "crewai[anthropic]" python-dotenv
+# Instalace (do .venv): uv pip install --python .venv\Scripts\python.exe "crewai[anthropic]" python-dotenv scipy
+# (scipy a numpy potřebuje nástroj Kalkulačka, crew/calc.py)
 load_dotenv(PROJECT_ROOT / ".env")   # vždy .env z kořene projektu, ne z aktuálního adresáře
 ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY")
 if not ANTHROPIC_API_KEY:

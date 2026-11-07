@@ -14,7 +14,7 @@ import argparse
 import shutil
 import sys
 
-from crew import pipeline
+from crew import pipeline, prompts
 from crew import style_guide as sg
 from crew.chapter import generate_chapter
 from crew.paths import (
@@ -48,57 +48,7 @@ def generate_style_guide() -> str:
     print("📋 Generuji Style Guide – spouštím analýzu projektu...")
 
     task_style_guide = Task(
-        description=f"""
-        Analyzuj stávající projekt „{sg.PROJECT_NAME}“ (Quarto kniha, česky) a napiš části
-        závazného Style Guide pro autory nových kapitol.
-
-        Pomocí nástroje `read_file` prozkoumej:
-        1. `_quarto.yml` – struktura, navigace, globální nastavení.
-        2. `hag_custom.scss` – barvy, proměnné, vlastní třídy, callouty.
-        3. `{STYLE_SAMPLE_CHAPTER}` – ukázka stávajícího textu a stylu.
-
-        Napiš PRÁVĚ tyto sekce, s přesně těmito nadpisy a v tomto pořadí:
-
-        ## 1. Celkový styl
-        Vzdušný styl, krátké odstavce, bezpatkové písmo, hierarchie H2/H3.
-
-        ## 2. Dvojjazyčnost
-        Příprava pro přepínač CS/EN, konzistentní struktura v obou jazycích.
-
-        ## 3. Dark / Light mode
-        Fakta: `_quarto.yml` definuje světlé i tmavé téma, ale obě zatím používají stejný
-        základ (cosmo + hag_custom.scss), takže tmavý režim zatím není skutečně tmavý.
-        Právě se ladí jen světlý režim, tmavý přijde později.
-        Popiš, jak psát divy a OJS grafy, aby fungovaly na světlém i tmavém pozadí
-        (barvy z proměnných motivu, ne napevno).
-        Barvy projektu jsou paleta JHRules ($jh-* v `hag_custom.scss`, CSS proměnné `--jh-*`).
-        V OJS se berou z modulu `assets/jhrules.js` (`import {{C}} from "../assets/jhrules.js"`, cesta relativní k souboru kapitoly).
-        Konkrétní hex hodnoty NEUVÁDĚJ (jsou v sekci 5, kterou doplní program).
-
-        ## 4. Responsive design
-        Pravidla pro OJS vizualizace na mobilech (šířka z vestavěné proměnné `width`,
-        čitelné písmo, ovládací prvky vhodné pro dotyk).
-
-        ## 7. Callout třídy
-        Jak používat .callout-note, .callout-tip, .callout-warning v kontextu projektu.
-        Nezmiňuj konkrétní hex barvy ani jména SCSS proměnných palety (paletu popisuje sekce 5).
-
-        Sekce 5 (barvy) a 6 (struktura kapitoly) NEPIŠ – doplní je program.
-
-        Závazné jednotné konvence (řiď se jimi, i když se ve stávajících kapitolách liší):
-        - Nadpisy: H1 název kapitoly, H2 sekce, H3 podsekce. H4 se používá výhradně
-          v závěru kapitoly („Shrnutí pojmů“, „Pracuj s AI“), jak ukazuje šablona v sekci 6.
-        - Titulek calloutu se píše jako nadpis druhé úrovně (`## Titulek`) na prvním řádku
-          uvnitř calloutu, shodně se šablonou v sekci 6.
-        - Nové soubory kapitol se jmenují ASCII kebab-case bez diakritiky a mezer
-          (např. `06-spojita-rozdeleni.qmd`); starší názvy se přejmenují později.
-
-        Formát výstupu:
-        - Začni přímo nadpisem `## 1. Celkový styl`. Žádná úvodní věta, žádný obalující kódový blok.
-        - Pokud uvnitř ukázky potřebuješ kódový blok (např. ```{{ojs}}), dej vnější ukázku
-          do ohrady ze ČTYŘ zpětných apostrofů (````markdown … ````).
-        - Projekt se jmenuje výhradně „{sg.PROJECT_NAME}“.
-        """,
+        description=prompts.style_guide_description(sg.PROJECT_NAME, STYLE_SAMPLE_CHAPTER),
         expected_output=(
             "Markdown se sekcemi ## 1., ## 2., ## 3., ## 4. a ## 7. (v tomto pořadí), "
             "bez úvodní věty a bez sekcí 5 a 6."

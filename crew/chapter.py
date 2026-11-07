@@ -7,9 +7,19 @@ výsledek kontrol a renderu) jde do docs_for_agents/review/<slug>.md.
 
 from datetime import date
 
-from crew import pipeline
+from crew import pipeline, prompts
 from crew.paths import REVIEW_DIR, display_path
-from crew.prompts import CHAPTER_STRUCTURE
+
+
+def task_text(instructions: str, style_guide: str | None = None, chapter: str | None = None) -> str:
+    """Zadání úkolu: nejdřív podklady (style guide, text kapitoly), potom pokyny z prompts.py."""
+    parts = []
+    if style_guide:
+        parts.append(f"══ ZÁVAZNÝ STYLE GUIDE ══\n{style_guide}")
+    if chapter:
+        parts.append(f"══ TEXT KAPITOLY ══\n{chapter}")
+    parts.append(instructions)
+    return "\n\n".join(parts)
 
 
 def run_single_task(agent, description: str, expected_output: str, tools=None) -> str:
@@ -28,134 +38,6 @@ def _save_failure(slug: str, step: str, raw: str) -> str:
     path = REVIEW_DIR / f"{slug}.{step}.failed.md"
     path.write_text(raw, encoding="utf-8")
     return display_path(path)
-
-
-# =============================================================================
-# ZADÁNÍ PRO AGENTY
-# =============================================================================
-
-def content_description(style_guide: str, inputs: dict) -> str:
-    return f"""
-        Napiš kompletní textový obsah kapitoly: **{inputs['tema']}**.
-        Kapitola bude po kontrole zařazena jako `{inputs['vystupni_soubor']}`.
-
-        ══════════════════════════════════════
-        ZÁVAZNÝ STYLE GUIDE:
-        {style_guide}
-        ══════════════════════════════════════
-
-        ZÁVAZNÁ STRUKTURA KAPITOLY:
-        {CHAPTER_STRUCTURE}
-        ══════════════════════════════════════
-
-        OBSAH KAPITOLY:
-
-        Hlavní témata (rozděl do max. 5 sekcí, každá = 1 pojem):
-        {inputs['klicove_pojmy']}
-
-        Zaměření příkladů:
-        {inputs['zamereni_uloh']}
-
-        Nástroje pro kódové bloky:
-        {inputs['nastroje']}
-
-        PRAVIDLA, která NESMÍŠ porušit:
-        - Začni přímo nadpisem první úrovně `# Název kapitoly` (bez YAML hlavičky a bez úvodní věty).
-        - Kapitolu začni VŽDY hned pod hlavním nadpisem chytlavým motivačním odstavcem(3–5 vět). Tento odstavec musí nastínit reálný problém z praxe (např. krachující výroba, epidemie, riskantní investice), který bez [klíčová slova] neumíme vyřešit. Musí jasně odpovědět na studentskou otázku: „K čemu mi to v životě bude?".
-        - Max. 5 sekcí. Pokud je pojmů více, spoj příbuzné do jedné sekce.
-        - Každá sekce: [teorie] → [OJS placeholder] → [1 školský příklad tabset] → [2 self-testy tabset]
-        - OJS bloky zatím vlož jako placeholder: ```{{ojs}}\n// OJS_PLACEHOLDER_SEKCE_N\n```
-          (N = pořadí sekce 1, 2, 3 …; ojs_agent je doplní v dalším kroku)
-        - Školský příklad: krátké čisté zadání ("Určete P(X=k), pokud X~Bin(10, 0.3)")
-        - Self-test: POUZE výsledek v tabu "Výsledek", žádný postup
-        - Aplikační úlohy: 2 úlohy, oblasti {inputs.get('aplikacni_oblasti', 'ekonomika/management a medicína')}
-          Každá úloha má kontext (reálný příběh) + otázky a), b), c)
-        - Závěr: tabulka pojmů + studentský AI prompt
-        """
-
-
-def ojs_description(style_guide: str, inputs: dict, chapter: str, numbers: list[int]) -> str:
-    return f"""
-        Pro kapitolu **{inputs['tema']}** napiš OJS (Observable JS) vizualizace do míst označených
-        `// OJS_PLACEHOLDER_SEKCE_N`. Sekce s grafem jsou: {numbers}.
-
-        ══════════════════════════════════════
-        STYLE GUIDE (sekce Barevné schéma pro OJS a Responsive design):
-        {style_guide}
-        ══════════════════════════════════════
-
-        TEXT KAPITOLY (graf musí ilustrovat právě pojem vysvětlený v dané sekci):
-        {chapter}
-        ══════════════════════════════════════
-
-        Požadavky na každou vizualizaci:
-        - Ilustruje PRÁVĚ vysvětlený pojem v dané sekci (ne obecnou grafiku).
-        - Obsahuje interaktivní prvek: slider pro parametr nebo dropdown pro volbu.
-        - Barvy VÝHRADNĚ z objektu `C` (modul assets/jhrules.js), žádné hex barvy ani pojmenované barvy.
-        - Responsive: používej vestavěnou proměnnou `width`, žádná pevná číselná šířka.
-        - Každá vizualizace jiná – nerecykluj stejný kód.
-
-        PRAVIDLA OJS, která NESMÍŠ porušit (všechny buňky kapitoly sdílejí jeden globální prostor):
-        - Názvy proměnných definovaných na začátku řádku (`x = …`, `viewof x = …`) musí být unikátní
-          v CELÉ kapitole. Přidej příponu podle sekce (např. `n1`, `p1`, `chart1`, `n2`, …).
-        - `import {{C, gradient, plotStyle}} from "../assets/jhrules.js"` patří POUZE do kódu sekce 1,
-          do ostatních sekcí import nedávej (C, gradient i plotStyle jsou už definované).
-        - Jiné importy nepoužívej. `Inputs`, `Plot` i `d3` jsou dostupné bez importu.
-
-        FORMÁT VÝSTUPU – pouze jeden JSON objekt, žádný jiný text, žádný obalující kódový blok:
-        {{"1": "<celý OJS kód sekce 1>", "2": "<celý OJS kód sekce 2>", …}}
-        Klíče jsou čísla sekcí {numbers}, hodnoty jsou řetězce s kódem (nový řádek jako \\n).
-        Kód nezačíná ```{{ojs}} ani nekončí ```: vkládá se do bloku automaticky.
-        """
-
-
-def review_description(inputs: dict, chapter: str, findings: list[str]) -> str:
-    findings_text = "\n".join(f"- {f}" for f in findings) if findings else "- žádné"
-    return f"""
-        Zkontroluj a oprav finální verzi kapitoly **{inputs['tema']}**.
-
-        AUTOMATICKY NALEZENÉ PROBLÉMY (oprav je):
-        {findings_text}
-
-        Checklist – ověř každý bod:
-
-        STRUKTURA:
-        ☐ Max. 5 sekcí? (pokud více, slučte)
-        ☐ Každá sekce má: teorie → OJS → školský příklad → 2 self-testy?
-        ☐ Aplikační úlohy jsou odděleny jako samostatný blok za sekcemi?
-        ☐ Závěr obsahuje tabulku pojmů a studentský AI prompt?
-
-        PŘÍKLADY:
-        ☐ Školský příklad: krátké čisté zadání + tabset Zadání/Řešení?
-        ☐ Self-testy: tabset Zadání/Výsledek, BEZ postupu v záložce Výsledek?
-        ☐ Aplikační úlohy: reálný kontext + otázky a)/b)/c) + tabset?
-
-        OJS:
-        ☐ Každá sekce má právě 1 OJS blok (ne placeholder)?
-        ☐ OJS bloky berou barvy z objektu C (žádné hex barvy)?
-        ☐ OJS bloky jsou interaktivní (slider/dropdown)?
-
-        MATEMATIKA:
-        ☐ Vzorce jsou správně (LaTeX syntax pro Quarto)?
-        ☐ Číselné výsledky v příkladech jsou správné?
-
-        STYL:
-        ☐ Odstavce krátké (max 3–4 věty)?
-        ☐ Žádné zbytečné úvody ("V této sekci si ukážeme...")?
-
-        PRAVIDLA ÚPRAV:
-        - OJS bloky nepřepisuj, pokud nejsou prokazatelně chybné; nepřidávej ani neodebírej sekce.
-        - Text nezkracuj.
-
-        FORMÁT VÝSTUPU:
-        1. Nejdřív CELÁ opravená kapitola (čisté Quarto Markdown, bez obalujícího kódového bloku,
-           bez jakýchkoli poznámek v textu).
-        2. Pak samostatný řádek přesně `{pipeline.REVIEW_MARKER}` a pod ním seznam provedených oprav.
-
-        ══════════════════════════════════════
-        KAPITOLA K REVIZI:
-        {chapter}
-        """
 
 
 # =============================================================================
@@ -208,6 +90,7 @@ def generate_chapter(style_guide: str, inputs: dict, force: bool = False) -> Non
     Zámek a potvrzení přepsání řeší příkaz `chapter`; tady je pojistka.
     """
     from crew.agents import content_agent, ojs_agent, reviewer_agent
+    from crew.tools import calc
 
     output_file = inputs["vystupni_soubor"]
     draft_path = pipeline.draft_path_for(output_file)
@@ -228,9 +111,11 @@ def generate_chapter(style_guide: str, inputs: dict, force: bool = False) -> Non
 
     # 1) Text kapitoly
     raw_content = run_single_task(
-        content_agent, content_description(style_guide, inputs),
-        "Kompletní Quarto Markdown kapitoly. OJS bloky jako placeholdery. "
-        "Struktura: max 5 sekcí, aplikační úlohy, závěr s tabulkou a AI promptem.")
+        content_agent, task_text(prompts.content_description(inputs), style_guide=style_guide),
+        "Kompletní Quarto Markdown kapitoly podle šablony ze style guide. "
+        "OJS bloky jako placeholdery, aplikační úlohy, závěr s tabulkou pojmů. "
+        "Všechna čísla spočítaná nástrojem calc.",
+        tools=[calc])
     try:
         chapter = pipeline.clean_chapter_output(raw_content)
         numbers = pipeline.placeholder_numbers(chapter)
@@ -241,7 +126,9 @@ def generate_chapter(style_guide: str, inputs: dict, force: bool = False) -> Non
 
     # 2) OJS: agent vrací jen JSON, vkládá Python
     raw_ojs = run_single_task(
-        ojs_agent, ojs_description(style_guide, inputs, chapter, numbers),
+        ojs_agent,
+        task_text(prompts.ojs_description(inputs, numbers, pipeline.inline_ojs_names(chapter)),
+                  style_guide=style_guide, chapter=chapter),
         'Jediný JSON objekt {"1": "<kód>", "2": "<kód>", …} s OJS kódem pro každou sekci s grafem.')
     try:
         with_ojs = pipeline.insert_ojs(chapter, pipeline.parse_ojs_json(raw_ojs, numbers))
@@ -251,8 +138,11 @@ def generate_chapter(style_guide: str, inputs: dict, force: bool = False) -> Non
 
     # 3) Recenze: dostane i automaticky nalezené problémy
     raw_review = run_single_task(
-        reviewer_agent, review_description(inputs, with_ojs, pipeline.check_chapter(with_ojs)),
-        f"Celá opravená kapitola, pak řádek {pipeline.REVIEW_MARKER} a seznam oprav.")
+        reviewer_agent,
+        task_text(prompts.review_description(inputs, pipeline.check_chapter(with_ojs)),
+                  style_guide=style_guide, chapter=with_ojs),
+        f"Celá opravená kapitola, pak řádek {prompts.REVIEW_MARKER} a seznam oprav.",
+        tools=[calc])
     review_errors: list[str] = []
     review_warnings: list[str] = []
     review_notes = ""

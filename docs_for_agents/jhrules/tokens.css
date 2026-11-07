@@ -1,8 +1,0 @@
-:root {
-  --bg: #ffffff; --text: #3d3d3d; --primary: #4682b4; --primary-light: #a9c6de;
-  --accent: #d35400; --context: #7f7f7f; --context-light: #d3d3d3; --grid: #ebebeb;
-  --space-1: 4px; --space-2: 8px; --space-4: 16px; --space-8: 32px;
-  --radius-none: 0px; --radius-sm: 2px; --radius-md: 4px;
-  --font-sans: Arial, Helvetica, sans-serif;
-  --font-mono: Menlo, Consolas, "DejaVu Sans Mono", monospace;
-}

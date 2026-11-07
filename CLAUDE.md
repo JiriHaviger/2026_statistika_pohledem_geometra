@@ -23,6 +23,18 @@ Starý název „Havi Notes“ se už nepoužívá.
   Výsledek je `_drafts/<název>.qmd` a report `docs_for_agents/review/<slug>.md` (REVIEW NOTES, diff, render);
   do knihy kapitolu přesouvá autor. Kapitola v knize ani soubor se stejným názvem (bez číselného prefixu)
   se nikdy nepřepíše.
+  Mapa souborů generátoru:
+  - `main.py` – příkazová řádka (style, chapter, audit).
+  - `chapters.py` – seznam kapitol ke generování (edituje autor).
+  - `crew/prompts.py` – JEDINÉ místo se specifikací kapitoly (počty, záložky, šablona) a se všemi zadáními agentů.
+  - `crew/chapter.py` – průchod autor → OJS → recenzent, zápis draftu a reportu.
+  - `crew/pipeline.py` – deterministické kontroly (bez LLM); `crew/style_guide.py` – skládání a kontrola style guide.
+  - `crew/config.py` – model a API klíč; `crew/agents.py` – agenti; `crew/tools.py` – nástroje (čtečka souborů, Kalkulačka);
+    `crew/calc.py` – spouštění výpočtů v samostatném procesu (numpy, scipy.stats; pojistka, ne bezpečný sandbox);
+    `crew/paths.py` – cesty.
+  - Čísla: autor a recenzent počítají nástrojem Kalkulačka, ne z hlavy. Číslo odvozené z dat grafu se v textu píše
+    inline `${mean1.toFixed(2)}`, aby nemohlo nesouhlasit s grafem (s matematikou `$…$` nekoliduje).
+  - `docs_for_agents/ojs_vzory.qmd` – vzorové OJS buňky pro ojs_agenta (prohlídka: `quarto preview` tohoto souboru).
 - `docs_for_agents/` – podklady pro agenty (`style_guide.md`, `audit_report.md`, jednorázová zadání).
 
 ### Pravidla
