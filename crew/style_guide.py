@@ -8,7 +8,6 @@ takže kontrolu lze spustit i bez API klíče:
     .venv\\Scripts\\python.exe -m crew.style_guide            # zkontroluje style_guide.md
 """
 
-import colorsys
 import hashlib
 import re
 import sys
@@ -19,7 +18,7 @@ from crew.prompts import CHAPTER_STRUCTURE
 
 PROJECT_NAME = "Statistika pohledem geometra"
 SCSS_PATH = "hag_custom.scss"
-SOURCE_FILES = ["_quarto.yml", SCSS_PATH]   # při jejich změně je style guide zastaralý
+SOURCE_FILES = ["_quarto.yml", SCSS_PATH, "jhrules.py", "assets/jhrules.js"]   # při jejich změně je style guide zastaralý
 
 LLM_SECTIONS = [1, 2, 3, 4, 7]
 SECTION_TITLES = {
@@ -103,17 +102,22 @@ def section_order(text: str) -> list[int]:
 
 # ----------------- Sekce 5: barvy ze SCSS -----------------
 
-def _darken(hex_color: str, percent: float) -> str:
-    """Stejně jako Sass darken(): sníží HSL světlost o `percent` procentních bodů."""
-    r, g, b = (int(hex_color[i:i + 2], 16) / 255 for i in (1, 3, 5))
-    h, l, s = colorsys.rgb_to_hls(r, g, b)
-    l = max(0.0, l - percent / 100)
-    r, g, b = colorsys.hls_to_rgb(h, l, s)
-    return "#" + "".join(f"{round(c * 255):02x}" for c in (r, g, b))
+PYTHON_PALETTE_PATH = "jhrules.py"
+OJS_MODULE_PATH = "assets/jhrules.js"
 
-
-def _lighten(hex_color: str, percent: float) -> str:
-    return _darken(hex_color, -percent) if percent else hex_color
+# Role barev JHRules (stručný popis do style guide)
+PALETTE_ROLES = {
+    "bg": "pozadí stránky a grafu (graf má průhledné pozadí)",
+    "text": "běžný text, nadpisy, druhá datová řada",
+    "primary": "hlavní datová barva (sloupce, křivky, prvky grafu)",
+    "primary-light": "výplně, podklady, vedlejší řady téže věci",
+    "primary-text": "tmavší primary jen pro odkazy a text (kontrast ≥ 4,5 : 1)",
+    "accent": "NA CO SE DÍVAT: jedna věc na obrázek (zvýrazněný bod, hodnota, výsledek)",
+    "context": "kontext: osy, popisky, vedlejší data",
+    "context-light": "okrajové a pomocné prvky",
+    "grid": "mřížka (jen vodorovná, jemná)",
+    "warning": "pouze varování a chyby (tlumená bordó)",
+}
 
 
 def _camel_case(scss_name: str) -> str:
@@ -122,43 +126,86 @@ def _camel_case(scss_name: str) -> str:
 
 
 def read_scss_colors(scss_path: str = SCSS_PATH) -> dict[str, str]:
-    """Načte barevné proměnné ze sekce scss:defaults (hex, darken(), lighten())."""
+    """Načte paletu JHRules: hex proměnné `$jh-*` ze SCSS. Klíče bez prefixu (primary-light …)."""
     colors: dict[str, str] = {}
-    var_re = re.compile(r"^\$([\w-]+):\s*([^;]+);")
-    func_re = re.compile(r"(darken|lighten)\(\$([\w-]+),\s*([\d.]+)%\)")
+    var_re = re.compile(r"^\$jh-([\w-]+):\s*(#[0-9a-fA-F]{6})\s*;")
     for line in Path(scss_path).read_text(encoding="utf-8").splitlines():
         match = var_re.match(line.strip())
-        if not match:
-            continue
-        name, value = match.group(1), match.group(2).strip()
-        if re.fullmatch(r"#[0-9a-fA-F]{6}", value):
-            colors[name] = value.upper()
-            continue
-        func = func_re.fullmatch(value)
-        if func and func.group(2) in colors:
-            base = colors[func.group(2)]
-            amount = float(func.group(3))
-            new = _darken(base, amount) if func.group(1) == "darken" else _lighten(base, amount)
-            colors[name] = new.upper()
+        if match:
+            colors[match.group(1)] = match.group(2).upper()
     return colors
+
+
+def read_python_palette(py_path: str = PYTHON_PALETTE_PATH) -> dict[str, str]:
+    """Načte slovník C z jhrules.py (klíče s podtržítkem převede na pomlčky)."""
+    source = Path(py_path).read_text(encoding="utf-8")
+    block = re.search(r"^C = dict\((.*?)\)\s*$", source, re.S | re.M)
+    if not block:
+        raise ValueError(f"V {py_path} nebyl nalezen slovník C.")
+    pairs = re.findall(r'(\w+)="(#[0-9a-fA-F]{6})"', block.group(1))
+    return {key.replace("_", "-"): value.upper() for key, value in pairs}
+
+
+def check_palette_consistency() -> list[str]:
+    """Paleta v SCSS (zdroj pravdy), jhrules.py a záložních hodnotách assets/jhrules.js musí souhlasit."""
+    scss = read_scss_colors()
+    problems = []
+    py = read_python_palette()
+    for name in sorted(set(scss) | set(py)):
+        if scss.get(name) != py.get(name):
+            problems.append(f"Barva '{name}': SCSS {scss.get(name)} × jhrules.py {py.get(name)}")
+    js_source = Path(OJS_MODULE_PATH).read_text(encoding="utf-8")
+    js = {_kebab(k): v.upper() for k, v in re.findall(r'(\w+): "(#[0-9a-fA-F]{6})"', js_source)}
+    for name in sorted(set(scss) | set(js)):
+        if scss.get(name) != js.get(name):
+            problems.append(f"Barva '{name}': SCSS {scss.get(name)} × assets/jhrules.js {js.get(name)}")
+    return problems
+
+
+def _kebab(camel: str) -> str:
+    return re.sub(r"[A-Z]", lambda m: "-" + m.group(0).lower(), camel)
 
 
 def build_colors_section(scss_path: str = SCSS_PATH) -> str:
     colors = read_scss_colors(scss_path)
     if not colors:
-        raise ValueError(f"V {scss_path} nebyla nalezena žádná barva.")
-    width = max(len(_camel_case(n)) for n in colors)
-    lines = [f'  {_camel_case(n) + ":":<{width + 1}} "{v}",   // ${n}' for n, v in colors.items()]
+        raise ValueError(f"V {scss_path} nebyla nalezena žádná paleta ($jh-*).")
+    rows = [f"| `C.{_camel_case(n)}` | `{v}` | {PALETTE_ROLES.get(n, '')} |" for n, v in colors.items()]
     return "\n".join([
-        f"Hodnoty jsou automaticky převzaté z `{scss_path}` (sekce `scss:defaults`).",
-        "Dočasné řešení: později je nahradí sdílený modul, který čte barvy přímo z CSS",
-        "(viz `docs_for_agents/zadani_revize.md`, B2 a B3).",
+        f"Paleta JHRules je převzatá z `{scss_path}` (proměnné `$jh-*`), což je jediný zdroj pravdy.",
+        "V OJS se barvy **nikdy nepíší napevno**, berou se z modulu, který je čte z CSS:",
         "",
         "```js",
-        "COLORS = ({",
-        *lines,
-        "})",
+        'import {C, gradient, plotStyle} from "/assets/jhrules.js"',
         "```",
+        "",
+        "| Konstanta | Hodnota | Použití |",
+        "|---|---|---|",
+        *rows,
+        "",
+        "Úplná pravidla stylu JHRules: `docs_for_agents/jhrules/README.md`.",
+        "",
+        "Principy:",
+        "",
+        "- Čistý design: bílé pozadí, tlumeně tmavě šedý text (ne čistá černá), žádné rámečky, stíny ani přechody.",
+        "- Jedna akcentová barva: `primary` nese veškerý důraz a nemusí se šetřit.",
+        "- Výjimka je výjimka: `accent` zvýrazňuje jen jeden prvek (bod, sloupec, výsledek).",
+        "- Kontext ustupuje: osy, popisky a potlačená data jsou šedé (`context`, `contextLight`).",
+        "- Zvýraznění místo duhy: víc kategorií = jedna `primary` a zbytek `contextLight`, případně plynulé stupňování `gradient(n)`.",
+        "",
+        "Grafy:",
+        "",
+        "- Bez horní a pravé osy. Mřížka žádná nebo jemná (`C.grid`), jen ve směru čtení hodnot.",
+        "- Legendy bez rámečku, raději přímé popisky u čar.",
+        "- Hlavní řada `C.primary`, srovnávací `C.text` nebo `C.context`, potlačené `C.contextLight`.",
+        "- Společný styl: `Plot.plot({ style: plotStyle, ... })` (průhledné pozadí, Arial, 12 px).",
+        "- Popisky obrázků jsou v barvě `context` (13 px), text je v Arialu, kód v monospace.",
+        "- Přístupnost: `primary` a `accent` mají na bílé kontrast jen kolem 4 : 1. Text v těchto barvách patří "
+        "tučně nebo od 18 px. Odkazy mají tmavší `C.primaryText`. `context` je jen pro popisky os, ne pro hlavní text.",
+        "",
+        "Python (matplotlib, plotly): `from jhrules import C, use_matplotlib, use_plotly`. "
+        "Animace (manim): bílé pozadí, objekty a rovnice `text`, hlavní objekt `primary`, "
+        "pomocné konstrukce `context` nebo `contextLight`, jeden klíčový moment `accent`.",
     ])
 
 
@@ -237,6 +284,7 @@ def validate(text: str) -> list[str]:
         errors.append("Sekce 6 není přesnou kopií CHAPTER_STRUCTURE z crew/prompts.py.")
     if "Havi Notes" in text:
         errors.append("Text obsahuje starý název „Havi Notes“.")
+    errors += check_palette_consistency()
     return errors
 
 

@@ -30,7 +30,17 @@ Starý název „Havi Notes“ se už nepoužívá.
 - Všechny `{ojs}` buňky stránky sdílejí jeden globální prostor: názvy proměnných musí být v kapitole unikátní.
 - `Inputs`, `Plot` a `d3` jsou dostupné bez `import`.
 - Šířku grafu brát z vestavěné proměnné `width`, ne pevným číslem.
-- Barvy nepsat napevno (hex), ale brát ze sdílené palety projektu.
+- Barvy nepsat napevno (hex): `import {C, gradient} from "/assets/jhrules.js"` (čte CSS proměnné `--jh-*`).
+  Nové kapitoly tak dělají; stávající kapitoly se zatím nemění.
+
+### Barvy (styl JHRules)
+
+- Úplná pravidla stylu: `docs_for_agents/jhrules/README.md` (čistý design, jedna akcentová barva, žádné rámečky, stíny ani přechody).
+- **Jediný zdroj palety:** proměnné `$jh-*` v `hag_custom.scss`. Kopie je jen v `jhrules.py` (matplotlib/plotly)
+  a ve záložních hodnotách `assets/jhrules.js`; shodu kontroluje `.venv\Scripts\python.exe -m crew.style_guide`.
+- Při změně palety upravit všechna tři místa a přegenerovat sekci 5 style guide.
+- Akcent (`accent`, oranžová) jen na jednu věc na obrázek, jinak `primary` a šedé `context`. Varování `warning` (bordó).
+- Zatím se ladí jen světlý režim; tmavý přijde později.
 
 ### Prostředí
 

@@ -1,38 +1,80 @@
 /*-- scss:defaults --*/
-$primary: #0085CC;
-$secondary: #666666;     // Dark gray
-$gray-light: #B0B0B0;
-$light: #F8F9FA;         // Světlé pozadí
-$dark: #1A1A1A;          // Tmavý text
-$warning: #8b0512;
-$warning-dark: darken($warning, 10%);
 
+// ===============================================================
+// Paleta JHRules – JEDINÝ zdroj barev projektu.
+// Odsud se berou proměnné Bootstrapu (níže), CSS proměnné --jh-* pro OJS
+// (assets/jhrules.js) i sekce 5 style guide. Kopie je jen v jhrules.py
+// (Python neumí číst SCSS); shodu hlídá `python -m crew.style_guide`.
+// ===============================================================
+$jh-bg:            #FFFFFF;
+$jh-text:          #3D3D3D;   // běžný text a nadpisy
+$jh-primary:       #4682B4;   // hlavní barva grafů a prvků
+$jh-primary-light: #A9C6DE;   // podklady, výplně
+$jh-primary-text:  #3D729E;   // tmavší primary pro odkazy (kontrast 5,1 : 1 na bílé)
+$jh-accent:        #D35400;   // „na co se dívat“ – jen jedna věc na obrázek
+$jh-context:       #7F7F7F;   // osy, popisky, vedlejší data
+$jh-context-light: #D3D3D3;
+$jh-grid:          #EBEBEB;
+$jh-warning:       #8C2D35;   // tlumená bordó pro varování (kontrast 8,3 : 1)
 
+// Bootstrap / Quarto
+$body-bg:          $jh-bg;
+$body-color:       $jh-text;
+$headings-color:   $jh-text;
+$primary:          $jh-primary;
+$secondary:        $jh-context;
+$warning:          $jh-warning;
+$link-color:       $jh-primary-text;
+$light:            #F8F9FA;   // světlé pozadí boxů
+$dark:             #1A1A1A;
+
+$font-family-sans-serif: Arial, Helvetica, sans-serif;
+$font-family-monospace:  Menlo, Consolas, "DejaVu Sans Mono", monospace;
 $font-size-base: 1rem;
 $headings-font-weight: 600;
 
-// Logo/brand v hlavičce
-.navbar-brand::before {
-  content: "📊";
-  font-size: 1.5rem;
-  margin-right: 0.5rem;
+
+/*-- scss:rules --*/
+
+// Paleta jako CSS proměnné – čte je OJS modul assets/jhrules.js
+:root {
+  --jh-bg: #{$jh-bg};
+  --jh-text: #{$jh-text};
+  --jh-primary: #{$jh-primary};
+  --jh-primary-light: #{$jh-primary-light};
+  --jh-primary-text: #{$jh-primary-text};
+  --jh-accent: #{$jh-accent};
+  --jh-context: #{$jh-context};
+  --jh-context-light: #{$jh-context-light};
+  --jh-grid: #{$jh-grid};
+  --jh-warning: #{$jh-warning};
+}
+
+// Pomocné třídy JHRules
+.accent { color: $jh-accent; font-weight: 700; }
+.muted  { color: $jh-context; }
+
+// Popisky obrázků a grafů: barva context, 13 px (JHRules)
+figcaption, .figure-caption, .quarto-figure figcaption {
+  color: $jh-context;
+  font-size: 13px;
 }
 
 
 /*-- SCSS: Custom Environments --*/
 
-// Styl pro DEFINICE (využití Primary barvy)
+// Styl pro DEFINICE
 .definition-box {
   display: block; // Ujistí se, že je na vlastním řádku
-  border: 1px solid $primary; // Rámeček kolem
-  border-left: 8px solid $primary; // Silnější levá hrana
-  background-color: $light; 
+  // JHRules: žádné rámečky – zůstává jen silnější levá hrana
+  border-left: 8px solid $primary;
+  background-color: $light;
   padding: 1rem;
   margin: 1.5rem 0;
   counter-increment: none !important;
 }
 
-// Styl pro PŘÍKLADY (využití Secondary barvy)
+// Styl pro PŘÍKLADY
 .example-box {
   padding: 1rem;
   padding-left: 3rem; // Více odsazení zleva
@@ -43,30 +85,28 @@ $headings-font-weight: 600;
 
 // Styl, aby nadpis v boxu byl vždy tučný
 .definition-box h3, .example-box h3 {
-  color: $dark;
+  color: $jh-text;
   font-weight: 700;
   border-left: none; // Vypne defaultní čáru na h3 uvnitř boxu
 }
 
 /*-- SCSS: Custom Highlights --*/
-// Barevný akcent na nadpisech
+// Nadpisy: text neutrální (JHRules), barevná je jen levá čára
 h1, h2, h3 {
-  color: $primary;
   border-left: 4px solid $primary;
   padding-left: 1rem;
 }
 
-// Zvýraznění (modré podsvícení celého testu)
-.highlight{
+// Zvýraznění
+.highlight {
   font-weight: bold;
-  color: $dark;
+  color: $jh-text;
   padding: 0.1rem 0.3rem;
   border-radius: 3px;
 }
 
-// Zvýraznění 
 .highlight-key {
-  background: linear-gradient(120deg, rgba(0, 133, 204, 0.1) 0%, rgba(0, 133, 204, 0.2) 100%);
+  background: rgba($jh-primary, 0.15); // JHRules: žádné přechody, jen plochá výplň
   padding: 0.1rem 0.3rem;
   border-radius: 3px;
 }
@@ -74,25 +114,19 @@ h1, h2, h3 {
 // Zvýraznění pro Riziko/Varování
 .highlight-warning {
   font-weight: bold;
-  color: $warning-dark;
+  color: $jh-warning;
   padding: 0.1rem 0.3rem;
   border-radius: 3px;
 }
 
-// Zvýraznění pro Definice/Pojmy 
+// Zvýraznění pro Definice/Pojmy
 .highlight-term {
-padding: 0.25rem 0.5rem; 
-  display: inline-block; // Důležité: Umožní boxu obtékat text
-  border-radius: 4px; 
-  
-  // Pravá a Horní strana: Pouze barevné pozadí
-  background-color: lighten($primary, 40%); // Světlejší odstín primární barvy
-  
-  // Viditelná Levá Hranice (Primary barva)
-  border-left: 5px solid $primary; 
-  
-  // Viditelná Dolní Hranice (Secondary barva)
-  border-bottom: 2px solid $secondary;}
+  padding: 0.25rem 0.5rem;
+  display: inline-block; // Umožní boxu obtékat text
+  border-radius: 4px;
+  background-color: rgba($jh-primary-light, 0.5); // světlý podklad z palety
+  border-left: 5px solid $primary;
+}
 
 /* ===============================================================*/
 /*-- SCSS: Custom callout --*/
@@ -106,19 +140,19 @@ padding: 0.25rem 0.5rem;
     padding-left: 0.5rem !important;
   }
   // 2. Základní nastavení čáry pro všechna appearance
-  border-left-width: 5px  !important;
+  border-left-width: 5px !important;
   margin: 1rem 0;
   &.callout-style-default {
     //  border: 1px solid rgba($primary, 0.2); // Jemný rámeček kolem dokola
     //  border-left: 5px solid $primary !important;
     //  background-color: rgba($primary, 0.05) !important;
-    }  
+  }
   &.callout-style-simple {
     background-color: transparent !important;
     border-top: none !important;    // Zruší horní okraj
     border-right: none !important;  // Zruší pravý okraj
     border-bottom: none !important; // Zruší dolní okraj
-    
+
     .callout-header {
       display: flex !important; // Vynutí nadpis
       background-color: transparent !important;
@@ -129,21 +163,16 @@ padding: 0.25rem 0.5rem;
     border-top: none !important;
     border-right: none !important;
     border-bottom: none !important;
-    
+
     .callout-header {
       display: none !important; // Skryje nadpis
     }
   }
-// TIP  ==================================================
-  &.callout-tip {
-    &.callout-style-simple {    }  
-    &.callout-style-minimal {    }
-  }
   // WARNING ==================================================
   &.callout-warning {
-    border-left-color: $warning-dark !important;
-    background-color: rgba($warning-dark, 0.1) !important;
-    
+    border-left-color: $jh-warning !important;
+    background-color: rgba($jh-warning, 0.08) !important;
+
     &.callout-style-minimal {
       background-color: transparent !important;
     }
@@ -153,35 +182,14 @@ padding: 0.25rem 0.5rem;
   &.callout-note {
     border-left-color: $primary !important;
     background-color: $light !important;
-    
+
     &.callout-style-minimal {
       background-color: transparent !important;
     }
   }
 }
-/*-- scss:rules --*/
 
-// 1. Přepsání barvy levého pruhu pro každý typ calloutu
+// Barva levého pruhu pro tip (note a warning jsou výše)
 .callout-tip {
   border-left-color: $primary !important;
-}
-
-.callout-note {
-  border-left-color: $secondary !important;
-}
-
-.callout-warning {
-  border-left-color: $warning-dark !important;
-}
-
-.callout-tip .callout-icon-container {
-  color: $primary !important;
-}
-
-.callout-note .callout-icon-container {
-  color: $secondary !important;
-}
-
-.callout-warning .callout-icon-container {
-  color: $warning-dark !important;
 }
