@@ -12,5 +12,4 @@ další přibudou později ...
 
 J.Haviger, 2025
 
-*Tato stránka je založená na quarto book stylu s využitím plotly.* 
-
+*Tato stránka je založená na quarto book stylu s využitím OJS.* 
