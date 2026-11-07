@@ -3,10 +3,10 @@
   Sekce 5 a 6 vkládá Python (crew/style_guide.py), ostatní píše LLM.
   Datum: 2026-11-07
   Zdroje (sha256):
-    _quarto.yml: 9da063e7ec705f7d1ef052b5b3dab668cfda562d91a416f47e153745349cfcd7
+    _quarto.yml: 1457f484998342eebbbef5de095557d8ba870f9d92e10fbfb24e0ea27536c547
     hag_custom.scss: 8b90a1499bb82ed24e2931799dce01a337953fc38a25e9647d4889783698bfd4
     jhrules.py: 15818ee72f2047b6e6e56c82a6a3b70695696f34962597a48878566828d7e392
-    assets/jhrules.js: 085b59f7e0426d93beaac5a7e8bca868400b74b33b4ea30a8d86353ee822eea2
+    assets/jhrules.js: fc6dfc072963a1cc5fcf8f74800f73bc8313ac557703e8c735672487ccda0fe0
 -->
 
 # Style Guide: Statistika pohledem geometra
@@ -157,7 +157,7 @@ Takto se píše vlastní div. Barvy jdou z proměnných motivu, ne napevno.
 ````markdown
 ```{ojs}
 //| echo: false
-import {C} from "/assets/jhrules.js"
+import {C} from "../assets/jhrules.js"
 
 Plot.plot({
   width,
@@ -206,7 +206,7 @@ Plot.plot({
 ````markdown
 ```{ojs}
 //| echo: false
-import {C} from "/assets/jhrules.js"
+import {C} from "../assets/jhrules.js"
 
 viewof hodnota = Inputs.range([0, 10], {step: 1, value: 5, label: "Hodnota"})
 
@@ -238,8 +238,11 @@ Paleta JHRules je převzatá z `hag_custom.scss` (proměnné `$jh-*`), což je j
 V OJS se barvy **nikdy nepíší napevno**, berou se z modulu, který je čte z CSS:
 
 ```js
-import {C, gradient, plotStyle} from "/assets/jhrules.js"
+import {C, gradient, plotStyle} from "../assets/jhrules.js"
 ```
+
+- Cesta je **relativní k souboru kapitoly** (`../assets/…`). Absolutní `/assets/…` Quarto odmítne.
+- Import patří **jen do jedné (první) OJS buňky kapitoly**. Jinak se `C` definuje víckrát a stránka se rozbije.
 
 | Konstanta | Hodnota | Použití |
 |---|---|---|

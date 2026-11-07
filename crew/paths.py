@@ -18,6 +18,8 @@ STYLE_GUIDE_PATH = DOCS_DIR / "style_guide.md"
 STYLE_GUIDE_BACKUP_PATH = DOCS_DIR / "style_guide.backup.md"
 STYLE_GUIDE_RAW_PATH = DOCS_DIR / "style_guide.raw.md"   # surový výstup LLM při chybě
 AUDIT_REPORT_PATH = DOCS_DIR / "audit_report.md"
+DRAFTS_DIR = PROJECT_ROOT / "_drafts"            # sem se generují kapitoly (Quarto složku ignoruje)
+REVIEW_DIR = DOCS_DIR / "review"                 # reporty ke generovaným kapitolám
 
 
 def project_path(relative: str) -> Path:

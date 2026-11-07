@@ -3,8 +3,8 @@
 // takže změna palety nevyžaduje úpravu žádné kapitoly.
 // Záložní hodnoty platí, jen kdyby CSS proměnné chyběly.
 //
-// Použití v kapitole (jednou, v libovolné {ojs} buňce):
-//   import {C, gradient} from "/assets/jhrules.js"
+// Použití v kapitole (jednou, v první {ojs} buňce; cesta je relativní k souboru kapitoly):
+//   import {C, gradient, plotStyle} from "../assets/jhrules.js"
 //   Plot.plot({ marks: [Plot.barY(data, {x: "k", y: "p", fill: C.primary})] })
 
 const FALLBACK = {

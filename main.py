@@ -14,16 +14,16 @@ import argparse
 import shutil
 import sys
 
+from crew import pipeline
 from crew import style_guide as sg
+from crew.chapter import generate_chapter
 from crew.paths import (
     AUDIT_REPORT_PATH,
     STYLE_GUIDE_BACKUP_PATH,
     STYLE_GUIDE_PATH,
     STYLE_GUIDE_RAW_PATH,
     display_path,
-    project_path,
 )
-from crew.prompts import CHAPTER_STRUCTURE
 
 
 # =============================================================================
@@ -72,7 +72,7 @@ def generate_style_guide() -> str:
         Popiš, jak psát divy a OJS grafy, aby fungovaly na světlém i tmavém pozadí
         (barvy z proměnných motivu, ne napevno).
         Barvy projektu jsou paleta JHRules ($jh-* v `hag_custom.scss`, CSS proměnné `--jh-*`).
-        V OJS se berou z modulu `assets/jhrules.js` (`import {{C}} from "/assets/jhrules.js"`).
+        V OJS se berou z modulu `assets/jhrules.js` (`import {{C}} from "../assets/jhrules.js"`, cesta relativní k souboru kapitoly).
         Konkrétní hex hodnoty NEUVÁDĚJ (jsou v sekci 5, kterou doplní program).
 
         ## 4. Responsive design
@@ -154,180 +154,8 @@ def load_style_guide() -> str:
 
 
 # =============================================================================
-# FÁZE 2: GENEROVÁNÍ KAPITOLY
-# =============================================================================
-
-def generate_chapter(style_guide: str, inputs: dict, force: bool = False) -> None:
-    """
-    0. zkontroluje jestli kapitola již existuje – pokud ano a není force, přeskočí generování
-    Generuje kapitolu ve třech krocích:
-    1. content_agent  → text + příklady + aplikační úlohy
-    2. ojs_agent      → OJS bloky pro každou sekci
-    3. reviewer_agent → kontrola a finální verze
-    Potvrzení přepsání (force) řeší příkaz `chapter` (cmd_chapter), tady je jen pojistka.
-    """
-    from crewai import Task, Crew, Process
-    from crew.agents import content_agent, ojs_agent, reviewer_agent
-
-    # Cesta je ukotvená ke kořeni projektu, nezávisí na aktuálním adresáři
-    output_path = project_path(inputs['vystupni_soubor'])
-
-    # --- BEZPEČNOSTNÍ ZÁMEK: Ochrana hotových kapitol ---
-    if output_path.exists() and not force:
-        print(f"🛑 Kapitola '{inputs['tema']}' již existuje ({display_path(output_path)}). "
-              "SKÁČU JÍ, aby nedošlo k přepsání! (přepsání: --force)")
-        return  # Ukončí funkci dříve, než se vůbec spustí CrewAI
-
-    print(f"\n📝 Generuji kapitolu: {inputs['tema']}...")
-
-    # ------------------------------------------------------------------
-    # TASK 1: Textový obsah
-    # ------------------------------------------------------------------
-    task_content = Task(
-        description=f"""
-        Napiš kompletní textový obsah kapitoly: **{inputs['tema']}**.
-        Výstupní soubor: `{inputs['vystupni_soubor']}`.
-
-        ══════════════════════════════════════
-        ZÁVAZNÝ STYLE GUIDE:
-        {style_guide}
-        ══════════════════════════════════════
-
-        ZÁVAZNÁ STRUKTURA KAPITOLY:
-        {CHAPTER_STRUCTURE}
-        ══════════════════════════════════════
-
-        OBSAH KAPITOLY:
-
-        Hlavní témata (rozděl do max. 5 sekcí, každá = 1 pojem):
-        {inputs['klicove_pojmy']}
-
-        Zaměření příkladů:
-        {inputs['zamereni_uloh']}
-
-        Nástroje pro kódové bloky:
-        {inputs['nastroje']}
-
-        PRAVIDLA, která NESMÍŠ porušit:
-        - Kapitolu začni VŽDY hned pod hlavním nadpisem chytlavým motivačním odstavcem(3–5 vět). Tento odstavec musí nastínit reálný problém z praxe (např. krachující výroba, epidemie, riskantní investice), který bez [klíčová slova] neumíme vyřešit. Musí jasně odpovědět na studentskou otázku: „K čemu mi to v životě bude?".
-        - Max. 5 sekcí. Pokud je pojmů více, spoj příbuzné do jedné sekce.
-        - Každá sekce: [teorie] → [OJS placeholder] → [1 školský příklad tabset] → [2 self-testy tabset]
-        - OJS bloky zatím vlož jako placeholder: ```{{ojs}}\n// OJS_PLACEHOLDER_SEKCE_N\n```
-          (ojs_agent je doplní v dalším kroku)
-        - Školský příklad: krátké čisté zadání ("Určete P(X=k), pokud X~Bin(10, 0.3)")
-        - Self-test: POUZE výsledek v tabu "Výsledek", žádný postup
-        - Aplikační úlohy: 2 úlohy, oblasti {inputs.get('aplikacni_oblasti', 'ekonomika/management a medicína')}
-          Každá úloha má kontext (reálný příběh) + otázky a), b), c)
-        - Závěr: tabulka pojmů + studentský AI prompt
-        """,
-        expected_output=(
-            "Kompletní Quarto Markdown kapitoly. "
-            "OJS bloky jako placeholdery. "
-            "Struktura: max 5 sekcí, aplikační úlohy, závěr s tabulkou a AI promptem."
-        ),
-        agent=content_agent
-    )
-
-    # ------------------------------------------------------------------
-    # TASK 2: OJS vizualizace
-    # ------------------------------------------------------------------
-    task_ojs = Task(
-        description=f"""
-        Dostaneš hotový textový obsah kapitoly **{inputs['tema']}**.
-        Tvůj úkol: nahraď každý `// OJS_PLACEHOLDER_SEKCE_N` funkční OJS vizualizací.
-
-        ══════════════════════════════════════
-        STYLE GUIDE (sekce Barevné schéma pro OJS a Responsive design):
-        {style_guide}
-        ══════════════════════════════════════
-
-        Požadavky na každou vizualizaci:
-        - Ilustruje PRÁVĚ vysvětlený pojem v dané sekci (ne obecnou grafiku).
-        - Obsahuje interaktivní prvek: slider pro parametr nebo dropdown pro volbu distribuce.
-        - Barvy VÝHRADNĚ z COLORS konstant ze Style Guide.
-        - Responsive: používej `width` z OJS, ne pevné px.
-        - Každá vizualizace jiná – nerecykluj stejný kód.
-
-        Příklady vhodných vizualizací pro diskrétní distribuce:
-        - Sekce Binomická: slider n a p → sloupcový graf PMF + zvýraznění P(X=k)
-        - Sekce Poissonova: slider λ → PMF graf + zobrazení střední hodnoty
-        - Sekce Geometrická: slider p → graf "čekání na první úspěch"
-        - Sekce CDF: interaktivní výpočet P(X ≤ x) s vizuálním zvýrazněním plochy
-
-        Výstupem je CELÝ obsah kapitoly s doplněnými OJS bloky (ne jen OJS bloky samotné).
-        """,
-        expected_output=(
-            "Kompletní Quarto Markdown kapitoly s funkčními OJS vizualizacemi "
-            "místo placeholderů. Každá vizualizace je interaktivní a tematicky relevantní."
-        ),
-        agent=ojs_agent
-    )
-
-    # ------------------------------------------------------------------
-    # TASK 3: Review
-    # ------------------------------------------------------------------
-    task_review = Task(
-        description=f"""
-        Zkontroluj a oprav finální verzi kapitoly **{inputs['tema']}**.
-
-        Checklist – ověř každý bod:
-
-        STRUKTURA:
-        ☐ Max. 5 sekcí? (pokud více, slučte)
-        ☐ Každá sekce má: teorie → OJS → školský příklad → 2 self-testy?
-        ☐ Aplikační úlohy jsou odděleny jako samostatný blok za sekcemi?
-        ☐ Závěr obsahuje tabulku pojmů a studentský AI prompt?
-
-        PŘÍKLADY:
-        ☐ Školský příklad: krátké čisté zadání + tabset Zadání/Řešení?
-        ☐ Self-testy: tabset Zadání/Výsledek, BEZ postupu v záložce Výsledek?
-        ☐ Aplikační úlohy: reálný kontext + otázky a)/b)/c) + tabset?
-
-        OJS:
-        ☐ Každá sekce má právě 1 OJS blok (ne placeholder)?
-        ☐ OJS bloky používají COLORS z Style Guide?
-        ☐ OJS bloky jsou interaktivní (slider/dropdown)?
-
-        MATEMATIKA:
-        ☐ Vzorce jsou správně (LaTeX syntax pro Quarto)?
-        ☐ Číselné výsledky v příkladech jsou správné?
-
-        STYL:
-        ☐ Odstavce krátké (max 3–4 věty)?
-        ☐ Žádné zbytečné úvody ("V této sekci si ukážeme...")?
-
-        Výstupem je OPRAVENÁ finální verze celé kapitoly.
-        Na konec přidej sekci `<!-- REVIEW NOTES -->` se seznamem provedených oprav.
-        """,
-        expected_output=(
-            "Finální opravená verze Quarto Markdown kapitoly. "
-            "Na konci souboru sekce <!-- REVIEW NOTES --> se seznamem oprav."
-        ),
-        agent=reviewer_agent
-    )
-
-    crew_chapter = Crew(
-        agents=[content_agent, ojs_agent, reviewer_agent],
-        tasks=[task_content, task_ojs, task_review],
-        process=Process.sequential,
-        verbose=True,
-        max_rpm=10,
-    )
-    crew_chapter.kickoff()
-
-    # Uložení finální verze (reviewer je poslední). Dřívější output_file u úkolu
-    # recenzenta jsem odstranil: zapisoval relativně k aktuálnímu adresáři a soubor
-    # se zapisoval podruhé tady.
-    try:
-        output_path.parent.mkdir(parents=True, exist_ok=True)
-        output_path.write_text(str(task_review.output.raw), encoding="utf-8")
-        print(f"✅ Kapitola uložena: {display_path(output_path)}")
-    except Exception as e:
-        print(f"❌ Chyba při zápisu kapitoly: {e}")
-
-
-# =============================================================================
-# FÁZE 3: AUDIT EXISTUJÍCÍCH KAPITOL
+# FÁZE 2: AUDIT EXISTUJÍCÍCH KAPITOL
+# (generování kapitoly je v crew/chapter.py)
 # =============================================================================
 
 # Obsahové kapitoly projektu – index.qmd, references.qmd a summary.qmd jsou vynechány
@@ -452,11 +280,16 @@ def confirm_overwrite(targets: list) -> bool:
     print("⚠️  Tyto soubory se PŘEPÍŠÍ:")
     for target in targets:
         print(f"   - {display_path(target)}")
+    return ask_yes_no("Pokračovat?")
+
+
+def ask_yes_no(question: str) -> bool:
+    """Zeptá se uživatele (výchozí je ne). V neinteraktivním režimu odmítne."""
     if not sys.stdin or not sys.stdin.isatty():
         print("Nelze se zeptat na potvrzení (vstup není terminál), končím beze změny.")
         return False
     try:
-        answer = input("Pokračovat? [a/N]: ")
+        answer = input(f"{question} [a/N]: ")
     except EOFError:   # např. Windows: NUL se tváří jako terminál, ale nic nepošle
         print("\nŽádná odpověď, končím beze změny.")
         return False
@@ -493,9 +326,15 @@ def cmd_chapter(args) -> int:
     if args.index is None:
         print("Kapitoly v chapters.py (použij --index N):")
         for number, chapter in enumerate(CHAPTERS, start=1):
-            exists = project_path(chapter.get("vystupni_soubor", "")).exists()
-            print(f"  {number}. {chapter.get('tema', '?')} → {chapter.get('vystupni_soubor', '?')}"
-                  f"{'  [soubor existuje]' if exists else ''}")
+            output_file = chapter.get("vystupni_soubor")
+            state = ""
+            if output_file:
+                found = pipeline.find_conflicts(output_file)
+                if found.blocking:
+                    state = "  [v projektu už je]"
+                elif found.draft:
+                    state = "  [draft existuje]"
+            print(f"  {number}. {chapter.get('tema', '?')} → {output_file or '?'}{state}")
         return 0
 
     if not 1 <= args.index <= len(CHAPTERS):
@@ -508,14 +347,27 @@ def cmd_chapter(args) -> int:
         print(f"V položce {args.index} v chapters.py chybí povinné klíče: {', '.join(missing)}")
         return 1
 
-    # Zámek: hotová kapitola se bez --force nepřepíše (kontroluje se před načtením CrewAI)
-    target = project_path(inputs["vystupni_soubor"])
-    if target.exists():
-        if not args.force:
-            print(f"🛑 Kapitola '{inputs['tema']}' již existuje ({display_path(target)}). "
-                  "Nepřepisuji (přepsání: --force).")
+    # Zámek (kontroluje se před načtením CrewAI):
+    # - kapitola v knize nebo jiný soubor se stejným názvem (bez číselného prefixu): nikdy se nepřepíše
+    # - draft v _drafts/: přepíše se jen s --force a po potvrzení
+    # - podobný název (společné slovo): jen upozornění a potvrzení
+    conflicts = pipeline.find_conflicts(inputs["vystupni_soubor"])
+    if conflicts.blocking:
+        existing = [conflicts.target] if conflicts.target else conflicts.same_slug
+        print(f"🛑 Kapitola '{inputs['tema']}' už v projektu je: "
+              f"{', '.join(display_path(p) for p in existing)}. Kapitola v knize se nepřepisuje.")
+        return 1
+    if conflicts.similar:
+        print("⚠️  V projektu jsou kapitoly s podobným názvem (možné překrytí tématu):")
+        for path in conflicts.similar:
+            print(f"   - {display_path(path)}")
+        if not ask_yes_no("Generovat přesto?"):
             return 1
-        if not confirm_overwrite([target]):
+    if conflicts.draft:
+        if not args.force:
+            print(f"🛑 Draft {display_path(conflicts.draft)} už existuje. Nepřepisuji (přepsání: --force).")
+            return 1
+        if not confirm_overwrite([conflicts.draft]):
             return 1
 
     style_guide = load_style_guide()

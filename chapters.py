@@ -9,7 +9,8 @@ CHAPTERS = [
     # Vzor položky – zkopíruj, odkomentuj a uprav:
     # {
     #     "tema": "Název kapitoly",
-    #     "vystupni_soubor": "02-statistika/NN_nazev-kapitoly.qmd",
+    #     # Cílové místo v knize. Generuje se do _drafts/<stejný název>.qmd, do knihy kapitolu přesouvá autor.
+#     "vystupni_soubor": "02-statistika/NN-nazev-kapitoly.qmd",
     #     "klicove_pojmy": """
     #         1. Pojem A – krátká charakteristika
     #         2. Pojem B – krátká charakteristika

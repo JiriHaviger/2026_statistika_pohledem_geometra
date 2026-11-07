@@ -139,6 +139,7 @@ celerybeat.pid
 # Generátor: záloha a surový výstup style guide (verze jsou v historii gitu)
 docs_for_agents/style_guide.backup.md
 docs_for_agents/style_guide.raw.md
+docs_for_agents/review/*.failed.md
 
 # Environments
 .env

@@ -18,6 +18,11 @@ Starý název „Havi Notes“ se už nepoužívá.
   (existující soubor se nepřepíše), s `--force` se program zeptá na potvrzení. Cesty se skládají přes
   `crew/paths.py` (PROJECT_ROOT), takže příkazy fungují z libovolného adresáře.
   Kontrola style guide bez API: `.venv\Scripts\python.exe -m crew.style_guide`.
+  Postup generování kapitoly: autor (text) → ojs_agent (jen JSON, kód vkládá Python) → recenzent; mezi kroky
+  kontroluje `crew/pipeline.py` (struktura, unikátní OJS proměnné, žádné hex barvy, srovnání před a po recenzi).
+  Výsledek je `_drafts/<název>.qmd` a report `docs_for_agents/review/<slug>.md` (REVIEW NOTES, diff, render);
+  do knihy kapitolu přesouvá autor. Kapitola v knize ani soubor se stejným názvem (bez číselného prefixu)
+  se nikdy nepřepíše.
 - `docs_for_agents/` – podklady pro agenty (`style_guide.md`, `audit_report.md`, jednorázová zadání).
 
 ### Pravidla
@@ -34,7 +39,10 @@ Starý název „Havi Notes“ se už nepoužívá.
 - Všechny `{ojs}` buňky stránky sdílejí jeden globální prostor: názvy proměnných musí být v kapitole unikátní.
 - `Inputs`, `Plot` a `d3` jsou dostupné bez `import`.
 - Šířku grafu brát z vestavěné proměnné `width`, ne pevným číslem.
-- Barvy nepsat napevno (hex): `import {C, gradient} from "/assets/jhrules.js"` (čte CSS proměnné `--jh-*`).
+- Barvy nepsat napevno (hex): `import {C, gradient, plotStyle} from "../assets/jhrules.js"` (čte CSS proměnné `--jh-*`).
+  Cesta je **relativní k souboru kapitoly** (kapitoly i `_drafts/` jsou o úroveň hlouběji); absolutní `/assets/…`
+  Quarto odmítne. Import patří jen do jedné (první) OJS buňky kapitoly, jinak se `C` definuje víckrát.
+  `assets/` se kopíruje do `_book` přes `project: resources:` v `_quarto.yml`.
   Nové kapitoly tak dělají; stávající kapitoly se zatím nemění.
 
 ### Barvy (styl JHRules)

@@ -43,7 +43,7 @@ def file_sha256(path: str) -> str:
     return hashlib.sha256(project_path(path).read_bytes()).hexdigest()
 
 
-def _next_fence_state(open_fence, line: str):
+def next_fence_state(open_fence, line: str):
     """Stav po řádku `line`. open_fence je None (mimo blok) nebo (znak, délka) otevřené ohrady.
     Vrací (nový_stav, je_řádek_ohrada)."""
     match = FENCE_RE.match(line)
@@ -63,7 +63,7 @@ def iter_lines_with_fence_state(text: str):
     open_fence = None
     for line in text.splitlines():
         before = open_fence
-        open_fence, is_fence = _next_fence_state(open_fence, line)
+        open_fence, is_fence = next_fence_state(open_fence, line)
         yield line, is_fence or before is not None
 
 
@@ -71,7 +71,7 @@ def fences_balanced(text: str) -> bool:
     """True, pokud po posledním řádku nezůstal otevřený kódový blok."""
     open_fence = None
     for line in text.splitlines():
-        open_fence, _ = _next_fence_state(open_fence, line)
+        open_fence, _ = next_fence_state(open_fence, line)
     return open_fence is None
 
 
@@ -177,8 +177,11 @@ def build_colors_section(scss_path: str = SCSS_PATH) -> str:
         "V OJS se barvy **nikdy nepíší napevno**, berou se z modulu, který je čte z CSS:",
         "",
         "```js",
-        'import {C, gradient, plotStyle} from "/assets/jhrules.js"',
+        'import {C, gradient, plotStyle} from "../assets/jhrules.js"',
         "```",
+        "",
+        "- Cesta je **relativní k souboru kapitoly** (`../assets/…`). Absolutní `/assets/…` Quarto odmítne.",
+        "- Import patří **jen do jedné (první) OJS buňky kapitoly**. Jinak se `C` definuje víckrát a stránka se rozbije.",
         "",
         "| Konstanta | Hodnota | Použití |",
         "|---|---|---|",
