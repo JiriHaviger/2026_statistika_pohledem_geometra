@@ -28,3 +28,6 @@ Thumbs.db
 
 # Zálohy
 *___backup_hag:stat_book
+
+# Zbloudilé HTML vykreslené přímo do složek s kapitolami (kniha jde do _book)
+/0*/*.html
