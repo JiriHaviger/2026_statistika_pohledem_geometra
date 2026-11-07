@@ -9,6 +9,8 @@ os.environ["OTEL_SDK_DISABLED"] = "true"
 from dotenv import load_dotenv
 from crewai import LLM
 
+from crew.paths import PROJECT_ROOT
+
 
 # ----------------- NASTAVENÍ -----------------
 # API klíč se načítá ze souboru .env v kořeni projektu (soubor je v .gitignore,
@@ -16,7 +18,7 @@ from crewai import LLM
 #   ANTHROPIC_API_KEY=sk-ant-...
 # Klíč: platform.claude.com → Settings → API Keys (účtuje se zvlášť od předplatného Claude).
 # Instalace (do .venv): uv pip install --python .venv\Scripts\python.exe "crewai[anthropic]" python-dotenv
-load_dotenv()
+load_dotenv(PROJECT_ROOT / ".env")   # vždy .env z kořene projektu, ne z aktuálního adresáře
 ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY")
 if not ANTHROPIC_API_KEY:
     raise RuntimeError("ANTHROPIC_API_KEY není nastaven – doplň ho do souboru .env")
@@ -39,6 +41,3 @@ llm_model = LLM(
 #     api_key=os.environ.get("GEMINI_API_KEY"),
 #     max_retries=5,
 # )
-
-
-STYLE_GUIDE_PATH = "docs_for_agents/style_guide.md"

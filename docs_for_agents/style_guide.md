@@ -1,5 +1,5 @@
 <!--
-  GENEROVÁNO automaticky (crew_agents.py, generate_style_guide). Needitovat ručně.
+  GENEROVÁNO automaticky (python main.py style --force). Needitovat ručně.
   Sekce 5 a 6 vkládá Python (crew/style_guide.py), ostatní píše LLM.
   Datum: 2026-11-07
   Zdroje (sha256):

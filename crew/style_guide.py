@@ -14,6 +14,7 @@ import sys
 from datetime import date
 from pathlib import Path
 
+from crew.paths import project_path
 from crew.prompts import CHAPTER_STRUCTURE
 
 PROJECT_NAME = "Statistika pohledem geometra"
@@ -39,7 +40,7 @@ HASH_LINE_RE = re.compile(r"^\s+(\S+): ([0-9a-f]{64})\s*$")
 # ----------------- Pomocné funkce -----------------
 
 def file_sha256(path: str) -> str:
-    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+    return hashlib.sha256(project_path(path).read_bytes()).hexdigest()
 
 
 def _next_fence_state(open_fence, line: str):
@@ -129,7 +130,7 @@ def read_scss_colors(scss_path: str = SCSS_PATH) -> dict[str, str]:
     """Načte paletu JHRules: hex proměnné `$jh-*` ze SCSS. Klíče bez prefixu (primary-light …)."""
     colors: dict[str, str] = {}
     var_re = re.compile(r"^\$jh-([\w-]+):\s*(#[0-9a-fA-F]{6})\s*;")
-    for line in Path(scss_path).read_text(encoding="utf-8").splitlines():
+    for line in project_path(scss_path).read_text(encoding="utf-8").splitlines():
         match = var_re.match(line.strip())
         if match:
             colors[match.group(1)] = match.group(2).upper()
@@ -138,7 +139,7 @@ def read_scss_colors(scss_path: str = SCSS_PATH) -> dict[str, str]:
 
 def read_python_palette(py_path: str = PYTHON_PALETTE_PATH) -> dict[str, str]:
     """Načte slovník C z jhrules.py (klíče s podtržítkem převede na pomlčky)."""
-    source = Path(py_path).read_text(encoding="utf-8")
+    source = project_path(py_path).read_text(encoding="utf-8")
     block = re.search(r"^C = dict\((.*?)\)\s*$", source, re.S | re.M)
     if not block:
         raise ValueError(f"V {py_path} nebyl nalezen slovník C.")
@@ -154,7 +155,7 @@ def check_palette_consistency() -> list[str]:
     for name in sorted(set(scss) | set(py)):
         if scss.get(name) != py.get(name):
             problems.append(f"Barva '{name}': SCSS {scss.get(name)} × jhrules.py {py.get(name)}")
-    js_source = Path(OJS_MODULE_PATH).read_text(encoding="utf-8")
+    js_source = project_path(OJS_MODULE_PATH).read_text(encoding="utf-8")
     js = {_kebab(k): v.upper() for k, v in re.findall(r'(\w+): "(#[0-9a-fA-F]{6})"', js_source)}
     for name in sorted(set(scss) | set(js)):
         if scss.get(name) != js.get(name):
@@ -241,7 +242,7 @@ def build_header() -> str:
     hashes = "\n".join(f"    {path}: {file_sha256(path)}" for path in SOURCE_FILES)
     return "\n".join([
         "<!--",
-        "  GENEROVÁNO automaticky (crew_agents.py, generate_style_guide). Needitovat ručně.",
+        "  GENEROVÁNO automaticky (python main.py style --force). Needitovat ručně.",
         "  Sekce 5 a 6 vkládá Python (crew/style_guide.py), ostatní píše LLM.",
         f"  Datum: {date.today().isoformat()}",
         "  Zdroje (sha256):",
@@ -306,7 +307,7 @@ def check_sources(text: str) -> list[str]:
 
 
 if __name__ == "__main__":
-    path = Path(sys.argv[1] if len(sys.argv) > 1 else "docs_for_agents/style_guide.md")
+    path = Path(sys.argv[1]) if len(sys.argv) > 1 else project_path("docs_for_agents/style_guide.md")
     content = path.read_text(encoding="utf-8")
     found = validate(content) + check_sources(content)
     for problem in found:

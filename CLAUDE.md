@@ -12,8 +12,12 @@ Starý název „Havi Notes“ se už nepoužívá.
 - `_quarto.yml` – seznam kapitol (`book.chapters`) a téma (`hag_custom.scss`).
 - `01-pravdepodobnost/`, `02-statistika/` – kapitoly knihy (`*.qmd`).
 - `_drafts/` – pracovní místo pro rozpracované a vygenerované texty (Quarto složky začínající `_` nerenderuje).
-- `crew_agents.py`, `crew/`, `chapters.py` – generátor kapitol (CrewAI + Claude, model v `crew/config.py`).
-  Běží v `.venv` (`.venv\Scripts\python.exe`); kontrola style guide bez API: `.venv\Scripts\python.exe -m crew.style_guide`.
+- `main.py`, `crew/`, `chapters.py` – generátor kapitol (CrewAI + Claude, model v `crew/config.py`).
+  Běží v `.venv`, interpreter se volá přímo (bez aktivace): `.venv\Scripts\python.exe main.py <příkaz>`.
+  Příkazy: `style [--force]`, `chapter [--index N] [--force]`, `audit [--force]`. Bez `--force` zůstává zámek
+  (existující soubor se nepřepíše), s `--force` se program zeptá na potvrzení. Cesty se skládají přes
+  `crew/paths.py` (PROJECT_ROOT), takže příkazy fungují z libovolného adresáře.
+  Kontrola style guide bez API: `.venv\Scripts\python.exe -m crew.style_guide`.
 - `docs_for_agents/` – podklady pro agenty (`style_guide.md`, `audit_report.md`, jednorázová zadání).
 
 ### Pravidla
