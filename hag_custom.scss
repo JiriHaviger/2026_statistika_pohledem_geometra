@@ -107,6 +107,37 @@ mjx-container[display="true"] { overflow-x: auto; overflow-y: hidden; max-width:
   label { white-space: normal; }
 }
 
+// Řada tlačítek (Inputs.button) v OJS: tlačítka vedle sebe v barvě primary
+.button-row {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 20px;
+  width: 100%;
+
+  // obaly generované Inputs.button nesmí zabírat celý řádek
+  > div, form {
+    display: inline-flex !important;
+    margin: 0 !important;
+    width: auto !important;
+  }
+
+  button {
+    background-color: $primary !important;
+    color: $jh-bg !important;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.2s;
+
+    &:hover { background-color: darken($primary, 8%) !important; }
+  }
+}
+
 /*-- SCSS: Custom Environments --*/
 
 // Styl pro DEFINICE

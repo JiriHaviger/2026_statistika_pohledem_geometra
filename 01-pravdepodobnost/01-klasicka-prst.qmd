@@ -2,6 +2,8 @@
 title: "Teoretická a experimentální pravděpodobnost"
 ---
 
+Meteorolog oznámí, že zítra bude pršet s pravděpodobností 30 %. Znamená to, že na 30 % území prší, že bude pršet 30 % dne, nebo něco jiného? Slovo „pravděpodobnost“ používáme denně, ale jeho význam je překvapivě jemný. Existují dva základní způsoby, jak ho chápat: z logiky úlohy (klasický přístup) a z pozorovaných dat (experimentální přístup).
+
 ## Klasický školský přístup
 
 Ve školách se pravděpodobnost učí na příkladech házení kostky a řeší se například jaká je pravděpodobnost, že padne sudé číslo. Pokud házíme kostkou, pak může padnout šest hodnot: $\Omega= \{1,2,3,4,5,6\}$, a sudá čísla z toho jsou tři: $A=\{2,4,6\}$. Pravděpodobnost se pak spočítá jako počet příznivých možností děleno počet všech možností
@@ -14,7 +16,7 @@ Ve školách se pravděpodobnost učí na příkladech házení kostky a řeší
 
 $$P(\text{sudé}) = \frac{|A|}{|\Omega|}=\frac{3}{6} = 0.5$$
 
-Takto definované pravděpodobnost je založena na principu **stejně pravděpodobných možných výsledků**. Ale co když výsledky nejsou stejně pravděpodobné, naříklad kdybychom stěny kostky přelepili tak, že strany 1 a 2 by byly modré a stěny 3,4, 5 a 6 červené? Pak pravděpodobnost červené > pravděpodobnost modré! Na základním proincipu to však nic nemění protože máme možnosti $\Omega= \{m,m,c,c,c,c\}$, a pravděpodobnost jedné modré je stále stejná jako jakékoli jiné strany. 
+Takto definované pravděpodobnost je založena na principu [stejně pravděpodobných možných výsledků]{.highlight-term}. Ale co když výsledky nejsou stejně pravděpodobné, naříklad kdybychom stěny kostky přelepili tak, že strany 1 a 2 by byly modré a stěny 3,4, 5 a 6 červené? Pak pravděpodobnost červené > pravděpodobnost modré! Na základním proincipu to však nic nemění protože máme možnosti $\Omega= \{m,m,c,c,c,c\}$, a pravděpodobnost jedné modré je stále stejná jako jakékoli jiné strany. 
 
 Takto pojatá definice pravděpodobnosti byla prokazatelně používána již od 16. století, ale její kodifikovaná verze je připisována [Pierru Laplaceovi (1749-1827)]{.smallcaps}. 
 
@@ -35,6 +37,11 @@ Přidávejte si počet hodů a sledujte, jak se "roztřesená" pozorovaná data 
 
 ```{ojs}
 //| echo: false
+import {C} from "../assets/jhrules.js"
+```
+
+```{ojs}
+//| echo: false
 
 // 1. PROMĚNNÉ PRO STAV
 mutable n = 0;
@@ -42,44 +49,8 @@ mutable heads = 0;
 mutable history = [];
 
 // 2. MODRÁ TLAČÍTKA V JEDNÉ ŘADĚ
+// styl .button-row je v hag_custom.scss
 viewof controls = html`<div class="button-row">
-  <style>
-    /* Hlavní kontejner */
-    .button-row {
-      display: flex !important;
-      flex-direction: row !important;
-      flex-wrap: wrap;
-      gap: 10px;
-      align-items: center;
-      margin-bottom: 20px;
-      width: 100%;
-    }
-
-    /* Klíčová oprava: Zaměření na automaticky generované obaly (divy a formy) */
-    .button-row > div, 
-    .button-row form {
-      display: inline-flex !important; /* Vynutí, aby obal nebyl na celý řádek */
-      margin: 0 !important;
-      width: auto !important; /* Zruší případnou 100% šířku */
-    }
-
-    /* Samotná tlačítka */
-    .button-row button {
-      background-color: steelblue !important;
-      color: white !important;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-weight: 500;
-      transition: background-color 0.2s;
-    }
-
-    .button-row button:hover {
-      background-color: #357ab0 !important;
-    }
-  </style>
-
   ${Inputs.button("🗑️ Reset", {value: null})}
   ${Inputs.button("+1 hod", {value: null})}
   ${Inputs.button("+10 hodů", {value: null})}
@@ -125,11 +96,11 @@ Plot.plot({
   x: { label: "Počet pokusů (n)", grid: true },
   marks: [
     Plot.rectY([{y1: 0.5 - epsilon, y2: 0.5 + epsilon}], {
-      y1: "y1", y2: "y2", fill: "green", fillOpacity: 0.1
+      y1: "y1", y2: "y2", fill: C.primary, fillOpacity: 0.1
     }),
-    Plot.ruleY([0.5], {stroke: "red", strokeWidth: 2}),
-    Plot.line(history, {x: "n", y: "freq", stroke: "#0085CC", strokeWidth: 2}),
-    Plot.dot(history.slice(-1), {x: "n", y: "freq", fill: "#0085CC", r: 4}),
+    Plot.ruleY([0.5], {stroke: C.accent, strokeWidth: 2}),
+    Plot.line(history, {x: "n", y: "freq", stroke: C.primary, strokeWidth: 2}),
+    Plot.dot(history.slice(-1), {x: "n", y: "freq", fill: C.primary, r: 4}),
     Plot.text(history.slice(-1), {x: "n", y: "freq", text: d => "n=" + d.n, dy: -15, fontWeight: "bold"})
   ]
 })
@@ -153,7 +124,7 @@ Bernoulli tento princip ilustroval na modelu urny: představte si nádobu s fixn
 
 
 ## Bernouli vs Laplace - dva přístupy k pravděpodobnosti 
-Rozlišujeme dva hlavní způsoby, jak nahlížet na pravděpodobnost výsledku. Zatímco klasický přístup spoléhá na logiku, experimentální přístup vychází z pozorovaných dat. Experimentální přístup získává pravděpodobnost až po experimentech (házíme kostkou abychom zjistili, s jakou pravděpodobností padá šestka), pro což se využívá latinského příslovce  **a posteriori**, poté. Klasický přístup vypočítává pravděpodobnost nezávisle na experimentu, někdy také před experimentem (ověřujem, že kostka není falešná: nejprve vypočteme očekávanou pravděpodobnost a poté házíme kostkou dostatečně dlouho a relativní četnost porovnáváme s očekávanou hodnotou). pro což se používá latinského spojení **a priori**, předem. 
+Rozlišujeme dva hlavní způsoby, jak nahlížet na pravděpodobnost výsledku. Zatímco klasický přístup spoléhá na logiku, experimentální přístup vychází z pozorovaných dat. Experimentální přístup získává pravděpodobnost až po experimentech (házíme kostkou abychom zjistili, s jakou pravděpodobností padá šestka), pro což se využívá latinského příslovce  [a posteriori]{.highlight-term}, poté. Klasický přístup vypočítává pravděpodobnost nezávisle na experimentu, někdy také před experimentem (ověřujem, že kostka není falešná: nejprve vypočteme očekávanou pravděpodobnost a poté házíme kostkou dostatečně dlouho a relativní četnost porovnáváme s očekávanou hodnotou). pro což se používá latinského spojení [a priori]{.highlight-term}, předem. 
 
 | Název| Logika | Vzorec | Klíčová postava |
 |:---|:---:|:---|:---|

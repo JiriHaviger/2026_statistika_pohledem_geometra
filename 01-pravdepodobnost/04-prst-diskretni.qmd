@@ -27,12 +27,12 @@ Tohle je distribuce pro výsledek jednoho pokusu,  co když jich ale máme více
 
 Na pořadí pacientů nám nezáleží, ale mění se pravděpodobnosti. Například pro situaci tří pacientů, kdy jsou úspěšní všichni, existuje jediná možnost: $(+++)$. Pokud jsou ale úspěšní pouze dva, zahrnuje to tři možnosti: $(++-), (+-+), (-++)$. 
 
-Protože úspěšnost pacienta nezávisí na ostatních, mluvíme o **nezávislých jevech** a využijeme pravidla o součinu a součtu:
+Protože úspěšnost pacienta nezávisí na ostatních, mluvíme o [nezávislých jevech]{.highlight-term} a využijeme pravidla o součinu a součtu:
 $P(+++) = P(+) \cdot P(+) \cdot P(+)$, 
 ale pro dva úspěchy:
 $P(\text{2 úspěchy}) = P(++-) + P(+-+) + P(-++) = 3 \cdot P(+)^2 \cdot P(-)^1$.
 
-Konstantu $3$ z předchozího výpočtu můžeme zobecnit pomocí binomického čísla jako počet možností, jak z $n$ prvků vybrat $k$ úspěchů, tedy $\binom{n}{k}$, v našem případě $\binom{3}{2} = 3$. Tato situace je typickým příkladem diskrétní distribucew, konkrétněji **binomické distribuce**. 
+Konstantu $3$ z předchozího výpočtu můžeme zobecnit pomocí binomického čísla jako počet možností, jak z $n$ prvků vybrat $k$ úspěchů, tedy $\binom{n}{k}$, v našem případě $\binom{3}{2} = 3$. Tato situace je typickým příkladem diskrétní distribucew, konkrétněji [binomické distribuce]{.highlight-term}. 
 
 ## Binomické rozdělní 
 
@@ -52,6 +52,11 @@ Abychom mohli mluvit o binomickém rozdělení, musí být splněno:
 $$p(x) = \binom{n}{x} \cdot \pi^x \cdot (1-\pi)^{n-x}$$
 :::
 
+
+```{ojs}
+//| echo: false
+import {C} from "../assets/jhrules.js"
+```
 
 ```{ojs}
 import { Inputs } from "@observablehq/inputs"
@@ -80,7 +85,7 @@ Plot.plot({
   marks: [
     Plot.barY(
       Array.from({length: n + 1}, (_, k) => ({k, y: pmf(k, n, p)})),
-      {x: "k", y: "y", fill: "steelblue"}
+      {x: "k", y: "y", fill: C.primary}
     ),
     Plot.ruleY([0])
   ],
@@ -91,7 +96,7 @@ Plot.plot({
 
 
 
-Fuknce, kterou jsem takto zavedli se korektně označuje **pravdpodobnostní funkce** (**probability mass function**, **pmf**). Matematické podrobnosti o binomickém rozdělední viz  @wikipedia-binomial.  
+Fuknce, kterou jsem takto zavedli se korektně označuje [pravdpodobnostní funkce]{.highlight-term} (**probability mass function**, **pmf**). Matematické podrobnosti o binomickém rozdělední viz  @wikipedia-binomial.  
 
 
 Binomické rozdělení patří do skupiny **diskrétních pravděpodobnostních rozdělení**. To znamená, že náhodná veličina v těchto případech nabývá pouze jasně oddělených, spočetných hodnot (typicky celých čísel $0, 1, 2, \dots$). Kromě binomického rozdělení se v praxi často setkáváme s dalšími typy, které modelují odlišné situace, několik jich zde uvedeme:
@@ -122,7 +127,7 @@ Plot.plot({
     Plot.barY(Array.from({length: 20}, (_, i) => {
       const k = i + 1;
       return { k, y: Math.pow(1 - p_geom, k - 1) * p_geom };
-    }), {x: "k", y: "y", fill: "steelblue"}),
+    }), {x: "k", y: "y", fill: C.primary}),
     Plot.ruleY([0])
   ]
 })
@@ -168,7 +173,7 @@ Plot.plot({
     Plot.barY(Array.from({length: Math.min(n_hg, M_hg) + 1}, (_, k) => ({
       k, 
       y: (combinations(M_hg, k) * combinations(N_hg - M_hg, n_hg - k)) / combinations(N_hg, n_hg)
-    })), {x: "k", y: "y", fill: "steelblue"}),
+    })), {x: "k", y: "y", fill: C.primary}),
     Plot.ruleY([0])
   ]
 })
@@ -221,7 +226,7 @@ Plot.plot({
     Plot.barY(poissonData, {
       x: "k", 
       y: "y", 
-      fill: "steelblue",
+      fill: C.primary,
       tip: true
     }),
     Plot.ruleY([0])

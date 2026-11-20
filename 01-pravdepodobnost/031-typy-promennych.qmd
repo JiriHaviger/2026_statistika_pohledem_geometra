@@ -1,10 +1,12 @@
 # Typy proměnných
 
+V tabulce jsou čtyři sloupce: poštovní směrovací číslo, pořadí v závodě, teplota a počet dětí. U každého se nabízí spočítat průměr. U počtu dětí i teploty to dává smysl, u pořadí jen s opatrností a u PSČ je to nesmysl, přestože jde o čísla. Rozhoduje totiž to, co čísla znamenají, ne jak vypadají.
+
 Než začneme popisovat, s jakou pravděpodobností veličina nabývá svých hodnot, musíme se shodnout na tom, **jakého druhu ty hodnoty jsou**. Od toho se odvíjí, co s nimi smíme počítat a jak je správně nakreslit.
 
 ## Od kategorií k číslům
 
-Náhodný pokus končí nějakým výsledkem: padne líc, vytáhneme modrou kuličku, zákazník je spokojený. Takové výsledky jsou často slova, nikoli čísla. **Náhodná veličina** $X$ je pravidlo, které každému výsledku pokusu přiřadí číslo:
+Náhodný pokus končí nějakým výsledkem: padne líc, vytáhneme modrou kuličku, zákazník je spokojený. Takové výsledky jsou často slova, nikoli čísla. [Náhodná veličina]{.highlight-term} $X$ je pravidlo, které každému výsledku pokusu přiřadí číslo:
 
 $$X:\ \Omega \to \mathbb{R}.$$
 
@@ -12,18 +14,18 @@ Díky tomu můžeme výsledky sčítat, průměrovat a kreslit na osu $x$. Při�
 
 ## Čtyři základní typy
 
-**Nominální proměnná** pouze pojmenovává. Příklady jsou krevní skupina, kraj bydliště nebo pohlaví. Pořadí kategorií je libovolné: když je prohodíme, informace zůstane stejná. Zvláštním případem je **dichotomická** (binární) proměnná, která má jen dvě hodnoty (úspěch/neúspěch, ano/ne). Jakmile jim přiřadíme čísla $1$ a $0$, získáme veličinu, kterou známe z Bernoulliho pokusu: $P(X=1)=\pi$, $P(X=0)=1-\pi$. Je to nejjednodušší možné rozdělení a stavební kámen mnoha dalších.
+[Nominální proměnná]{.highlight-term} pouze pojmenovává. Příklady jsou krevní skupina, kraj bydliště nebo pohlaví. Pořadí kategorií je libovolné: když je prohodíme, informace zůstane stejná. Zvláštním případem je [dichotomická]{.highlight-term} (binární) proměnná, která má jen dvě hodnoty (úspěch/neúspěch, ano/ne). Jakmile jim přiřadíme čísla $1$ a $0$, získáme veličinu, kterou známe z Bernoulliho pokusu: $P(X=1)=\pi$, $P(X=0)=1-\pi$. Je to nejjednodušší možné rozdělení a stavební kámen mnoha dalších.
 
-**Ordinální proměnná** má kategorie s jasným pořadím, ale **neznámými rozestupy**. Příklady jsou známka ve škole, spokojenost (nízká, střední, vysoká) nebo pořadí v závodě. Víme, že druhý doběhl před třetím, ale nevíme, o kolik.
+[Ordinální proměnná]{.highlight-term} má kategorie s jasným pořadím, ale **neznámými rozestupy**. Příklady jsou známka ve škole, spokojenost (nízká, střední, vysoká) nebo pořadí v závodě. Víme, že druhý doběhl před třetím, ale nevíme, o kolik.
 
-**Kardinální diskrétní proměnná** nabývá izolovaných číselných hodnot a rozestupy mezi nimi mají smysl. Příklady jsou počet dětí v rodině nebo počet šestek v deseti hodech. Mezi jedním a dvěma dětmi nic nenajdeme.
+[Kardinální diskrétní proměnná]{.highlight-term} nabývá izolovaných číselných hodnot a rozestupy mezi nimi mají smysl. Příklady jsou počet dětí v rodině nebo počet šestek v deseti hodech. Mezi jedním a dvěma dětmi nic nenajdeme.
 
-**Kardinální spojitá proměnná** může nabývat jakékoli hodnoty v intervalu, například výška, doba čekání nebo teplota. Mezi libovolnými dvěma hodnotami leží nekonečně mnoho dalších. Spojitým veličinám se věnuje kapitola o spojitém rozdělení.
+[Kardinální spojitá proměnná]{.highlight-term} může nabývat jakékoli hodnoty v intervalu, například výška, doba čekání nebo teplota. Mezi libovolnými dvěma hodnotami leží nekonečně mnoho dalších. Spojitým veličinám se věnuje kapitola o spojitém rozdělení.
 
 Nominální a ordinální proměnné jsou **kvalitativní** (kategoriální). Obě kardinální jsou **kvantitativní**, což se také označuje jako **metrické** nebo **škála**. Kvantitativní proměnné se dále dělí podle toho, zda mají smysluplnou nulu:
 
-- **intervalová** proměnná nemá pevnou nulu, mají smysl rozdíly, ale ne podíly. Příkladem je teplota ve stupních Celsia: $20\,^\circ\mathrm{C}$ není „dvakrát tepleji“ než $10\,^\circ\mathrm{C}$.
-- **poměrová** proměnná má nulu danou věcně (věk, příjem, hmotnost, rychlost), takže smysl mají i podíly: $20$ kg je dvakrát víc než $10$ kg.
+- [intervalová]{.highlight-term} proměnná nemá pevnou nulu, mají smysl rozdíly, ale ne podíly. Příkladem je teplota ve stupních Celsia: $20\,^\circ\mathrm{C}$ není „dvakrát tepleji“ než $10\,^\circ\mathrm{C}$.
+- [poměrová]{.highlight-term} proměnná má nulu danou věcně (věk, příjem, hmotnost, rychlost), takže smysl mají i podíly: $20$ kg je dvakrát víc než $10$ kg.
 
 ## Co s jednotlivými typy smíme
 
@@ -182,3 +184,16 @@ Určete typ proměnné.
 ## Typ proměnné a pravděpodobnostní rozdělení
 
 Typ proměnné říká, jakého druhu hodnoty veličina nabývá. Otázku, **s jakou pravděpodobností** je nabývá, a jak tu informaci zapsat přehledně a úplně, řeší pravděpodobnostní rozdělení (viz [kapitola o rozdělení pravděpodobnosti diskrétní veličiny](032-rozdeleni-diskretni-veliciny.qmd)).
+
+## Klíčové poznatky {.unnumbered}
+
+|  |  |
+|:---|:---|
+| náhodná veličina | pravidlo $X:\Omega\to\mathbb{R}$, které výsledkům pokusu přiřadí čísla |
+| nominální | pouze pojmenování; četnost, relativní četnost, modus |
+| ordinální | pořadí; navíc medián a percentily |
+| kardinální intervalová | smysl mají rozdíly (bez pevné nuly); navíc průměr a rozptyl |
+| kardinální poměrová | smysl mají i podíly (pevná nula); navíc geometrický průměr |
+| diskrétní a spojitá | izolované hodnoty, nebo libovolná hodnota v intervalu |
+| dichotomická | dvě hodnoty (0 a 1), základ Bernoulliho pokusu |
+| graf podle typu | nominální a ordinální sloupce, kardinální diskrétní sloupce nebo body |

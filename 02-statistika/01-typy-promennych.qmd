@@ -1,18 +1,18 @@
 # Deskriptivní statistiky
 
-Představte si, že máte seznam studentů a u každého z nich výsledek testu ze statistiky (údaje můžeme mít uložené například jako sloupec hodnot v excelu). **Deskriptivní statistiky** jsou čísla, která souhrně charakterizují **velikost** hodnot a jejich **rozložení** nějaké **proměnné**, v našem příkladu výsledků testu. Nejprve si pojďme ujasnit co se rozumí pod pojmem proměnná a jaké typy proměnných máme.
+Představte si, že máte seznam studentů a u každého z nich výsledek testu ze statistiky (údaje můžeme mít uložené například jako sloupec hodnot v excelu). [Deskriptivní statistiky]{.highlight-term} jsou čísla, která souhrně charakterizují **velikost** hodnot a jejich **rozložení** nějaké **proměnné**, v našem příkladu výsledků testu. Nejprve si pojďme ujasnit co se rozumí pod pojmem proměnná a jaké typy proměnných máme.
 
 
 ## Proměnná 
 Proměnná je jakákoli **měřená** (zaznamenávaná) **veličina**, která **může nabývat různých hodnot**. Například čas průjezdu kola v motocyklové soutěži, počet nehod v kraji za měsíc, výdaje domácností na stravu, spokojenost s výukou, barva očí, pohlaví pacienta, ... Hodnoty kterých tyto veličiny mohou nabývat jsou různé a podle toho s nimi pak můžeme pracovat. Proto se proměnné rozdělují na následující typu, kterým se také říká **úroveň měření**. Stejné typy proměnných z pohledu pravděpodobnosti, tedy jako hodnoty náhodné veličiny, najdete v kapitole [Typy proměnných](../01-pravdepodobnost/031-typy-promennych.qmd).
 
-**Nominální proměnná**: objekty jen pojmenováváme. Např. $\Omega = \{\text{muž, žena}\}$ nebo $\Omega = \{Královéhradecký, Pardubický, ...\}$ jako kraj rodiště studentů.Matematicky můžeme kategorie popsat pouze četností (např kolik je žen) a relativní četností (jaké je procentuální zastoupení žen).  Patří mezi **kvalitativní** proměnné, speciálním příadem je **dichotomická**, která má jen dva možné výsledky. 
+[Nominální proměnná]{.highlight-term}: objekty jen pojmenováváme. Např. $\Omega = \{\text{muž, žena}\}$ nebo $\Omega = \{Královéhradecký, Pardubický, ...\}$ jako kraj rodiště studentů.Matematicky můžeme kategorie popsat pouze četností (např kolik je žen) a relativní četností (jaké je procentuální zastoupení žen).  Patří mezi **kvalitativní** proměnné, speciálním příadem je **dichotomická**, která má jen dva možné výsledky. 
 
-**Ordinální proměnná**: Kategorie už mají jasné pořadí. Např. známky ve škole, pocity spokojenosti (nízká, střední, vysoká) nebo pořadí v závodu. Zde už má smysl mluvit o tom, že hodnoty rostou a na ose x je uspořádat od nejmenší po největší. Patří také mezi **kvalitativní** proměnné. 
+[Ordinální proměnná]{.highlight-term}: Kategorie už mají jasné pořadí. Např. známky ve škole, pocity spokojenosti (nízká, střední, vysoká) nebo pořadí v závodu. Zde už má smysl mluvit o tom, že hodnoty rostou a na ose x je uspořádat od nejmenší po největší. Patří také mezi **kvalitativní** proměnné. 
 
-**Kardinální diskrétní proměnná**: Na ose $x$ jsou skutečná čísla (počet dětí, počet padlých šestek). Rozestupy mezi nimi jsou matematicky definované. Stále jsou to ale izolované body – mezi 1 a 2 dětmi neexistuje žádná hodnota. 
+[Kardinální diskrétní proměnná]{.highlight-term}: Na ose $x$ jsou skutečná čísla (počet dětí, počet padlých šestek). Rozestupy mezi nimi jsou matematicky definované. Stále jsou to ale izolované body – mezi 1 a 2 dětmi neexistuje žádná hodnota. 
 
-**Kardinální spojitá proměnná**: Body na ose $x$ se k sobě přiblíží natolik, že mezi jakýmikoliv dvěma hodnotami vždy najdeme nekonečně mnoho dalších (viz kapitola o spojitém rozdělení).
+[Kardinální spojitá proměnná]{.highlight-term}: Body na ose $x$ se k sobě přiblíží natolik, že mezi jakýmikoliv dvěma hodnotami vždy najdeme nekonečně mnoho dalších (viz kapitola o spojitém rozdělení).
 
 Obě kardinální porměnné patří mezi **kvantitativní**, alternativně se pro ně používají i označení **metrická** nebo **škála**. Někdy se dělí na **intervalové**, které nemají pevnou nulu (teplota ve stuních celsia, datum) a **poměrové**  které mají nulu definovanou (věk, plat, hmotnost, rychlost, ...). 
 
@@ -20,10 +20,15 @@ Obě kardinální porměnné patří mezi **kvantitativní**, alternativně se p
 
 Když máme nějakou proměnnou, můžeme provádět její měření (nebo zaznamenávat její hodnoty), kterých však může mít mnoho. Proto je vhodné těchto "mnoho" hodnot nějak popsat a k tomu slouží popisná neboli **deskriptivní statistika**. Jaké nástroje nám tedy nabízí? V zásadě dvoje: 
 
-- **míry polohy** určují **kde** na ose jsou data umístěna.
-- **míry variability** ukazují **jak** jsou data nahuštěna nebo naopak rozprostřena. 
+- [míry polohy]{.highlight-term} určují **kde** na ose jsou data umístěna.
+- [míry variability]{.highlight-term} ukazují **jak** jsou data nahuštěna nebo naopak rozprostřena. 
 
 V grafu jsou původní data, data posunutá (+5) a data rozptýlená (.3). U posunu se jen změnila poloha těch dat ale vzájemné rozestupy zůstaly stejné. U vynásobení se změnily rozestupy i celkový rozsah.
+
+```{ojs}
+//| echo: false
+import {C} from "../assets/jhrules.js"
+```
 
 ```{ojs}
 //| echo: false
@@ -74,14 +79,14 @@ Plot.plot({
   },  
   marks: [
     // Vodorovné linky pro každou skupinu
-    Plot.ruleY(["Data", "Změna polohy", "Změna variability"], {stroke: "lightgrey"}),
+    Plot.ruleY(["Data", "Změna polohy", "Změna variability"], {stroke: C.contextLight}),
     // Úsečky mezi min a max hodnotou
 Plot.link(minMaxLinesArray, {
       x1: "x1", 
       x2: "x2", 
       y1: "skupina", 
       y2: "skupina", 
-      stroke: "steelblue", 
+      stroke: C.primary, 
       strokeWidth: 4,
       strokeOpacity: 0.6 // trošku průhlednosti, aby nezanikly tečky
     }),
@@ -89,8 +94,8 @@ Plot.link(minMaxLinesArray, {
     Plot.dot(dataProGraf, {
       x: "hodnota",
       y: "skupina",
-      fill: d => d.isMinMax ? "steelblue" : "gray", // Podmíněná barva
-      stroke: "white",
+      fill: d => d.isMinMax ? C.primary : C.context, // Podmíněná barva
+      stroke: C.bg,
       r: 6
     })
   ]
@@ -112,7 +117,7 @@ Můžeme tedy říci, že průměrná domácnost má $4.1$ motorových vozidel
 
 ## Míra založená na četnostech
 
-Mírou polohy založenou na četnostech je **Modus (mod)**, což je hodnota, která se v datovém souboru vyskytuje nejčastěji. V našem případě je to hodnota 2, která se vyskytuje třikrát. 
+Mírou polohy založenou na četnostech je [Modus (mod)]{.highlight-term}, což je hodnota, která se v datovém souboru vyskytuje nejčastěji. V našem případě je to hodnota 2, která se vyskytuje třikrát. 
 
 $\{1, \mathbf{ 2, 2, 2}, 3, 3, 4, 5, 8, 11\}$, tedy $mds=2$. 
 
@@ -139,7 +144,7 @@ Předchozí data můžeme velmi snadno vizualizovat pomocí sloupcovho grafu
   Plot.plot({
     marks: [
       // rectY automaticky spočítá četnosti (binning není nutný pro diskrétní čísla)
-      Plot.rectY(data01, Plot.binX({y: "count"}, {thresholds: d3.range(0.5, 12.5, 1), fill: "steelblue"})),
+      Plot.rectY(data01, Plot.binX({y: "count"}, {thresholds: d3.range(0.5, 12.5, 1), fill: C.primary})),
       // Přidání pravítka na nule pro lepší čitelnost
       Plot.ruleY([0])
     ],
@@ -212,7 +217,7 @@ Plot.plot({
     Plot.barY(getLetterCounts(texts[selection]), {
       x: "letter", 
       y: "count", 
-      fill: "steelblue"
+      fill: C.primary
     }),
     Plot.ruleY([0])
   ]
@@ -251,7 +256,7 @@ Plot.plot({
   grid: true,
   marks: [
     // Histogram (Density)
-    Plot.rectY(data02, Plot.binX({y: "count"}, {x: "val", thresholds: binCount, fill: "steelblue", fillOpacity: 0.7})),
+    Plot.rectY(data02, Plot.binX({y: "count"}, {x: "val", thresholds: binCount, fill: C.primary, fillOpacity: 0.7})),
     
   // dodgeY vytvoří "mrak" bodů, anchor: "bottom" je drží u spodní hrany
     Plot.dot(data02, Plot.dodgeY({
@@ -259,7 +264,7 @@ Plot.plot({
       anchor: "bottom", 
       padding: 0.5, // Tímto zvětšuješ/zmenšuješ rozestupy mezi body
       r: 2, 
-      fill: "black",
+      fill: C.text,
       fillOpacity: 0.4
     })),
     
@@ -279,7 +284,7 @@ Pro málo kategorií nám graf příliš neřekne, pro příliš mnoho je pak ne
 
 ## Střední hodnota založená na uspořádání
 
-Mírou polohy založenou na uspořádání je **Medián (mdn)**, prostřední hodnota v uspořádaném datovém souboru, případně polovina z dvou prostředních hodnot, pokud máme sudý počet dat. V našem případě je medián mezi 3 a 3, $\{1, 2, 2, 2, \mathbf{ 3, 3}, 4, 5, 8, 11\}$ tedy $\text{mdn} = \frac{3 + 3}{2} = 3$.
+Mírou polohy založenou na uspořádání je [Medián (mdn)]{.highlight-term}, prostřední hodnota v uspořádaném datovém souboru, případně polovina z dvou prostředních hodnot, pokud máme sudý počet dat. V našem případě je medián mezi 3 a 3, $\{1, 2, 2, 2, \mathbf{ 3, 3}, 4, 5, 8, 11\}$ tedy $\text{mdn} = \frac{3 + 3}{2} = 3$.
 
 Můžeme tedy říci, že 50 % domácností má tři nebo méně aut. 
 
@@ -296,9 +301,9 @@ data = [1, 2, 2, 2, 3, 3, 4, 5, 8, 11].map(d => ({ hodnota: d }))
 
 // Statistiky pro čáry a legendu
 stats = [
-  { label: "Modus", val: 2, color: "green", dash: "2,2", yOffset: 15 },
-  { label: "Medián", val: 3, color: "blue", dash: "2.2", yOffset: 35 },
-  { label: "Průměr", val: 4.1, color: "red", dash: "2.2", yOffset: 55 }
+  { label: "Modus", val: 2, color: C.context, dash: "2,2", yOffset: 15 },
+  { label: "Medián", val: 3, color: C.primary, dash: "2.2", yOffset: 35 },
+  { label: "Průměr", val: 4.1, color: C.accent, dash: "2.2", yOffset: 55 }
 ]
 
 Plot.plot({
@@ -312,7 +317,7 @@ Plot.plot({
         domain: [0, 3] }, 
   marks: [
     // Tečky nad sebou
-    Plot.dot(data, Plot.stackY({ x: "hodnota", fill: "gray", stroke: "white", r: 6 })),
+    Plot.dot(data, Plot.stackY({ x: "hodnota", fill: C.context, stroke: C.bg, r: 6 })),
 
     // Svislé čáry na pozicích statistik
     stats.map(s => Plot.ruleX([s.val], { stroke: s.color, strokeWidth: 1, strokeDasharray: s.dash })),
@@ -336,7 +341,7 @@ Plot.plot({
 
 ## Kvantily - další míry založené na uspořádání {.unnumbered .unlisted}
 
-Míra polohy však nemusí kazovat na střed jako **medián (mdn)**, ale také na krajní hodnoty:  **minimum (min)**, **maximum (max)**. Pokud chceme podrobnější dělení našich dat, pak můžeme využít i další kvantily. **Kvantil** je hodnota, "pod kterou" leží určité procento dat (přesněji jsou menší nebo stejné). Důležité kvantily mají svá spěcifická označení: **medián** pro polovinu, **kvartily** pro čtvrtiny, **decily** pro desetiny a **percentily** pro setiny. Proto platí že např medián = druhý kvartil = pátý decil = padesátý percentil. Postup výpočtu se může lišit, my uvedeme ten nejvíce používaný, který odpovídá funkci PERCENTIL.INC v MS EXCEL. Kvantil $p$ hledáme **v setříděném souboru** na pozici **$k=1+(n-1)\cdot p$** a to buď přímo, pokud $k$ je celé, nebo interpolací, pokud $k$ celé není. V druhém příapdě  číslo $k$ rozdělíme na celou část $c$ (index souseda vlevo) a desetinnou část $d$ (poměrná vzdálenost k sousedovi vpravo). Percentil je pak hodnota na spojnici těchto dvou sousedů: **$x_{c} + (x_{c+1}-x_c) \cdot d$**. Ukažme to na příkladu našich dat.
+Míra polohy však nemusí kazovat na střed jako **medián (mdn)**, ale také na krajní hodnoty:  **minimum (min)**, **maximum (max)**. Pokud chceme podrobnější dělení našich dat, pak můžeme využít i další kvantily. [Kvantil]{.highlight-term} je hodnota, "pod kterou" leží určité procento dat (přesněji jsou menší nebo stejné). Důležité kvantily mají svá spěcifická označení: **medián** pro polovinu, **kvartily** pro čtvrtiny, **decily** pro desetiny a **percentily** pro setiny. Proto platí že např medián = druhý kvartil = pátý decil = padesátý percentil. Postup výpočtu se může lišit, my uvedeme ten nejvíce používaný, který odpovídá funkci PERCENTIL.INC v MS EXCEL. Kvantil $p$ hledáme **v setříděném souboru** na pozici **$k=1+(n-1)\cdot p$** a to buď přímo, pokud $k$ je celé, nebo interpolací, pokud $k$ celé není. V druhém příapdě  číslo $k$ rozdělíme na celou část $c$ (index souseda vlevo) a desetinnou část $d$ (poměrná vzdálenost k sousedovi vpravo). Percentil je pak hodnota na spojnici těchto dvou sousedů: **$x_{c} + (x_{c+1}-x_c) \cdot d$**. Ukažme to na příkladu našich dat.
 
 ::: {.callout-note collapse="true"}
 # Určete první kvartil a osmý decil {.unnumbered .unlisted}
@@ -374,29 +379,29 @@ Plot.plot({
   y: { domain: [6.8, 9.2], label: "Pořadí (index) ⭡", ticks: [7, 8, 8.2, 9] },
   marks: [
     // Lomená čára propojující body x7 -> x8 -> x9
-    Plot.line(body_data, {x: "x", y: "y", stroke: "#ccc", strokeWidth: 1}),
+    Plot.line(body_data, {x: "x", y: "y", stroke: C.contextLight, strokeWidth: 1}),
 
     // Svislá pomocná čára (průmět na osu X)
-    Plot.ruleX([target_x], {y1: 6.8, y2: target_y, stroke: "darkred", strokeDasharray: "4,4" }),
+    Plot.ruleX([target_x], {y1: 6.8, y2: target_y, stroke: C.accent, strokeDasharray: "4,4" }),
     
     // Vodorovná pomocná čára (zadání indexu 8.2)
-    Plot.ruleY([target_y], {x1: 3.5, x2: target_x, stroke: "grey", strokeDasharray: "4,4"}),
+    Plot.ruleY([target_y], {x1: 3.5, x2: target_x, stroke: C.context, strokeDasharray: "4,4"}),
     
     // Body x7, x8 a x9 v grafu (v prostoru)
-    Plot.dot(body_data, {x: "x", y: "y", r: 5, fill: "gray", stroke: "white"}),
+    Plot.dot(body_data, {x: "x", y: "y", r: 5, fill: C.context, stroke: C.bg}),
     Plot.text(body_data, {x: "x", y: "y", text: "label", dy: -15, fontWeight: "bold"}),
 
     // Cílový bod (8. decil) na spojnici
-    Plot.dot([{x: target_x, y: target_y}], {x: "x", y: "y", r: 5, fill: "darkred"}),
+    Plot.dot([{x: target_x, y: target_y}], {x: "x", y: "y", r: 5, fill: C.accent}),
     
     // Původní data na ose x (šedá/modrá)
-    Plot.dot(body_data, {x: "x", y: 6.8, r: 8, fill: "steelblue", stroke: "white" }),
+    Plot.dot(body_data, {x: "x", y: 6.8, r: 8, fill: C.primary, stroke: C.bg }),
     
     // Zvýraznění výsledné hodnoty přímo na ose X (červená tečka a číslo)
-    Plot.dot( [{x: target_x, y: 6.8}], {x: "x", y: "y", r: 8, fill: "darkred", stroke: "white", strokeWidth: 2 }),
+    Plot.dot( [{x: target_x, y: 6.8}], {x: "x", y: "y", r: 8, fill: C.accent, stroke: C.bg, strokeWidth: 2 }),
     // Popisek u cílového bodu na spojnici 
-    Plot.text([{x: target_x, y: 6.8}], {x: "x", y: "y", text: ["osmý decil"], dy: 15, fontWeight: "bold", fill: "darkred"}),
-    // Plot.text([{x: target_x, y: 6.8}], { text: [target_x.toFixed(1)], fill: "darkred", fontWeight: "bold", dy: 20, fontSize: 14 })
+    Plot.text([{x: target_x, y: 6.8}], {x: "x", y: "y", text: ["osmý decil"], dy: 15, fontWeight: "bold", fill: C.accent}),
+    // Plot.text([{x: target_x, y: 6.8}], { text: [target_x.toFixed(1)], fill: C.accent, fontWeight: "bold", dy: 20, fontSize: 14 })
   ]
 })
 ```
@@ -439,14 +444,14 @@ Interpretačně nám odpovídá na otázky například *jaký plat má spodních
       Plot.line(points, {
         x: d => d[0], 
         y: d => d[1], 
-        stroke: "steelblue", 
+        stroke: C.primary, 
         strokeWidth: 3
       }),
       // Samotné body
       Plot.dot(points, {
         x: d => d[0], 
         y: d => d[1], 
-        fill: "steelblue", 
+        fill: C.primary, 
         r: 8
       }),
       // Pravítko na nule
@@ -466,9 +471,9 @@ Doposud jsme se ptali, **kde** leží střed, minimum, čtvrtina, .... Druhou ot
 
 Základní idea vychází z uspořádaného souboru a pořadí jednotivých hodnot.  
 
-**Rozpětí** (*range*), někdy také **variační rozpětí**: rozdíl mezi největší a nejmenš hodnotou, **$range = max-min$**.  
+[Rozpětí]{.highlight-term} (*range*), někdy také **variační rozpětí**: rozdíl mezi největší a nejmenš hodnotou, **$range = max-min$**.  
 
-**Mezikvartilové rozpětí** (*inter-quartile-range, IQR*): rozdíl mezi třetím kvartilem a prvním kvartilem, **$IQR=Q_3-Q_1$**.
+[Mezikvartilové rozpětí]{.highlight-term} (*inter-quartile-range, IQR*): rozdíl mezi třetím kvartilem a prvním kvartilem, **$IQR=Q_3-Q_1$**.
 
 ::: {.callout-note}
 **Range** nám říká, kolik "prostoru" data zabírají. Pozor na to, že rozsah, min a max se nemusí shodovat z rozsahem škály. Například měřené hodnoty mohou mít maximální rozsah 0-20, ale data mohou obsahovat hodnoty 1-11 a tedy min=1 a max=11, range = 10.
@@ -497,7 +502,7 @@ IQR$. Z našich dat
 
 V našich datech tedy nemáme žádné odlehlé hodnoty pod dolní hradbou ale jednu odlehlou hodnoty nad horní hradbou. 
 
-Důležité kvantily a odlehlé hodnoty  se často znázorňují do grafu, který se nazývá **box-plot**: obdélník ukazuje na 1Q, med a 3Q, levý "vous" ukazuje buď minimum, nebo dolní hradbu, pravý "vous" maximum nebo horní hradbu, červenou tečkou je znázorněna odlehlá hodnota. Můžete se setkat s různými variantami, ale tato je nejčastější. 
+Důležité kvantily a odlehlé hodnoty  se často znázorňují do grafu, který se nazývá [box-plot]{.highlight-term}: obdélník ukazuje na 1Q, med a 3Q, levý "vous" ukazuje buď minimum, nebo dolní hradbu, pravý "vous" maximum nebo horní hradbu, červenou tečkou je znázorněna odlehlá hodnota. Můžete se setkat s různými variantami, ale tato je nejčastější. 
 
 ```{ojs}
 //| echo: false
@@ -542,29 +547,29 @@ Plot.plot({
     // Stackované body
     Plot.dot(data_base.map(d => ({x: d})), Plot.stackY({
       x: "x",
-      fill: "steelblue",
-      stroke: "white",
+      fill: C.primary,
+      stroke: C.bg,
       r: 6
     })),
     
     // Boxplot (box)
     Plot.rect([{}], {
       x1: q1, x2: q3, y1: -0.3, y2: 0.3,
-      fill: "lightblue", stroke: "black", fillOpacity: 0.5
+      fill: C.primaryLight, stroke: C.text, fillOpacity: 0.5
     }),
     
     // Medián
-    Plot.ruleX([q2], {y1: -0.3, y2: 0.3, stroke: "black", strokeWidth: 2}),
+    Plot.ruleX([q2], {y1: -0.3, y2: 0.3, stroke: C.text, strokeWidth: 2}),
     
     // Vousy (Linky)
-    Plot.link([{x1: q1, x2: lowerWhisker}], {x1: "x1", x2: "x2", y: 0, stroke: "black"}),
-    Plot.link([{x1: q3, x2: upperWhisker}], {x1: "x1", x2: "x2", y: 0, stroke: "black"}),
+    Plot.link([{x1: q1, x2: lowerWhisker}], {x1: "x1", x2: "x2", y: 0, stroke: C.text}),
+    Plot.link([{x1: q3, x2: upperWhisker}], {x1: "x1", x2: "x2", y: 0, stroke: C.text}),
     
     // Konce vousů
-    Plot.ruleX([lowerWhisker, upperWhisker], {y1: -0.2, y2: 0.2, stroke: "black"}),
+    Plot.ruleX([lowerWhisker, upperWhisker], {y1: -0.2, y2: 0.2, stroke: C.text}),
     
     // Odlehlé hodnoty (zobrazeny červeně)
-    Plot.dot(outliers.map(d => ({x: d})), {x: "x", y: 0, r: 4, fill: "red"})
+    Plot.dot(outliers.map(d => ({x: d})), {x: "x", y: 0, r: 4, fill: C.accent})
   ]
 })
 ```

@@ -1,11 +1,16 @@
 # Momentové statistiky
-Dosud jsem po proměné požadovali aby měla uspořádání, tedy byla alespoň ordinální. To nám umožnilo definovat medián, kvantily a viualizaci rozloření dat pomocí box-plot.  Abychom mohli přejít k aritmetickému průměru a statistikám z něj odvozeným, musíme přejít do vyšší úrovně měření, tedy k proměnným **kardinálním poměrovým**. 
+Dvě firmy mají stejný průměrný plat. V jedné berou všichni zhruba stejně, ve druhé má ředitel plat stonásobně vyšší než ostatní. Samotný průměr tedy o datech řekne jen málo a potřebujeme popsat i to, jak moc se hodnoty rozptylují a jak jsou rozložené. K tomu slouží momentové statistiky: průměr, rozptyl, šikmost a špičatost. Počítají se ze samotných hodnot, nejen z jejich pořadí, proto vyžadují proměnnou alespoň **kardinální** (viz kapitola o typech proměnných). 
 
 ## Momentová míra polohy
 
-Jak již bylo zmíněno, nejznámější statistikou je **(aritmetický) průměr** označovaný jako **$\bar{x}$** nebo **m (mean)**. Jedná se o statistiku momentovou, ale co to vlastně znamená? 
+Nejznámější statistikou je [(aritmetický) průměr]{.highlight-term} označovaný jako **$\bar{x}$** nebo **m (mean)**. Jedná se o statistiku momentovou, ale co to vlastně znamená? 
 
-Slovo **moment** pochází původně z fyziky, kde popisuje situaci na páce - **moment síly je součin hmotnosti $x_i$ a vzdálenosti $d_i$ od bodu otáčení**. Artimetický průměr v této situaci ukazuje na **těžiště**, tedy když páku podepřeme právě v tomto místě, bude v rovnováze. Hmotnost je ve statistice nahrazena relativní četností $p_i$, vzdálenost je nahrazena pojmem **odchylka od průměru** $d_i$. 
+Slovo [moment]{.highlight-term} pochází původně z fyziky, kde popisuje situaci na páce - **moment síly je součin hmotnosti $x_i$ a vzdálenosti $d_i$ od bodu otáčení**. Artimetický průměr v této situaci ukazuje na [těžiště]{.highlight-term}, tedy když páku podepřeme právě v tomto místě, bude v rovnováze. Hmotnost je ve statistice nahrazena relativní četností $p_i$, vzdálenost je nahrazena pojmem **odchylka od průměru** $d_i$. 
+
+```{ojs}
+//| echo: false
+import {C} from "../assets/jhrules.js"
+```
 
 ```{ojs}
 //| echo: false
@@ -21,15 +26,15 @@ Plot.plot({
   y: { axis: null, domain: [0, 4] },
   marks: [
     // Tyč páky
-    Plot.ruleY([0.5], { strokeWidth: 2, stroke: "#333" }),
+    Plot.ruleY([0.5], { strokeWidth: 2, stroke: C.text }),
 
     // Závaží (datové body) naskládané na sebe
     Plot.dot(data_base.map(d => ({x: d})), Plot.stackY({
       x: "x",
       y: 0.3,
       dy: -10,
-      fill: "steelblue",
-      stroke: "white",
+      fill: C.primary,
+      stroke: C.bg,
       r: 6
     })),
 
@@ -40,7 +45,7 @@ Plot.plot({
       symbol: "triangle",
       r: 10,
       rotate: 0, // otočení trojúhelníku, aby vypadal jako podstavec
-      fill: "darkred",
+      fill: C.accent,
       dy: 15
     }),
 
@@ -50,7 +55,7 @@ Plot.plot({
       y: "y",
       text: [`Těžiště (průměr) = ${mean_vypocet.toFixed(1)}`],
       dy: 25,
-      fill: "red",
+      fill: C.accent,
       fontWeight: "bold"
     })
   ]
@@ -79,7 +84,7 @@ Pojďme se podívat na to, jak na lze charakterizovat variabilitu dat vzhledem k
 To že součet odchylek je nulový ukazuje na to, že se opravdu jedná o těžiště: součet odchylek záporných = součet odchylek kladných, žádná strana není zvýhodněna. 
 :::
 
-Abychom získali průměrnou odchylku můžeme buď použít absolutní hodnoty a získat tak hodnotu zvanou ***mean absolute deviance, MAD*** : $MAD=\frac{\sum |x_i-\bar{x}|}{n}$, Nebo spočítat nejprve kvadratické odchylky $(x_i-\bar{x})^2$, určit průměrnou kvadratickou odchylku $\frac{\sum (x_i-\bar{x})^2}{n}$ a poté ji odmocnit. Získáme tím hodnotu které se říká **směrodatná odchylka** a značí se symbolem *sd (standard deviation)* 
+Abychom získali průměrnou odchylku můžeme buď použít absolutní hodnoty a získat tak hodnotu zvanou ***mean absolute deviance, MAD*** : $MAD=\frac{\sum |x_i-\bar{x}|}{n}$, Nebo spočítat nejprve kvadratické odchylky $(x_i-\bar{x})^2$, určit průměrnou kvadratickou odchylku $\frac{\sum (x_i-\bar{x})^2}{n}$ a poté ji odmocnit. Získáme tím hodnotu které se říká [směrodatná odchylka]{.highlight-term} a značí se symbolem *sd (standard deviation)* 
 
 $$ sd=\sqrt{\frac{\sum (x_i-\bar{x})^2}{n}} $$
 
@@ -128,17 +133,17 @@ Plot.plot({
     // VEKTOR jedniček
     Plot.link([{x: pru_static, y: pru_static}], {
       x1: 0, y1: 0, x2: 1, y2: 1, 
-      stroke: "#666", strokeWidth: 2,markerEnd: "arrow"
+      stroke: C.context, strokeWidth: 2,markerEnd: "arrow"
     }),
     Plot.text([{x: pru_static/2, y: pru_static/2}], {
       x: "x", y: "y", text: ["prostor generovaný 1"], 
-      rotate: -45, dy: 15, fill: "#666"
+      rotate: -45, dy: 15, fill: C.context
     }),
     
     // BOD DAT
     Plot.dot([{x: x1_static, y: x2_static}], {
       x: "x", y: "y",
-      fill: "steelblue",
+      fill: C.primary,
       r: 5  // poloměr bodu
     }),
     Plot.text([{x: x1_static, y: x2_static}], {
@@ -147,7 +152,7 @@ Plot.plot({
       text: [`Data X = [${x1_static.toFixed(1)}, ${x2_static.toFixed(1)}]`], 
       dy: 20, dx: -5, 
       fontWeight: "bold",
-      fill: "steelblue"
+      fill: C.primary
     })
   ]
 })
@@ -206,47 +211,47 @@ Plot.plot({
   y: {domain: [0, 10], label: "Osa x₂"},
   marks: [
     // Přímka y = x
-    Plot.line([[0,0], [10,10]], {stroke: "#ccc", strokeDasharray: "4,4"}),
+    Plot.line([[0,0], [10,10]], {stroke: C.contextLight, strokeDasharray: "4,4"}),
     
     // VEKTOR jedniček
     Plot.link([{x: pru_static, y: pru_static}], {
       x1: 0, y1: 0, x2: 1, y2: 1, 
-      stroke: "#666", strokeWidth: 3,markerEnd: "arrow"
+      stroke: C.context, strokeWidth: 3,markerEnd: "arrow"
     }),
     // VEKTOR PRŮMĚRU (Projekce)
-    Plot.link([{x: pru, y: pru}], {x1: 0, y1: 0, x2: "x", y2: "y", stroke: "#666", strokeWidth: 2}),
+    Plot.link([{x: pru, y: pru}], {x1: 0, y1: 0, x2: "x", y2: "y", stroke: C.context, strokeWidth: 2}),
     Plot.text([{x: pru/2, y: pru/2}], {
       x: "x", y: "y", text: ["vektor průměru (x̄.1)"], 
-      rotate: -45, dy: 15, fill: "#666"
+      rotate: -45, dy: 15, fill: C.context
     }),
     
     // VEKTOR ODCHYLEK (Kolmice)
     Plot.link([{x1: x1, y1: x2, x2: pru, y2: pru}], {
       x1: "x1", y1: "y1", x2: "x2", y2: "y2", 
-      stroke: "darkred", strokeWidth: 3, 
+      stroke: C.accent, strokeWidth: 3, 
     }),
     Plot.text([{x: (x1+pru)/2, y: (x2+pru)/2}], {
       x: "x", y: "y", text: ["vektor odchylek (e)"], 
-      rotate: 45, dx: 25, fill: "darkred"
+      rotate: 45, dx: 25, fill: C.accent
     }),    
     
     // Pravý úhel (symbol čtverce)
     Plot.dot([{x: pru, y: pru}], {
-        symbol: "square", r: 6, rotate: 45, fill: "none", stroke: "black", 
+        symbol: "square", r: 6, rotate: 45, fill: "none", stroke: C.text, 
         dx: (x1 > x2 ? -4 : 4), dy: (x1 > x2 ? 4 : -4)
     }),
 
     // VEKTOR DAT (Přepona)
-    Plot.link([{x: x1, y: x2}], {x1: 0, y1: 0, x2: "x", y2: "y", stroke: "steelblue", strokeWidth: 1, markerEnd: "dot"}),
+    Plot.link([{x: x1, y: x2}], {x1: 0, y1: 0, x2: "x", y2: "y", stroke: C.primary, strokeWidth: 1, markerEnd: "dot"}),
     Plot.text([{x: x1/2, y: x2/2}], {
       x: "x", y: "y", text: ["vektor dat (x)"], 
       //rotate: Math.atan2(x2, x1) * (180/Math.PI), 
-      dy: -12, fill: "steelblue"
+      dy: -12, fill: C.primary
     }),
     // BOD DAT
     Plot.dot([{x: x1, y: x2}], {
       x: "x", y: "y",
-      fill: "steelblue",
+      fill: C.primary,
       r: 5  // poloměr bodu
     }),    
     Plot.text([{x: x1, y: x2}], {
@@ -256,17 +261,17 @@ Plot.plot({
       dy: 20,       // Posun nad bod
       dx: -5, 
       fontWeight: "bold",
-      fill: "steelblue"
+      fill: C.primary
     }),
 
 
     // Legenda s výsledky// Legenda s výpočty
-    Plot.text([{x: 0.5, y: 10.0}],{x: "x", y: "y", text: [`||x||² = ${Math.pow(norma_x,2).toFixed(2)}`],  textAnchor: "start", fill: "black" }),
-    Plot.text([{x: 0.5, y: 9.5}], {x: "x", y: "y", text: [`x̄= ${Math.pow(pru,1).toFixed(1)}`],            textAnchor: "start", fill: "black" }),
-    Plot.text([{x: 0.5, y: 9.0}], {x: "x", y: "y", text: [`||x̄||²= ${Math.pow(pru,2).toFixed(2)}`],       textAnchor: "start", fill: "black" }),
-    Plot.text([{x: 0.5, y: 8.5}], {x: "x", y: "y", text: [`||e||² = ${Math.pow(norma_e,2).toFixed(2)}`],  textAnchor: "start", fill: "black" }),
-    Plot.text([{x: 0.5, y: 8.0}], {x: "x", y: "y", text: [`σ² = ||e||² / 2 = ${(Math.pow(norma_e, 2) / 2).toFixed(2)}`], textAnchor: "start", fill: "black" }),
-    Plot.text([{x: 0.5, y: 7.5}], {x: "x", y: "y", text: [`σ = √σ² = ${sigma_val.toFixed(2)}`],           textAnchor: "start", fill: "black"})
+    Plot.text([{x: 0.5, y: 10.0}],{x: "x", y: "y", text: [`||x||² = ${Math.pow(norma_x,2).toFixed(2)}`],  textAnchor: "start", fill: C.text }),
+    Plot.text([{x: 0.5, y: 9.5}], {x: "x", y: "y", text: [`x̄= ${Math.pow(pru,1).toFixed(1)}`],            textAnchor: "start", fill: C.text }),
+    Plot.text([{x: 0.5, y: 9.0}], {x: "x", y: "y", text: [`||x̄||²= ${Math.pow(pru,2).toFixed(2)}`],       textAnchor: "start", fill: C.text }),
+    Plot.text([{x: 0.5, y: 8.5}], {x: "x", y: "y", text: [`||e||² = ${Math.pow(norma_e,2).toFixed(2)}`],  textAnchor: "start", fill: C.text }),
+    Plot.text([{x: 0.5, y: 8.0}], {x: "x", y: "y", text: [`σ² = ||e||² / 2 = ${(Math.pow(norma_e, 2) / 2).toFixed(2)}`], textAnchor: "start", fill: C.text }),
+    Plot.text([{x: 0.5, y: 7.5}], {x: "x", y: "y", text: [`σ = √σ² = ${sigma_val.toFixed(2)}`],           textAnchor: "start", fill: C.text})
   ]
 })
 ```
@@ -294,7 +299,7 @@ nebo ve tvaru
   \end{align}
 
 
-$\|\mathbf{e}\|^2$ vyjadřuje celkovou odchylku dat od vekotru průměrů,  přepočítáno na jedno pozorování dostaneme veličiny zvanou **rozptyl** a označovanou jako $var$ nebo $\sigma^2$ a která se tedy rovná $= \frac{\|\mathbf{e}\|^2}{n}$
+$\|\mathbf{e}\|^2$ vyjadřuje celkovou odchylku dat od vekotru průměrů,  přepočítáno na jedno pozorování dostaneme veličiny zvanou [rozptyl]{.highlight-term} a označovanou jako $var$ nebo $\sigma^2$ a která se tedy rovná $= \frac{\|\mathbf{e}\|^2}{n}$
 
 $$
   var=\sigma^2 = \frac{\sum (x_i - \bar{x})^2}{n}
@@ -341,7 +346,7 @@ Plot.plot({
   grid: true,
   marks: [
     // Histogram (Density)
-    Plot.rectY(data02, Plot.binX({y: "count"}, {x: "val", thresholds: binCount, fill: "steelblue", fillOpacity: 0.7})),
+    Plot.rectY(data02, Plot.binX({y: "count"}, {x: "val", thresholds: binCount, fill: C.primary, fillOpacity: 0.7})),
     
   // dodgeY vytvoří "mrak" bodů, anchor: "bottom" je drží u spodní hrany
     Plot.dot(data02, Plot.dodgeY({
@@ -349,7 +354,7 @@ Plot.plot({
       anchor: "bottom", 
       padding: 0.5, // Tímto zvětšuješ/zmenšuješ rozestupy mezi body
       r: 2, 
-      fill: "black",
+      fill: C.text,
       fillOpacity: 0.4
     })),
     
@@ -372,7 +377,7 @@ Jak číselně odlišit data, tkerá jsou symetrická od dat, která symetrická
 
 $$z_i=\frac{(x_i-\bar{x})}{sd}$$
 
-Proměnná $z$ má průměr nula a směrodatnou odchylku jedna nezávisle na tom, z jakých dat pochází (viz kapitola o aritmetice dat). hodnota $z_i$ naám tak přímo ukazuje standardizovanou odchylku dat od průměru. Pro zjištění zešikmení využijeme třetí mocninu - ta potlačuje hodnoty menší než $|x_i|<1$ ,zvýrazňuje hodnoty $|x_i|>1$ a přitom zachovává stejné znaménko, takže budeme umět rozlišit, zda jsou data zešikmená napravo nebo nalevo. **Šikmost** (*skewness, skew*) tedy počítáme pomocí vzorce 
+Proměnná $z$ má průměr nula a směrodatnou odchylku jedna nezávisle na tom, z jakých dat pochází (viz kapitola o aritmetice dat). hodnota $z_i$ naám tak přímo ukazuje standardizovanou odchylku dat od průměru. Pro zjištění zešikmení využijeme třetí mocninu - ta potlačuje hodnoty menší než $|x_i|<1$ ,zvýrazňuje hodnoty $|x_i|>1$ a přitom zachovává stejné znaménko, takže budeme umět rozlišit, zda jsou data zešikmená napravo nebo nalevo. [Šikmost]{.highlight-term} (*skewness, skew*) tedy počítáme pomocí vzorce 
 
 $$ 
   skew(X)=\frac{\sum z_i^3}{n}
@@ -436,18 +441,18 @@ Plot.plot({
     Plot.rectY(data03, Plot.binX({y: "count"}, {
       x: "val", 
       thresholds: stats03.sturges, 
-      fill: "#f0f0f0", 
-      stroke: "#ccc"
+      fill: C.grid, 
+      stroke: C.contextLight
     })),
     
     // Svislé čáry
-    Plot.ruleX([stats03.mean], {stroke: "steelblue", strokeWidth: 2}),
-    Plot.ruleX([stats03.median], {stroke: "darkred", strokeWidth: 2}),
+    Plot.ruleX([stats03.mean], {stroke: C.primary, strokeWidth: 2}),
+    Plot.ruleX([stats03.median], {stroke: C.accent, strokeWidth: 2}),
 
     // Dynamická legenda pomocí Plot.text
     // Souřadnice x a y je nutné ladit podle rozsahu tvých dat (zde x: vlevo, y: nahoře)
-    Plot.text([`Průměr: ${stats03.mean.toFixed(3)}`], {frameAnchor: "top-left", dx: 10, dy: 20, fill: "steelblue", fontWeight: "bold", fontSize: 14}),
-    Plot.text([`Medián: ${stats03.median.toFixed(3)}`], {frameAnchor: "top-left", dx: 10, dy: 40, fill: "darkred", fontWeight: "bold", fontSize: 14}),
+    Plot.text([`Průměr: ${stats03.mean.toFixed(3)}`], {frameAnchor: "top-left", dx: 10, dy: 20, fill: C.primary, fontWeight: "bold", fontSize: 14}),
+    Plot.text([`Medián: ${stats03.median.toFixed(3)}`], {frameAnchor: "top-left", dx: 10, dy: 40, fill: C.accent, fontWeight: "bold", fontSize: 14}),
     Plot.text([`Šikmost (z³): ${stats03.skew.toFixed(3)}`], {frameAnchor: "top-left", dx: 10, dy: 60, fontWeight: "bold", fontSize: 14}),
     Plot.text([stats03.relation], {frameAnchor: "top-left", dx: 10, dy: 80, fontSize: 14, fontWeight: "bold"}),    
 
@@ -457,7 +462,7 @@ Plot.plot({
       anchor: "bottom", 
       padding: 0.5, 
       r: 2, 
-      fill: "black",
+      fill: C.text,
       fillOpacity: 0.2
     })),
     
@@ -474,7 +479,7 @@ Vztah mezi šikmostí průměrem, mediánem a tvarem distribuce.
 
 ### Špičatost
 
-Jak číselně odlišit data, která mají většinu hodnot blízko průměru od hodnot, která mají rozprostření dat volnější a vzdálenější hodnoty nejsou vyjímkou (*heavy tails, těžké ocasy*)? Protože zešikmení máme popsané pomocí skew, nezáleží nám nyní na směru ochylky, musíme však velmi zvýraznit odlehlé hodnoty. K tomu nám poslouží čtvrtá mocnina $z$, pomocí které určujeme **špičatost** (*kurtoisis, kurt*), kterou určíme pomocí vzorce 
+Jak číselně odlišit data, která mají většinu hodnot blízko průměru od hodnot, která mají rozprostření dat volnější a vzdálenější hodnoty nejsou vyjímkou (*heavy tails, těžké ocasy*)? Protože zešikmení máme popsané pomocí skew, nezáleží nám nyní na směru ochylky, musíme však velmi zvýraznit odlehlé hodnoty. K tomu nám poslouží čtvrtá mocnina $z$, pomocí které určujeme [špičatost]{.highlight-term} (*kurtoisis, kurt*), kterou určíme pomocí vzorce 
 
 $$
   kurt(X) = \frac{\sum z_i^4}{n}
@@ -504,25 +509,25 @@ Plot.plot({
     Plot.ruleX([-1, 1], {strokeOpacity: 0.2, strokeDasharray: "4,4"}),
 
     // MAD |z| - Lineární
-    Plot.line(d3.range(-2, 2.05, 0.05), {x: d => d, y: d => Math.abs(d), stroke: "steelblue", dash: "none", strokeWidth: 2, label: "Průměr (|z|¹)"}),
+    Plot.line(d3.range(-2, 2.05, 0.05), {x: d => d, y: d => Math.abs(d), stroke: C.primary, dash: "none", strokeWidth: 2, label: "Průměr (|z|¹)"}),
     // Rozptyl z^2
-    Plot.line(d3.range(-2, 2.05, 0.05), {x: d => d, y: d => d**2, stroke: "#7A5B8C", dash: "8,4", strokeWidth: 2, label: "Rozptyl (z²)"}),
+    Plot.line(d3.range(-2, 2.05, 0.05), {x: d => d, y: d => d**2, stroke: C.context, dash: "8,4", strokeWidth: 2, label: "Rozptyl (z²)"}),
     // Šikmost z^3
-    Plot.line(d3.range(-2, 2.05, 0.05), {x: d => d, y: d => d**3, stroke: "#AF3363", dash: "4,3", strokeWidth: 2, label: "Šikmost (z³)"}),
+    Plot.line(d3.range(-2, 2.05, 0.05), {x: d => d, y: d => d**3, stroke: C.text, dash: "4,3", strokeWidth: 2, label: "Šikmost (z³)"}),
     // Špičatost z^4
-    Plot.line(d3.range(-2, 2.05, 0.05), {x: d => d, y: d => d**4, stroke: "darkred", dash: "1,2", strokeWidth: 2,  label: "Špičatost (z⁴)"}),
+    Plot.line(d3.range(-2, 2.05, 0.05), {x: d => d, y: d => d**4, stroke: C.accent, dash: "1,2", strokeWidth: 2,  label: "Špičatost (z⁴)"}),
 
     // Interaktivní tečky (body na křivkách podle posuvníku)
-    Plot.dot([z], {x: d => d, y: d => Math.abs(d), fill: "steelblue", r: 4}),
-    Plot.dot([z], {x: d => d, y: d => d**2, fill: "#7A5B8C", r: 4}),
-    Plot.dot([z], {x: d => d, y: d => d**3, fill: "#AF3363", r: 4}),
-    Plot.dot([z], {x: d => d, y: d => d**4, fill: "darkred", r: 6}),
+    Plot.dot([z], {x: d => d, y: d => Math.abs(d), fill: C.primary, r: 4}),
+    Plot.dot([z], {x: d => d, y: d => d**2, fill: C.context, r: 4}),
+    Plot.dot([z], {x: d => d, y: d => d**3, fill: C.text, r: 4}),
+    Plot.dot([z], {x: d => d, y: d => d**4, fill: C.accent, r: 6}),
 
     // Dynamická legenda v rohu
-    Plot.text([`pro průměr: |z|= ${Math.abs(z).toFixed(2)}`], {x: -1.9, y: 7.5, fill: "steelblue", textAnchor: "start"}),
-    Plot.text([`pro rozptyl: z²= ${(z**2).toFixed(2)}`], {x: -1.9, y: 6.5, fill: "#7A5B8C", textAnchor: "start"}),
-    Plot.text([`pro šikmost: z³= ${(z**3).toFixed(2)}`], {x: -1.9, y: 5.5, fill: "#AF3363", textAnchor: "start"}),
-    Plot.text([`pro špičatost: z⁴= ${(z**4).toFixed(2)}`], {x: -1.9, y: 4.5, fill: "darkred", textAnchor: "start"})
+    Plot.text([`pro průměr: |z|= ${Math.abs(z).toFixed(2)}`], {x: -1.9, y: 7.5, fill: C.primary, textAnchor: "start"}),
+    Plot.text([`pro rozptyl: z²= ${(z**2).toFixed(2)}`], {x: -1.9, y: 6.5, fill: C.context, textAnchor: "start"}),
+    Plot.text([`pro šikmost: z³= ${(z**3).toFixed(2)}`], {x: -1.9, y: 5.5, fill: C.text, textAnchor: "start"}),
+    Plot.text([`pro špičatost: z⁴= ${(z**4).toFixed(2)}`], {x: -1.9, y: 4.5, fill: C.accent, textAnchor: "start"})
   ]
 })
 ```
@@ -606,48 +611,48 @@ Plot.plot({
     // KRABICE TLUMIVOSTI: x i y v rozsahu [-1, 1]
     Plot.rect([-1], {
       x1:-1, x2: 1, y1: -1, y2: 1, 
-      fill: "steelblue", fillOpacity: 0.15,
-      stroke: "steelblue",
+      fill: C.primary, fillOpacity: 0.15,
+      stroke: C.primary,
       strokeDasharray: "2,2",
       strokeOpacity: 0.3
     }),
-    Plot.frame({stroke: "#ccc", strokeDasharray: "4,4"}),
+    Plot.frame({stroke: C.contextLight, strokeDasharray: "4,4"}),
     
     // hlavní osy 
     Plot.ruleY([0], {strokeOpacity: 0.8}),
     Plot.ruleX([0], {strokeOpacity: 0.5}),
 
     // Svislé referenční čáry na bodech zlomu
-    Plot.ruleX([-1, 1], {stroke: "#666", strokeDasharray: "4,4", strokeWidth: 1}),
+    Plot.ruleX([-1, 1], {stroke: C.context, strokeDasharray: "4,4", strokeWidth: 1}),
     
     // Vodorovná referenční čára y=1 (bod, kde se všechny křivky potkají)
-    Plot.ruleY([1], {stroke: "#666", strokeDasharray: "4,4", strokeWidth: 1, strokeOpacity: 1}),
-    Plot.ruleY([-1], {stroke: "#666", strokeDasharray: "4,4", strokeWidth: 1, strokeOpacity: 1}),
+    Plot.ruleY([1], {stroke: C.context, strokeDasharray: "4,4", strokeWidth: 1, strokeOpacity: 1}),
+    Plot.ruleY([-1], {stroke: C.context, strokeDasharray: "4,4", strokeWidth: 1, strokeOpacity: 1}),
 
     // Křivka funkce
     Plot.line(d3.range(-3, 3.1, 0.1), {
       x: d => d, 
       y: d => functionTransform(d), 
-      stroke: "#ccc", strokeWidth: 4
+      stroke: C.contextLight, strokeWidth: 4
     }),
 
     // Projekce X -> Křivka -> Y
-    Plot.ruleX(currentData, {x: d => d, y1: 0, y2: d => functionTransform(d), stroke: "steelblue", strokeOpacity: 0.5}),
-    Plot.ruleY(results, {y: d => d, x1: (d, i) => currentData[i], x2: 0, stroke: "steelblue", strokeDasharray: "2,2", strokeOpacity: 0.5}),
+    Plot.ruleX(currentData, {x: d => d, y1: 0, y2: d => functionTransform(d), stroke: C.primary, strokeOpacity: 0.5}),
+    Plot.ruleY(results, {y: d => d, x1: (d, i) => currentData[i], x2: 0, stroke: C.primary, strokeDasharray: "2,2", strokeOpacity: 0.5}),
 
     // Body
-    Plot.dot(currentData, {x: d => d, y: 0, fill: "steelblue", r: 6}), // Data na X
-    Plot.dot(currentData, {x: d => d, y: d => functionTransform(d), fill: "steelblue", r: 3}), // Na křivce
-    Plot.dot(results, {x: 0, y: d => d, fill: "steelblue", r: 4}), // Na ose Y
+    Plot.dot(currentData, {x: d => d, y: 0, fill: C.primary, r: 6}), // Data na X
+    Plot.dot(currentData, {x: d => d, y: d => functionTransform(d), fill: C.primary, r: 3}), // Na křivce
+    Plot.dot(results, {x: 0, y: d => d, fill: C.primary, r: 4}), // Na ose Y
 
     // Modrý diamant - Průměr (Výsledný moment)
-    Plot.dot([finalValue], {x: 0, y: d => d, fill: "darkred", symbol: "circle", r: 10, stroke: "white", strokeWidth: 2}),
+    Plot.dot([finalValue], {x: 0, y: d => d, fill: C.accent, symbol: "circle", r: 10, stroke: C.bg, strokeWidth: 2}),
     
     // Dynamický popisek výsledku
     Plot.text([finalValue], {
       x: 0.2, y: d => d, 
       text: d => ` ${momentLabels[moment]} = ${d.toFixed(3)}`,
-      textAnchor: "start", fill: "darkred", fontWeight: "bold", fontSize: 16
+      textAnchor: "start", fill: C.accent, fontWeight: "bold", fontSize: 16
     })
   ]
 })

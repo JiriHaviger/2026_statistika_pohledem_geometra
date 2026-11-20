@@ -1,10 +1,12 @@
 # Rozdělení pravděpodobnosti diskrétní veličiny
 
-Pravděpodobnostní rozdělení říká, jak se celková pravděpodobnost $1$ rozděluje mezi možné hodnoty náhodné veličiny. Zde se zabýváme veličinou **diskrétní**, tedy takovou, která nabývá izolovaných hodnot.
+Sázková kancelář nabízí hru s upravenou kostkou. Aby mohla určit férovou cenu sázky, nestačí jí vědět, co všechno může padnout. Musí vědět, s jakou pravděpodobností které hodnoty padají. Přesně to popisuje pravděpodobnostní rozdělení.
+
+[Pravděpodobnostní rozdělení]{.highlight-term} říká, jak se celková pravděpodobnost $1$ rozděluje mezi možné hodnoty náhodné veličiny. Zde se zabýváme veličinou **diskrétní**, tedy takovou, která nabývá izolovaných hodnot.
 
 ## Definice a tři způsoby zadání
 
-Diskrétní náhodná veličina $X$ nabývá hodnot $x_1, x_2, \dots$ s pravděpodobnostmi $p_k=P(X=x_k)$, kde $p_k$ je pravděpodobnost $k$-té hodnoty. Tyto pravděpodobnosti jsou nezáporné a jejich součet je $1$. Rozdělení lze zadat třemi způsoby: **tabulkou**, **grafem** nebo **vzorcem**.
+[Diskrétní náhodná veličina]{.highlight-term} $X$ nabývá hodnot $x_1, x_2, \dots$ s pravděpodobnostmi $p_k=P(X=x_k)$, kde $p_k$ je pravděpodobnost $k$-té hodnoty. Tyto pravděpodobnosti jsou nezáporné a jejich součet je $1$. Rozdělení lze zadat třemi způsoby: **tabulkou**, **grafem** nebo **vzorcem**.
 
 ### Příklad: upravená kostka
 
@@ -59,9 +61,9 @@ Vzorec je stručný, ale pro čtenáře méně přehledný než tabulka a graf.
 
 ## Dvě tváře pravděpodobnosti: bod versus interval
 
-**Pravděpodobnostní funkce** (probability mass function, PMF), $p(x)=P(X=x)$, odpovídá na otázku: „Jaká je pravděpodobnost, že veličina nabude přesně hodnoty $x$?“. U kostky nám $p(5)$ říká, jaká je šance, že padne pětka.
+[Pravděpodobnostní funkce]{.highlight-term} (probability mass function, PMF), $p(x)=P(X=x)$, odpovídá na otázku: „Jaká je pravděpodobnost, že veličina nabude přesně hodnoty $x$?“. U kostky nám $p(5)$ říká, jaká je šance, že padne pětka.
 
-**Distribuční funkce** (cumulative distribution function, CDF), $F(x)=P(X\leq x)$, odpovídá na otázku: „Jaká je pravděpodobnost, že výsledek bude nanejvýš $x$?“. U kostky $F(5)=P(X\leq 5)$ říká, jaká je šance, že padne pětka nebo méně. Platí
+[Distribuční funkce]{.highlight-term} (cumulative distribution function, CDF), $F(x)=P(X\leq x)$, odpovídá na otázku: „Jaká je pravděpodobnost, že výsledek bude nanejvýš $x$?“. U kostky $F(5)=P(X\leq 5)$ říká, jaká je šance, že padne pětka nebo méně. Platí
 
 $$F(x)=\sum_{k:\,x_k\leq x} p_k.$$
 
@@ -80,7 +82,7 @@ Plot.plot({
   y: {grid: true, label: "p(x) = P(X = x)", domain: [0, 0.6]},
   marks: [
     Plot.ruleY([0], {stroke: C.context}),
-    Plot.dot(kostka32, {x: "x", y: 0, r: 4, fill: "white", stroke: C.context}),
+    Plot.dot(kostka32, {x: "x", y: 0, r: 4, fill: C.bg, stroke: C.context}),
     Plot.ruleX(kostka32, {x: "x", y1: 0, y2: "p", stroke: C.primary, strokeWidth: 2}),
     Plot.dot(kostka32, {x: "x", y: "p", r: 5, fill: C.primary})
   ]
@@ -112,7 +114,7 @@ Plot.plot({
     Plot.ruleY(schody32, {x1: "x1", x2: "x2", y: "F", stroke: C.primary, strokeWidth: 2.5}),
     // plné kolečko na začátku schodu (hodnota zprava spojitá), prázdné na konci (limita zleva)
     Plot.dot(schody32, {x: "x1", y: "F", fill: C.primary, stroke: C.primary, r: 4}),
-    Plot.dot(schody32.slice(0, -1), {x: "x2", y: "F", fill: "white", stroke: C.primary, r: 4}),
+    Plot.dot(schody32.slice(0, -1), {x: "x2", y: "F", fill: C.bg, stroke: C.primary, r: 4}),
     // vybraný bod t jako jediný akcentový prvek
     Plot.ruleX([t32], {y1: 0, y2: Ft32, stroke: C.accent, strokeDasharray: "3,3"}),
     Plot.dot([{x: t32, y: Ft32}], {x: "x", y: "y", fill: C.accent, r: 5}),
@@ -140,16 +142,16 @@ a navíc pro interval $P(a<X\leq b)=F(b)-F(a)$.
 
 Rozdělení lze shrnout několika čísly, která říkají, kde leží „střed“ a jak velký je rozptyl.
 
-**Střední hodnota** $E(X)=\mu$ je očekávaný výsledek při velmi mnoha opakováních:
+[Střední hodnota]{.highlight-term} $E(X)=\mu$ je očekávaný výsledek při velmi mnoha opakováních:
 
 $$E(X)=\sum_k x_k\, p_k.$$
 
-**Rozptyl** $\operatorname{Var}(X)=\sigma^2$ měří, jak moc se hodnoty rozptylují kolem střední hodnoty:
+[Rozptyl]{.highlight-term} $\operatorname{Var}(X)=\sigma^2$ měří, jak moc se hodnoty rozptylují kolem střední hodnoty:
 
 $$\operatorname{Var}(X)=\sum_k \bigl(x_k-\mu\bigr)^2\, p_k,
 \qquad \sigma=\sqrt{\operatorname{Var}(X)}.$$
 
-**Medián** je hodnota, která rozděluje rozdělení na dvě poloviny: $P(X\leq m)\geq 0{,}5$ a $P(X\geq m)\geq 0{,}5$.
+[Medián]{.highlight-term} je hodnota, která rozděluje rozdělení na dvě poloviny: $P(X\leq m)\geq 0{,}5$ a $P(X\geq m)\geq 0{,}5$.
 
 ```{ojs}
 //| echo: false
@@ -160,3 +162,16 @@ var32 = d3.sum(kostka32, d => (d.x - mean32) ** 2 * d.p)
 Pro naši kostku vychází $E(X)=$ ${mean32.toFixed(3).replace(".", ",")} a $\operatorname{Var}(X)=$ ${var32.toFixed(3).replace(".", ",")}, tedy $\sigma\approx$ ${Math.sqrt(var32).toFixed(3).replace(".", ",")}. Střední hodnota $16/3$ není hodnotou, které kostka může nabýt. Jde o průměr při velmi mnoha hodech, ne o „nejčastější výsledek“.
 
 U mediánu je kostka poučná: $F(5)=0{,}5$ přesně, takže podmínce vyhovuje každé číslo z intervalu $[5,6]$. Obvykle se volí střed tohoto intervalu, tedy $5{,}5$.
+
+## Klíčové poznatky {.unnumbered}
+
+|  |  |
+|:---|:---|
+| rozdělení | tabulka, graf nebo vzorec; $p_k\geq 0$ a $\sum_k p_k=1$ |
+| pravděpodobnostní funkce | $p(x)=P(X=x)$, pravděpodobnost přesné hodnoty |
+| distribuční funkce | $F(x)=P(X\leq x)=\sum_{k:\,x_k\leq x}p_k$, schodovitá, neklesající, spojitá zprava |
+| limity | $F(-\infty)=0$ a $F(+\infty)=1$ |
+| interval | $P(a<X\leq b)=F(b)-F(a)$ |
+| střední hodnota | $E(X)=\sum_k x_k\,p_k$ |
+| rozptyl | $\operatorname{Var}(X)=\sum_k (x_k-\mu)^2\,p_k$ |
+| medián | $F(m)\geq 0{,}5$ a $P(X\geq m)\geq 0{,}5$, nemusí být určen jednoznačně |

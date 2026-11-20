@@ -1,5 +1,7 @@
 # Rozklad rozptylu geometricky
 
+Pythagorova věta se ve statistice objevuje na nečekaném místě: rozptyl dat je vlastně čtverec délky jedné úsečky. Uvidíme to na nejmenším možném příkladu, na dvou domácnostech.
+
 Mějme dvě domácnosti, kteří mají počet vozidel v rozsahu 0-10. V tabulce je označení domácnosti id a počet vozidel y. Naším cílem bude najít 
 **číslo (parametr) $b_0$**, takové které bude reprezentovat data $\mathbf{y}$. Základní model tedy bude mít tvar
 
@@ -63,6 +65,11 @@ V tomto znázornění je vidět geometrický princip rozkladu dat $\|\mathbf{y}\
 ### Graf
 ```{ojs}
 //| echo: false
+import {C} from "../assets/jhrules.js"
+```
+
+```{ojs}
+//| echo: false
 Plot.plot({
 // GLOBÁLNÍ STYL (pro čísla na osách a mřížku)
   style: {
@@ -89,7 +96,7 @@ Plot.plot({
   },   
   aspectRatio: 1,   
   marks: [
-    Plot.dot([{x:7, y:3}], {x:"x", y:"y", fill:"steelblue", r:10, stroke:"white", strokeWidth:2}),
+    Plot.dot([{x:7, y:3}], {x:"x", y:"y", fill:C.primary, r:10, stroke:C.bg, strokeWidth:2}),
   ]
 })
 ```
@@ -114,11 +121,11 @@ Plot.plot({
   y: {domain:[0,10], label:"Osa y₂ (2. domácnost)", ticks:[0,2,4,6,8,10]},
   aspectRatio: 1,    
   marks: [
-    Plot.line([[0,0],[10,10]], {stroke:"#bbb", strokeWidth:1.5, strokeDasharray:"5,4"}),
-    Plot.line([[0,0],[1.5,1.5]], {stroke:"#666", strokeWidth:2.5, markerEnd:"arrow"}),
-    Plot.text([{x:2.3, y:0.9}], {x:"x", y:"y", text:["jedničkový vektor 1"], fill:"#666", fontSize:11, textAnchor:"start"}),
-    Plot.dot([{x:7, y:3}], {x:"x", y:"y", fill:"steelblue", r:10, stroke:"white", strokeWidth:2}),
-    Plot.text([{x:7, y:3}], {x:"x", y:"y", text:["y = [7, 3]"], dx:12, dy:-14, fill:"steelblue", fontWeight:"bold", textAnchor:"start"})
+    Plot.line([[0,0],[10,10]], {stroke:C.contextLight, strokeWidth:1.5, strokeDasharray:"5,4"}),
+    Plot.line([[0,0],[1.5,1.5]], {stroke:C.context, strokeWidth:2.5, markerEnd:"arrow"}),
+    Plot.text([{x:2.3, y:0.9}], {x:"x", y:"y", text:["jedničkový vektor 1"], fill:C.context, fontSize:11, textAnchor:"start"}),
+    Plot.dot([{x:7, y:3}], {x:"x", y:"y", fill:C.primary, r:10, stroke:C.bg, strokeWidth:2}),
+    Plot.text([{x:7, y:3}], {x:"x", y:"y", text:["y = [7, 3]"], dx:12, dy:-14, fill:C.primary, fontWeight:"bold", textAnchor:"start"})
   ]
 })
 ```
@@ -139,16 +146,16 @@ Plot.plot({
   y: {domain:[0,10], label:"Osa y₂ (2. domácnost)", ticks:[0,2,4,6,8,10]},
   aspectRatio: 1,    
   marks: [
-    Plot.line([[0,0],[10,10]], {stroke:"#bbb", strokeWidth:1.5, strokeDasharray:"5,4"}),
-    Plot.line([[0,0],[1.5,1.5]], {stroke:"#666", strokeWidth:2.5, markerEnd:"arrow"}),
-    Plot.text([{x:2.3, y:0.9}], {x:"x", y:"y", text:["jedničkový vektor 1"], fill:"#666", fontSize:11, textAnchor:"start"}),
-    Plot.line([[0,0],[5,5]], {stroke:"#666", strokeWidth:2}),
-    Plot.line([[7,3],[5,5]], {stroke:"darkred", strokeWidth:2.5}),
-    Plot.text([{x:6.5, y:4.3}], {x:"x", y:"y", text:["e"], fill:"darkred", fontWeight:"bold", fontSize:14}),
-    Plot.dot([{x:5, y:5}], {x:"x", y:"y", fill:"#666", r:5}),
-    Plot.text([{x:5, y:5}], {x:"x", y:"y", text:["ŷ·1 = [5, 5]"], dx:-74, dy:-13, fill:"#666", fontSize:11}),
-    Plot.dot([{x:7, y:3}], {x:"x", y:"y", fill:"steelblue", r:10, stroke:"white", strokeWidth:2}),
-    Plot.text([{x:7, y:3}], {x:"x", y:"y", text:["y = [7, 3]"], dx:12, dy:-14, fill:"steelblue", fontWeight:"bold", textAnchor:"start"})
+    Plot.line([[0,0],[10,10]], {stroke:C.contextLight, strokeWidth:1.5, strokeDasharray:"5,4"}),
+    Plot.line([[0,0],[1.5,1.5]], {stroke:C.context, strokeWidth:2.5, markerEnd:"arrow"}),
+    Plot.text([{x:2.3, y:0.9}], {x:"x", y:"y", text:["jedničkový vektor 1"], fill:C.context, fontSize:11, textAnchor:"start"}),
+    Plot.line([[0,0],[5,5]], {stroke:C.context, strokeWidth:2}),
+    Plot.line([[7,3],[5,5]], {stroke:C.accent, strokeWidth:2.5}),
+    Plot.text([{x:6.5, y:4.3}], {x:"x", y:"y", text:["e"], fill:C.accent, fontWeight:"bold", fontSize:14}),
+    Plot.dot([{x:5, y:5}], {x:"x", y:"y", fill:C.context, r:5}),
+    Plot.text([{x:5, y:5}], {x:"x", y:"y", text:["ŷ·1 = [5, 5]"], dx:-74, dy:-13, fill:C.context, fontSize:11}),
+    Plot.dot([{x:7, y:3}], {x:"x", y:"y", fill:C.primary, r:10, stroke:C.bg, strokeWidth:2}),
+    Plot.text([{x:7, y:3}], {x:"x", y:"y", text:["y = [7, 3]"], dx:12, dy:-14, fill:C.primary, fontWeight:"bold", textAnchor:"start"})
   ]
 })
 ```
@@ -171,18 +178,18 @@ Plot.plot({
   y: {domain:[0,10], label:"Osa y₂ (2. domácnost)", ticks:[0,2,4,6,8,10]},
   aspectRatio: 1,
   marks: [
-    Plot.line([[0,0],[10,10]], {stroke:"#bbb", strokeWidth:1.5, strokeDasharray:"5,4"}),
-    Plot.line([[0,0],[1.5,1.5]], {stroke:"#666", strokeWidth:2.5, markerEnd:"arrow"}),
-    Plot.text([{x:2.3, y:0.9}], {x:"x", y:"y", text:["jedničkový vektor 1"], fill:"#666", fontSize:11, textAnchor:"start"}),
-    Plot.line([[0,0],[5,5]], {stroke:"#666", strokeWidth:2}),
-    Plot.line([[7,3],[5,5]], {stroke:"darkred", strokeWidth:2.5}),
-    Plot.text([{x:6.5, y:4.3}], {x:"x", y:"y", text:["e"], fill:"darkred", fontWeight:"bold", fontSize:14}),
-    Plot.dot([{x:5, y:5}], {x:"x", y:"y", fill:"#666", r:5}),
-    Plot.text([{x:5, y:5}], {x:"x", y:"y", text:["ŷ·1 = [5, 5]"], dx:-74, dy:-13, fill:"#666", fontSize:11}),
-    Plot.line([[0,0],[7,3]], {stroke:"steelblue", strokeWidth:2, markerEnd:"arrow"}),
-    Plot.text([{x:0.4, y:9.6}], {x:"x", y:"y", text:["‖y‖² = 58   ‖ȳ·1‖² = 50   ‖e‖² = 8   σ² = 4"], textAnchor:"start", fill:"#444", fontSize:11}),
-    Plot.dot([{x:7, y:3}], {x:"x", y:"y", fill:"steelblue", r:10, stroke:"white", strokeWidth:2}),
-    Plot.text([{x:7, y:3}], {x:"x", y:"y", text:["y = [7, 3]"], dx:12, dy:-14, fill:"steelblue", fontWeight:"bold", textAnchor:"start"})
+    Plot.line([[0,0],[10,10]], {stroke:C.contextLight, strokeWidth:1.5, strokeDasharray:"5,4"}),
+    Plot.line([[0,0],[1.5,1.5]], {stroke:C.context, strokeWidth:2.5, markerEnd:"arrow"}),
+    Plot.text([{x:2.3, y:0.9}], {x:"x", y:"y", text:["jedničkový vektor 1"], fill:C.context, fontSize:11, textAnchor:"start"}),
+    Plot.line([[0,0],[5,5]], {stroke:C.context, strokeWidth:2}),
+    Plot.line([[7,3],[5,5]], {stroke:C.accent, strokeWidth:2.5}),
+    Plot.text([{x:6.5, y:4.3}], {x:"x", y:"y", text:["e"], fill:C.accent, fontWeight:"bold", fontSize:14}),
+    Plot.dot([{x:5, y:5}], {x:"x", y:"y", fill:C.context, r:5}),
+    Plot.text([{x:5, y:5}], {x:"x", y:"y", text:["ŷ·1 = [5, 5]"], dx:-74, dy:-13, fill:C.context, fontSize:11}),
+    Plot.line([[0,0],[7,3]], {stroke:C.primary, strokeWidth:2, markerEnd:"arrow"}),
+    Plot.text([{x:0.4, y:9.6}], {x:"x", y:"y", text:["‖y‖² = 58   ‖ȳ·1‖² = 50   ‖e‖² = 8   σ² = 4"], textAnchor:"start", fill:C.text, fontSize:11}),
+    Plot.dot([{x:7, y:3}], {x:"x", y:"y", fill:C.primary, r:10, stroke:C.bg, strokeWidth:2}),
+    Plot.text([{x:7, y:3}], {x:"x", y:"y", text:["y = [7, 3]"], dx:12, dy:-14, fill:C.primary, fontWeight:"bold", textAnchor:"start"})
   ]
 })
 ```
@@ -216,7 +223,7 @@ V našem případě však
   \end{align}
 
 
-Aritmetický **průměr** je tedy číslo, kterým musíme vynásobit vektor **1**, aby vektor $b_0\mathbf{1}$ byl co nejblíže vektoru dat **y**.
+Aritmetický [průměr]{.highlight-term} je tedy číslo, kterým musíme vynásobit vektor **1**, aby vektor $b_0\mathbf{1}$ byl co nejblíže vektoru dat **y**.
 
 Můžeme tedy sestrojit vektor odchylek našich dat od vektoru průměru 
 
@@ -233,7 +240,7 @@ Zaměřme se na velikosti těchto vektorů:Pomocí Pythogorovy věty dostáváme
 
 $$\|\mathbf{y}\|^2 = \|b_0\mathbf{1}\|^2 + \|\mathbf{e}\|^2$$
 
-$\|\mathbf{e}\|^2$ vyjadřuje celkovou odchylku dat od vekotru průměrů,  přepočítáno na jedno pozorování dostaneme veličiny zvanou **rozptyl** a označovanou jako $var$ nebo $\sigma^2$ a která se tedy rovná $= \frac{\|\mathbf{e}\|^2}{n}$
+$\|\mathbf{e}\|^2$ vyjadřuje celkovou odchylku dat od vekotru průměrů,  přepočítáno na jedno pozorování dostaneme veličiny zvanou [rozptyl]{.highlight-term} a označovanou jako $var$ nebo $\sigma^2$ a která se tedy rovná $= \frac{\|\mathbf{e}\|^2}{n}$
 
 $$
   var=\sigma^2 = \frac{\sum (y_i - b_0)^2}{n}
@@ -247,3 +254,12 @@ $$
 
  
 
+## Klíčové poznatky {.unnumbered}
+
+|  |  |
+|:---|:---|
+| model | $\mathbf{y}=b_0\mathbf{1}+\mathbf{e}$ |
+| průměr | $b_0=\bar{y}$ je kolmá projekce dat na přímku daného směru |
+| Pythagorova věta | $\lVert\mathbf{y}\rVert^2=\lVert b_0\mathbf{1}\rVert^2+\lVert\mathbf{e}\rVert^2$ |
+| rozptyl | $var=\frac{\lVert\mathbf{e}\rVert^2}{n}$ |
+| směrodatná odchylka | $sd=\sqrt{var}$ |

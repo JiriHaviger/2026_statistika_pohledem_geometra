@@ -80,7 +80,7 @@ $$P(a\cap b) = P(a)\cdot P(b)$$
 
 Tento vztah se označuje jak **pravidlo součinu** pro slovní vyjádření **... a současně ...**
 
-Tato rovnice je používána jako definice [nezávislosti jevů]{.hihglight-term}. Pokud známe obě strany rovnice, pak lze tento vztah využít k testování nezávislosti dvou jevů. 
+Tato rovnice je používána jako definice [nezávislosti jevů]{.highlight-term}. Pokud známe obě strany rovnice, pak lze tento vztah využít k testování nezávislosti dvou jevů. 
 
 Pokud máme nezávislé jevy, pak 
 $$P(a\cap b) = P(a)\cdot P(b)$$

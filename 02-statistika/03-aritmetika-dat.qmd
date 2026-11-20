@@ -1,5 +1,7 @@
 # Vlastnosti metrik a aritmetika dat
 
+Ředitel firmy oznámí, že všem zaměstnancům zvýší plat o 1 000 Kč. O rok později přidá všem 10 %. V obou případech si polepší všichni, ale rozdíly mezi nimi se mění různě. Jak se při takových úpravách chovají průměr, rozptyl nebo medián?
+
 V této kapitole si ukážeme, jak reagují jednotlivé statistiky na to když 
 
 1. k datům přičteme stejnou hodnotu
@@ -48,19 +50,19 @@ Pokud stát požaduje od všech stejnou částku (např. televizní poplatky), v
 
 ## Transformace dat
 
-Zkusme naše data **standardizovat** tak, abychom eliminovali posun a zároveň upravili variabilitu. Cílem je, aby data s rozdílnou polohou a rozdílnou variabilitou  byla porovnateln (např počet vozidel v rodině a celkový roční příjem rodiny). Jednou z tradičních standardizací je převod hodnot $x_i$ na $z-skór$ pomocí vzorce 
+Zkusme naše data [standardizovat]{.highlight-term} tak, abychom eliminovali posun a zároveň upravili variabilitu. Cílem je, aby data s rozdílnou polohou a rozdílnou variabilitou  byla porovnateln (např počet vozidel v rodině a celkový roční příjem rodiny). Jednou z tradičních standardizací je převod hodnot $x_i$ na $z-skór$ pomocí vzorce 
 
 $$z_i=\frac{x_i-\bar{x}}{sd}$$ 
 
 Z skór tedy získáme nejprve posunem dat o průměr a poté vydělením směrodatnou odchylkou. Získané proměnná $z$ pak má průměr nula a směrodatnou odchylku 1. Tato standardizace je vhodná pro data alespoň přibližně symetrická kolem průměru, jinými slovy kdy je průměr blízko mediánu,$\bar{x}-mdn\to 0$. 
 
-Variantou odolnou vůči odlehlým hodotám je **robustní standardizace**m která každé hodnotě $x_i$ přiřadí hodnotu 
+Variantou odolnou vůči odlehlým hodotám je [robustní standardizace]{.highlight-term}m která každé hodnotě $x_i$ přiřadí hodnotu 
 
 $$x_r=\frac{x_i-mdn}{iqr}$$ 
 
 Robustní standarizaci tedy získáme posunem dat o medián a vydělením mezikvartilovým rozpětím. Získaná proměnná $x_r$ pak má medán nula a iqr jedna. Rubustní standardizace je vhodná pro data zešikmená, kdy většina hodnot je na jedné straně od průměru, jinými slovy medián a průměr jsou daleko.  
 
-Jinou bežně používanou trasformací je **normalizace** rozsahu, které každé hodnotě $x$ přiřadí hodnotu 
+Jinou bežně používanou trasformací je [normalizace]{.highlight-term} rozsahu, které každé hodnotě $x$ přiřadí hodnotu 
 
 $$x_{n}=\frac{x-min}{range}$$
 
@@ -83,13 +85,18 @@ Existují i další transformace, které jsou založené na rozdělení dat, ale
 
 ```{ojs}
 //| echo: false
+import {C} from "../assets/jhrules.js"
+```
+
+```{ojs}
+//| echo: false
 data = [1, 2, 2, 2, 3, 3, 4, 5, 8, 11].map(d => ({ hodnota: d }))
 
 // Statistiky pro čáry a legendu
 stats = [
-  { label: "Modus", val: 2, color: "green", dash: "2,2", yOffset: 15 },
-  { label: "Medián", val: 3, color: "blue", dash: "2.2", yOffset: 35 },
-  { label: "Průměr", val: 4.1, color: "red", dash: "2.2", yOffset: 55 }
+  { label: "Modus", val: 2, color: C.context, dash: "2,2", yOffset: 15 },
+  { label: "Medián", val: 3, color: C.primary, dash: "2.2", yOffset: 35 },
+  { label: "Průměr", val: 4.1, color: C.accent, dash: "2.2", yOffset: 55 }
 ]
 
 Plot.plot({
@@ -103,7 +110,7 @@ Plot.plot({
         domain: [0, 3] }, 
   marks: [
     // Tečky nad sebou
-    Plot.dot(data, Plot.stackY({ x: "hodnota", fill: "gray", stroke: "white", r: 6 })),
+    Plot.dot(data, Plot.stackY({ x: "hodnota", fill: C.context, stroke: C.bg, r: 6 })),
 
     // Svislé čáry na pozicích statistik
     stats.map(s => Plot.ruleX([s.val], { stroke: s.color, strokeWidth: 1, strokeDasharray: s.dash })),
@@ -125,4 +132,12 @@ Plot.plot({
 })
 ```
 
+## Klíčové poznatky {.unnumbered}
 
+|  |  |
+|:---|:---|
+| přičtení čísla $a$ | míry polohy se posunou o $a$, míry variability (range, IQR, var, sd) se nezmění |
+| násobení číslem $a$ | polohy, range, IQR a sd se vynásobí $a$ (v absolutní hodnotě), var se vynásobí $a^2$ |
+| z-skór | $z_i=\frac{x_i-\bar{x}}{sd}$, průměr 0 a směrodatná odchylka 1 |
+| robustní standardizace | $x_r=\frac{x_i-mdn}{iqr}$, medián 0 a IQR 1, vhodná pro zešikmená data |
+| normalizace | $x_n=\frac{x-min}{range}$, rozsah $(0,1)$ |
