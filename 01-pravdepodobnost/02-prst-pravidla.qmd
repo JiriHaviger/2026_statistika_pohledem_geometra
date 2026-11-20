@@ -1,14 +1,13 @@
 # Příklady, základní pojmy a vzorce
 
+Jaké jsou základní otázky které lze řešit pomocí teorie pravděpodobnosti? Pojďme si to ukázat na několika příkladech:
 
-## základní pojmy
-
-Nejprvě několik příkladů s různým kontextem
-
-**Člověče nezlob se:**  házíme 1 x kostkou. Jaké jsou možnosti, co nám padne? Co nám reálně padlo? jaká je pravděpodobnost, že to bude číslo větší než 4?
+**Člověče nezlob se:** házíme 1 x kostkou. Jaké jsou možnosti, co nám padne? Co nám reálně padlo? jaká je pravděpodobnost, že to bude číslo větší než 4?
 
 **Karty:**  Z balíčku 52 karet (žolíkové, 4 typy, 8 stypňů každéhy typu) vybereme kartu.  Kolik možností máme, když nás zajímá jenom barva? Jakou barvu jsme vylosovali? Jaká je pravděpodobnost, že vybereme zelené?
 
+::: {.callout-note collapse="true"}
+## Další příklady 
 
 **Pojišťovna:** Rodina jede autem na dovolenou, má nehodu. Kolik osob může mít zranění (kolik je v autě osob)?. Kolik jich reálně zranění má? Jaká je pravděpodobnost, že nebude zraněn nikdo?
 
@@ -19,7 +18,7 @@ Nejprvě několik příkladů s různým kontextem
 **Reklama:** prohlížíme web, na něm je reklamní banner. Můžeme ho ignorovat  nebo na něj kliknout. Kliknul jsi na něj? jaká je pravděpodobnost, že na něj návštěvník stránky klikne?
 
 **Stromy:** máme les vysazený před dvaceti lety. Jaká je výška stromů v tomto lese? Kolik měří nejbližší strom? Jaká je pravděpodobnost, že strom bude vyšší než 50 metrů?
-
+:::
 
 Zkusme tyto situace zobecnit a formalizovat. 
 
@@ -32,7 +31,7 @@ Zkusme tyto situace zobecnit a formalizovat.
 : Základní pojmy a jejich definice {#tbl-definice}
 
 ::: {.example-box}
-| Příklad | Základní množina ($\Omega$) | Elementární Jev ($\omega$) | nastal jev ($A$)? |
+| Příklad | Základní množina $\Omega$ | Elementární Jev $\omega$ | nastal jev $A$? |
 |:---|:---|:---|:---|
 | **Člověčec nezlob se**    | $\{  1, 2, 3, 4, 5, 6 \}$         | Padla 4           | Padlo sudé číslo ? |
 | **Karty **                | {srdce, káry, piky, kříže}         | Vybralo se srdce           | Vybraly se kříže? |
@@ -41,7 +40,7 @@ Zkusme tyto situace zobecnit a formalizovat.
 | **Bonbóny**               | $\{$ červený (Red), zelený (Green) $\}$   | vybraný je zelený | Je vybraný zelený? |
 | **Reklama**               | $\{$ ano, ne $\}$                 | ano, kliknul      | kliknul?|
 | **Stromy**                | $(40, 80)$ metrů                  | strom měří 55,4m  | je strom větší než 60 m? |
-: Základní pojmy a jejich příklady {#tbl-pojmypriklady}
+: Základní pojmy a jejich příklady {#02-tbl-pojmypriklady}
 :::
 
 
@@ -95,7 +94,7 @@ $$P(a\cap b)=P(a)\cdot P(b|a)$$
 
 Následujcí vzorce platí jak pro pravděpodobnosti empirické, tak pro teoretické
 
-| Zkoumaný jev |Vzorec |
+| Zkoumaný jev |Pravděpodobnost|
 |:---|:---| 
 |Hodnoty|$0\leq P(a) \leq 1$ |
 |Doplněk (vše ostatní než $a$)                 |$P(\bar{a})=1-P(a)$|

@@ -16,24 +16,19 @@ $$P(\text{sudé}) = \frac{|A|}{|\Omega|}=\frac{3}{6} = 0.5$$
 
 Takto definované pravděpodobnost je založena na principu **stejně pravděpodobných možných výsledků**. Ale co když výsledky nejsou stejně pravděpodobné, naříklad kdybychom stěny kostky přelepili tak, že strany 1 a 2 by byly modré a stěny 3,4, 5 a 6 červené? Pak pravděpodobnost červené > pravděpodobnost modré! Na základním proincipu to však nic nemění protože máme možnosti $\Omega= \{m,m,c,c,c,c\}$, a pravděpodobnost jedné modré je stále stejná jako jakékoli jiné strany. 
 
-Takto pojatá definice pravděpodobnosti byla prokazatelně používána již od 16. století, ale její kodifikovaná verze je připisována [Pierru Laplaceovi]{.smallcaps}. 
+Takto pojatá definice pravděpodobnosti byla prokazatelně používána již od 16. století, ale její kodifikovaná verze je připisována [Pierru Laplaceovi (1749-1827)]{.smallcaps}. 
 
 
 
 :::{.callout-caution}
-Uvedený příklad vychází z tradičního pojetí, jak bylo toto pojetí Laplacem a dalšími upřesněno a zobecňováno uvidíme v dalších kapitolách.
+Uvedený příklad vychází z tradičního pojetí. O tom, jak bylo toto pojetí Laplacem a dalšími upřesněno a zobecněno, viz [kapitola o základních pojmech a pravidlech pravděpodobnosti](02-prst-pravidla.qmd).
 :::
 
 
 ## "Zákon velkých čísel"
 
-Pravděpodobnost často chápeme intuitivně jako míru nejistoty v náhodných jevech – například pravděpodobnost, že při hodu férovou mincí padne panna. Ale co přesně znamená pravděpodobnost 50%? [Jacob Bernoulli]{.smallcaps}, jeden z prvních matematiků, kteří se tímto problémem systematicky zabývali, navrhl, že pravděpodobnost je něco, co se projevuje v dlouhodobém opakování pokusu. Představte si, že házíte mincí tisíckrát: i když v prvních deseti hodech může padnout lev osmkrát, s rostoucím počtem hodů se poměr lvů výrazně blíží k 1/2. 
+Pravděpodobnost často chápeme intuitivně jako míru nejistoty v náhodných jevech – například pravděpodobnost, že při hodu férovou mincí padne panna. Ale co přesně znamená pravděpodobnost 50%? [Jacob Bernoulli (1655-1705)]{.smallcaps}, jeden z prvních matematiků, kteří se tímto problémem systematicky zabývali, navrhl, že pravděpodobnost je něco, co se projevuje v dlouhodobém opakování pokusu. Představte si, že házíte mincí tisíckrát: i když v prvních deseti hodech může padnout lev osmkrát, s rostoucím počtem hodů se poměr lvů výrazně blíží k 1/2. 
 
-::: {.column-margin}
-<!-- ![Jacob Bernoulli]() -->
-**Jacob Bernoulli**
-*1655 – 1705, Basilej*
-:::
 
 Přidávejte si počet hodů a sledujte, jak se "roztřesená" pozorovaná data postupně uklidňují na teoretické hodnotě $p = 0.5$.
 
@@ -162,13 +157,13 @@ Rozlišujeme dva hlavní způsoby, jak nahlížet na pravděpodobnost výsledku.
 
 | Název| Logika | Vzorec | Klíčová postava |
 |:---|:---:|:---|:---|
-| **a priori**, teoretická|  prst $\to$ experiment | $P(A) = \frac{|A|}{|\Omega|}$ | Pierre-Simon Laplace |
-| **a posteriori**, empirická| experiment  $\to$ prst| $P(A)=\lim_{n\to \infty}\frac{n_A}{n}$ | Jacob Bernouli|
-: Srovnání teoretického (a priori) a empirického (a posteriori) přístupu k pravděpodobnosti {#tbl-pravdepodobnost}
+| **a priori**, teoretická|  prst $\to$ experiment | $P(A) = \frac{|A|}{|\Omega|}$ | J.S. Laplace |
+| **a posteriori**, empirická| experiment  $\to$ prst| $P(A)=\lim_{n\to \infty}\frac{n_A}{n}$ | J.  Bernouli|
+: Srovnání teoretického (a priori) a empirického (a posteriori) přístupu k pravděpodobnosti {#tbl-01-pravdepodobnost}
 
 ---
 
-Jak vidíme v @tbl-pravdepodobnost, každý přístup má své historické ukotvení využití. Laplaceův přístup je ideální pro hazardní hry a symetrické systémy, zatímco Bernouliův přístup je vodný pro neznámé ale pevně dané pravděpodobnosti.
+každý přístup má ejen své historické ukotvení a také praktické využití. **Laplaceův přístup** je ideální např pro sázení na výhru při losování, zatímco **Bernouliův přístup** je vhodný např na určwení výše pojistného pro zahraniční cestu (prast úrazu při cestách pro velké množství pojištěnců konverguje k hodnotě, kterou neznáme).
 
 ## Shrnutí
 

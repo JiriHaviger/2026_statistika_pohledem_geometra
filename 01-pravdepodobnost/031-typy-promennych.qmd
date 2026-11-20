@@ -1,0 +1,184 @@
+# Typy proměnných
+
+Než začneme popisovat, s jakou pravděpodobností veličina nabývá svých hodnot, musíme se shodnout na tom, **jakého druhu ty hodnoty jsou**. Od toho se odvíjí, co s nimi smíme počítat a jak je správně nakreslit.
+
+## Od kategorií k číslům
+
+Náhodný pokus končí nějakým výsledkem: padne líc, vytáhneme modrou kuličku, zákazník je spokojený. Takové výsledky jsou často slova, nikoli čísla. **Náhodná veličina** $X$ je pravidlo, které každému výsledku pokusu přiřadí číslo:
+
+$$X:\ \Omega \to \mathbb{R}.$$
+
+Díky tomu můžeme výsledky sčítat, průměrovat a kreslit na osu $x$. Přiřazení čísel ale **není jednoznačné** a ne každé je smysluplné. U mince můžeme položit $X(\text{líc})=1$ a $X(\text{rub})=0$. Stejně dobře by fungovalo $5$ a $7$, jenže rozdíl $7-5$ nic neznamená. Co s čísly smíme dělat, říká typ proměnné.
+
+## Čtyři základní typy
+
+**Nominální proměnná** pouze pojmenovává. Příklady jsou krevní skupina, kraj bydliště nebo pohlaví. Pořadí kategorií je libovolné: když je prohodíme, informace zůstane stejná. Zvláštním případem je **dichotomická** (binární) proměnná, která má jen dvě hodnoty (úspěch/neúspěch, ano/ne). Jakmile jim přiřadíme čísla $1$ a $0$, získáme veličinu, kterou známe z Bernoulliho pokusu: $P(X=1)=\pi$, $P(X=0)=1-\pi$. Je to nejjednodušší možné rozdělení a stavební kámen mnoha dalších.
+
+**Ordinální proměnná** má kategorie s jasným pořadím, ale **neznámými rozestupy**. Příklady jsou známka ve škole, spokojenost (nízká, střední, vysoká) nebo pořadí v závodě. Víme, že druhý doběhl před třetím, ale nevíme, o kolik.
+
+**Kardinální diskrétní proměnná** nabývá izolovaných číselných hodnot a rozestupy mezi nimi mají smysl. Příklady jsou počet dětí v rodině nebo počet šestek v deseti hodech. Mezi jedním a dvěma dětmi nic nenajdeme.
+
+**Kardinální spojitá proměnná** může nabývat jakékoli hodnoty v intervalu, například výška, doba čekání nebo teplota. Mezi libovolnými dvěma hodnotami leží nekonečně mnoho dalších. Spojitým veličinám se věnuje kapitola o spojitém rozdělení.
+
+Nominální a ordinální proměnné jsou **kvalitativní** (kategoriální). Obě kardinální jsou **kvantitativní**, což se také označuje jako **metrické** nebo **škála**. Kvantitativní proměnné se dále dělí podle toho, zda mají smysluplnou nulu:
+
+- **intervalová** proměnná nemá pevnou nulu, mají smysl rozdíly, ale ne podíly. Příkladem je teplota ve stupních Celsia: $20\,^\circ\mathrm{C}$ není „dvakrát tepleji“ než $10\,^\circ\mathrm{C}$.
+- **poměrová** proměnná má nulu danou věcně (věk, příjem, hmotnost, rychlost), takže smysl mají i podíly: $20$ kg je dvakrát víc než $10$ kg.
+
+## Co s jednotlivými typy smíme
+
+Každý další typ „umí“ všechno, co předchozí, a něco navíc.
+
+| typ | co lze určit | příklady | typické statistiky |
+|:---|:---|:---|:---|
+| nominální | rovnost $A=B$, počet | (ne)úspěch, kraj, krevní skupina | četnost, relativní četnost, modus |
+| ordinální | porovnání $A<B$ | vzdělání, spokojenost, pořadí | navíc medián, percentily |
+| kardinální intervalová | rozdíly $A-B$ | teplota, datum | navíc průměr, rozptyl |
+| kardinální poměrová | podíly $A/B$ | věk, příjem, hmotnost | navíc geometrický průměr |
+
+: Povolené operace a vhodné statistiky podle typu proměnné {#tbl-typy}
+
+Průměr pořadí v závodě nebo průměr krevních skupin nemá smysl, i když počítač ochotně vypočítá číslo.
+
+## Popisná statistika z dat: tabulka četností
+
+Pro diskrétní proměnné (nominální, ordinální i kardinální diskrétní) je základním nástrojem **tabulka četností**. Tady je počet dětí ve 20 náhodně vybraných domácnostech.
+
+```{ojs}
+//| echo: false
+import {C, gradient, plotStyle} from "../assets/jhrules.js"
+
+deti31 = [0, 1, 1, 2, 0, 1, 2, 1, 3, 1, 0, 2, 1, 2, 1, 0, 1, 4, 2, 1]
+
+freq31 = {
+  const counts = d3.rollup(deti31, v => v.length, d => d);
+  const sorted = Array.from(counts, ([x, n]) => ({x, n})).sort((a, b) => a.x - b.x);
+  let cum = 0;
+  return sorted.map(d => {
+    cum += d.n;
+    return {x: d.x, n: d.n, rel: d.n / deti31.length, cumRel: cum / deti31.length};
+  });
+}
+
+Inputs.table(freq31.map(d => ({
+  "Počet dětí x": d.x,
+  "Četnost n": d.n,
+  "Relativní četnost": d.rel.toFixed(2).replace(".", ","),
+  "Kumulativní rel. četnost": d.cumRel.toFixed(2).replace(".", ",")
+})), {layout: "auto", select: false})
+```
+
+Průměr je ${d3.mean(deti31).toFixed(2).replace(".", ",")} dítěte na domácnost a medián ${d3.median(deti31)}. Relativní četnosti jsou odhady pravděpodobností $P(X=x)$. Pravděpodobnostní rozdělení je tedy „ideální tabulka četností“ pro nekonečně mnoho opakování.
+
+## Graf podle typu proměnné
+
+Typ proměnné určuje i graf.
+
+**Nominální proměnná**: sloupce, jejichž pořadí je libovolné (hodí se seřadit podle velikosti).
+
+```{ojs}
+//| echo: false
+krev31 = [
+  {kat: "A", p: 0.42}, {kat: "0", p: 0.33},
+  {kat: "B", p: 0.18}, {kat: "AB", p: 0.07}
+]
+
+Plot.plot({
+  width,
+  height: 220,
+  style: plotStyle,
+  x: {label: "Krevní skupina", domain: krev31.map(d => d.kat)},
+  y: {grid: true, label: "Pravděpodobnost", domain: [0, 0.5]},
+  marks: [
+    Plot.barY(krev31, {x: "kat", y: "p", fill: C.primary}),
+    Plot.ruleY([0], {stroke: C.context})
+  ]
+})
+```
+
+**Ordinální proměnná**: sloupce v pevném pořadí kategorií. Mezery mezi sloupci připomínají, že vzdálenosti mezi kategoriemi neznáme.
+
+```{ojs}
+//| echo: false
+spok31 = [
+  {kat: "nízká", p: 0.15}, {kat: "střední", p: 0.50}, {kat: "vysoká", p: 0.35}
+]
+
+Plot.plot({
+  width,
+  height: 220,
+  style: plotStyle,
+  x: {label: "Spokojenost", domain: spok31.map(d => d.kat)},
+  y: {grid: true, label: "Pravděpodobnost", domain: [0, 0.6]},
+  marks: [
+    Plot.barY(spok31, {x: "kat", y: "p", fill: C.primary}),
+    Plot.ruleY([0], {stroke: C.context})
+  ]
+})
+```
+
+**Kardinální diskrétní proměnná**: tady jsou na ose skutečná čísla, takže jsou možné dva grafy.
+
+```{ojs}
+//| echo: false
+deti31p = [
+  {x: 0, p: 0.20}, {x: 1, p: 0.45}, {x: 2, p: 0.25},
+  {x: 3, p: 0.08}, {x: 4, p: 0.02}
+]
+
+Plot.plot({
+  width,
+  height: 220,
+  style: plotStyle,
+  x: {label: "Počet dětí", type: "band"},
+  y: {grid: true, label: "Pravděpodobnost", domain: [0, 0.5]},
+  marks: [
+    Plot.barY(deti31p, {x: "x", y: "p", fill: C.primary}),
+    Plot.ruleY([0], {stroke: C.context})
+  ]
+})
+```
+
+```{ojs}
+//| echo: false
+Plot.plot({
+  width,
+  height: 220,
+  style: plotStyle,
+  x: {label: "Počet dětí", domain: [-0.5, 4.5]},
+  y: {grid: true, label: "Pravděpodobnost", domain: [0, 0.5]},
+  marks: [
+    Plot.ruleX(deti31p, {x: "x", y1: 0, y2: "p", stroke: C.context, strokeDasharray: "2,2"}),
+    Plot.dot(deti31p, {x: "x", y: "p", fill: C.primary, r: 5}),
+    Plot.ruleY([0], {stroke: C.context})
+  ]
+})
+```
+
+- **Sloupcový graf** je vizuálně příjemnější. Pokud má sloupec šířku 1, jeho plocha odpovídá pravděpodobnosti.
+- **Bodový graf** je matematicky přesnější. Zdůrazňuje, že hodnoty mezi body mají nulovou pravděpodobnost, například $P(X=1{,}3)=0$.
+
+U spojitých proměnných se oba grafy nahradí histogramem a křivkou hustoty (viz kapitola o spojitém rozdělení).
+
+## Zařaďte: procvičení
+
+Určete typ proměnné.
+
+1. Pořadí běžce v cíli závodu.
+2. Teplota vzduchu ve stupních Celsia.
+3. Poštovní směrovací číslo.
+4. Počet dětí v rodině.
+
+<details>
+<summary>Řešení</summary>
+
+1. **Ordinální.** Pořadí známe, ale rozdíly časů mezi místy mohou být zcela různé.
+2. **Kardinální spojitá, intervalová.** Rozdíly mají smysl, nula je dohodnutá, ne věcná.
+3. **Nominální.** Je to sice číslo, ale jen jako štítek. Sčítat PSČ ani počítat jejich průměr nedává smysl.
+4. **Kardinální diskrétní, poměrová.** Nula dětí je skutečná nula a čtyři děti jsou dvakrát víc než dvě.
+
+</details>
+
+## Typ proměnné a pravděpodobnostní rozdělení
+
+Typ proměnné říká, jakého druhu hodnoty veličina nabývá. Otázku, **s jakou pravděpodobností** je nabývá, a jak tu informaci zapsat přehledně a úplně, řeší pravděpodobnostní rozdělení (viz [kapitola o rozdělení pravděpodobnosti diskrétní veličiny](032-rozdeleni-diskretni-veliciny.qmd)).

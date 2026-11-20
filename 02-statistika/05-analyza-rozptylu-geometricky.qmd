@@ -29,7 +29,7 @@ Model stavíme pouze pro naše data, proto používáme značení $b_0$
 
 indexujeme nulou, abycho mohli rozšířit model o další vstupní proměnné s parametry $b_1, b_2, ...$. 
 
-Odhady parametrů pro populaci najderte v kapitle týkající se inference, specificky regresní analýzy. Tam budeme používat značení $\beta_0, \beta_1, ...$, pro populační parametry a $\hat{\beta}_0, \hat{\beta}_1, ...$ pro odhady populačních
+Odhady parametrů pro populaci viz kapitola o inferenci, konkrétně o regresní analýze, kde se používá značení $\beta_0, \beta_1, ...$, pro populační parametry a $\hat{\beta}_0, \hat{\beta}_1, ...$ pro odhady populačních
 parametrů na základě dat.
 :::
 

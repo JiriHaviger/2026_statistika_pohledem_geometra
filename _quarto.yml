@@ -24,7 +24,8 @@ book:
       chapters:
         - 01-pravdepodobnost/01-klasicka-prst.qmd
         - 01-pravdepodobnost/02-prst-pravidla.qmd
-        - 01-pravdepodobnost/03-prst-distribuce.qmd
+        - 01-pravdepodobnost/031-typy-promennych.qmd
+        - 01-pravdepodobnost/032-rozdeleni-diskretni-veliciny.qmd
         - 01-pravdepodobnost/04-prst-diskretni.qmd
     - part: "**Deskriptivní statistika**"
       chapters:

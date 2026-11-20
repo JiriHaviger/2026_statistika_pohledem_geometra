@@ -1,10 +1,12 @@
 # Od pravděpodobnosti výsledku k pravděpodobnostnímu rozdělení
 
-V předchozích kapitolách jsme se zabývali pravděpodobností jednotlivých výsledků náhodných pokusů. Nyní se podíváme na to, jak tyto jednotlivé pravděpodobnosti spojit do celkového obrazu všech možných výsledků a jejich pravděpodobností. K tomu nám slouží koncept, který nazýváme **pravděpodobnostní rozdělení** (nebo pravděpodobnostní **distribuce**).
+Jak tyto jednotlivé pravděpodobnosti spojit do celkového obrazu všech možných výsledků a jejich pravděpodobností? 
 
-## Co je pravděpodobnostní rozdělení?
+K odpovědi na tuto otázku slouží koncept, který nazýváme **rozdělení pravděpodobností** (nebo pravděpodobnostní **distribuce**).
 
-Pravděpodobnostní rozdělení je způsob, jakým jsou pravděpodobnosti jednotlivých výsledků náhodného pokusu uspořádány a prezentovány. Máme v podstatě tři možnosti – pomocí tabulky, grafu nebo matematické funkce.
+## Co je rozdělení pravděpodobností?
+
+Rozdělení pravděpodobnosti říká, jak se celková pravděpodobnost 1 rozděluje mezi možné výsledky náhodného pokusu. Zadat ho můžeme třemi způsoby: tabulkou, grafem nebo vzorcem.
 
 ### Základní příklad
 **Kostka**
@@ -49,6 +51,15 @@ Plot.plot({
 })
 ```
 
+Zápis funkcí je zde možný ale ne tak přehledný 
+
+$$
+p(x)=P(X=x)=
+  \begin{cases}
+    \dfrac{x-3}{6}, & x\in\{4,5,6\},\\[6pt]
+    0, & \text{jinak.}
+  \end{cases}
+$$
 
 ### Od kategorií k číslům
 Ne každá „osa x“ je stejná. To, jak graf vypadá, závisí na povaze jevu, který modelujeme:

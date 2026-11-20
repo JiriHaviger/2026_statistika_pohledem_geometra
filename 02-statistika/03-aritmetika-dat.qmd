@@ -9,8 +9,8 @@ V této kapitole si ukážeme, jak reagují jednotlivé statistiky na to když
 
 ## Aritmetika dat
 
-Zůstaňme u příkladu z předchozí lekce: máme deset domácností a sledujeme, jaký mají počet motorových vozidel (automobilů, motocyklů, elektrokoloběžek). Získaná data po uspořádání od nejmenšího po největší jsou $X=\{1, 2, 2, 2, 3, 3, 4, 5, 8, 11\}$.
-O nich víme, že je lze popsat následujícími charakteristikami (zaokrouhlenými na dvě desetinná místa):
+Použijme příklad, kdy máme deset domácností a sledujeme, jaký mají počet motorových vozidel (automobilů, motocyklů, elektrokoloběžek). Získaná data po uspořádání od nejmenšího po největší jsou $X=\{1, 2, 2, 2, 3, 3, 4, 5, 8, 11\}$.
+Tato data lze popsat následujícími charakteristikami (zaokrouhlenými na dvě desetinná místa):
 
 |statistika|$X$|
 |:--|:--|

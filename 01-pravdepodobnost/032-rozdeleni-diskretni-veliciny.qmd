@@ -1,0 +1,162 @@
+# Rozdělení pravděpodobnosti diskrétní veličiny
+
+Pravděpodobnostní rozdělení říká, jak se celková pravděpodobnost $1$ rozděluje mezi možné hodnoty náhodné veličiny. Zde se zabýváme veličinou **diskrétní**, tedy takovou, která nabývá izolovaných hodnot.
+
+## Definice a tři způsoby zadání
+
+Diskrétní náhodná veličina $X$ nabývá hodnot $x_1, x_2, \dots$ s pravděpodobnostmi $p_k=P(X=x_k)$, kde $p_k$ je pravděpodobnost $k$-té hodnoty. Tyto pravděpodobnosti jsou nezáporné a jejich součet je $1$. Rozdělení lze zadat třemi způsoby: **tabulkou**, **grafem** nebo **vzorcem**.
+
+### Příklad: upravená kostka
+
+Kostka má jednu stěnu se čtyřkou, dvě stěny s pětkou a tři stěny se šestkou.
+
+**Tabulkou:**
+
+| $k$ | $x_k$ | $p_k$ |
+|:---:|:---:|:---:|
+| 1 | 4 | 1/6 |
+| 2 | 5 | 2/6 |
+| 3 | 6 | 3/6 |
+
+: Pravděpodobnostní rozdělení kostky tabulkou {#tbl-kostka}
+
+**Grafem:**
+
+```{ojs}
+//| echo: false
+import {C, gradient, plotStyle} from "../assets/jhrules.js"
+
+kostka32 = [
+  {x: 4, p: 1 / 6},
+  {x: 5, p: 2 / 6},
+  {x: 6, p: 3 / 6}
+]
+
+Plot.plot({
+  width,
+  height: 220,
+  style: plotStyle,
+  x: {label: "Výsledek x", type: "band"},
+  y: {grid: true, label: "Pravděpodobnost P(X = x)", domain: [0, 0.6]},
+  marks: [
+    Plot.barY(kostka32, {x: "x", y: "p", fill: C.primary}),
+    Plot.ruleY([0], {stroke: C.context})
+  ]
+})
+```
+
+**Vzorcem:** hodnoty $4,5,6$ mají pravděpodobnost úměrnou $x-3$, proto
+
+$$
+p(x)=P(X=x)=
+  \begin{cases}
+    \dfrac{x-3}{6}, & x\in\{4,5,6\},\\[6pt]
+    0, & \text{jinak.}
+  \end{cases}
+$$
+
+Vzorec je stručný, ale pro čtenáře méně přehledný než tabulka a graf.
+
+## Dvě tváře pravděpodobnosti: bod versus interval
+
+**Pravděpodobnostní funkce** (probability mass function, PMF), $p(x)=P(X=x)$, odpovídá na otázku: „Jaká je pravděpodobnost, že veličina nabude přesně hodnoty $x$?“. U kostky nám $p(5)$ říká, jaká je šance, že padne pětka.
+
+**Distribuční funkce** (cumulative distribution function, CDF), $F(x)=P(X\leq x)$, odpovídá na otázku: „Jaká je pravděpodobnost, že výsledek bude nanejvýš $x$?“. U kostky $F(5)=P(X\leq 5)$ říká, jaká je šance, že padne pětka nebo méně. Platí
+
+$$F(x)=\sum_{k:\,x_k\leq x} p_k.$$
+
+### Grafy PMF a CDF
+
+Posuvníkem vybíráme bod $t$ a sledujeme, jak se v CDF mění hodnota $F(t)$.
+
+```{ojs}
+//| echo: false
+// pravděpodobnostní funkce jako „tyčinky“: nulová čára s prázdnými kolečky, tyčinky s plnými
+Plot.plot({
+  width,
+  height: 220,
+  style: plotStyle,
+  x: {label: "x", domain: [3, 7]},
+  y: {grid: true, label: "p(x) = P(X = x)", domain: [0, 0.6]},
+  marks: [
+    Plot.ruleY([0], {stroke: C.context}),
+    Plot.dot(kostka32, {x: "x", y: 0, r: 4, fill: "white", stroke: C.context}),
+    Plot.ruleX(kostka32, {x: "x", y1: 0, y2: "p", stroke: C.primary, strokeWidth: 2}),
+    Plot.dot(kostka32, {x: "x", y: "p", r: 5, fill: C.primary})
+  ]
+})
+```
+
+```{ojs}
+//| echo: false
+viewof t32 = Inputs.range([3, 7], {step: 0.05, value: 5.5, label: "Bod t"})
+
+// schody CDF: na každém intervalu [x1, x2) je F konstantní
+schody32 = [
+  {x1: 3, x2: 4, F: 0},
+  {x1: 4, x2: 5, F: 1 / 6},
+  {x1: 5, x2: 6, F: 3 / 6},
+  {x1: 6, x2: 7, F: 1}
+]
+
+Ft32 = d3.sum(kostka32.filter(d => d.x <= t32), d => d.p)
+
+Plot.plot({
+  width,
+  height: 240,
+  style: plotStyle,
+  x: {label: "x", domain: [3, 7]},
+  y: {grid: true, label: "F(x) = P(X ≤ x)", domain: [0, 1.1]},
+  marks: [
+    // vodorovné schody
+    Plot.ruleY(schody32, {x1: "x1", x2: "x2", y: "F", stroke: C.primary, strokeWidth: 2.5}),
+    // plné kolečko na začátku schodu (hodnota zprava spojitá), prázdné na konci (limita zleva)
+    Plot.dot(schody32, {x: "x1", y: "F", fill: C.primary, stroke: C.primary, r: 4}),
+    Plot.dot(schody32.slice(0, -1), {x: "x2", y: "F", fill: "white", stroke: C.primary, r: 4}),
+    // vybraný bod t jako jediný akcentový prvek
+    Plot.ruleX([t32], {y1: 0, y2: Ft32, stroke: C.accent, strokeDasharray: "3,3"}),
+    Plot.dot([{x: t32, y: Ft32}], {x: "x", y: "y", fill: C.accent, r: 5}),
+    Plot.text([{x: t32, y: Ft32}], {x: "x", y: "y", dy: -12, fontWeight: "bold", fill: C.accent,
+                                    text: () => `F(${t32.toFixed(2)}) = ${Ft32.toFixed(3)}`})
+  ]
+})
+```
+
+Všimněte si, že CDF je **spojitá zprava**. V bodě $x=5$ graf „vyskočí“ na hodnotu $F(5)=3/6$ a plné kolečko leží na horním schodu. Prázdné kolečko ukazuje limitu zleva, která je $1/6$. Důvod je, že $P(X\leq 5)=P(X\leq 5{,}5)$: mezi $5$ a $5{,}5$ nepřibyla žádná možná hodnota, takže se pravděpodobnost nezměnila. Výška každého schodu je přesně hodnota $p_k$ v daném bodě.
+
+### Vlastnosti
+
+Pro PMF platí
+
+$$p(x)\geq 0,\qquad \sum_{x} p(x)=1,$$
+
+a pro CDF
+
+$$F \text{ je neklesající},\qquad \lim_{x\to-\infty}F(x)=0,\qquad \lim_{x\to+\infty}F(x)=1,$$
+
+a navíc pro interval $P(a<X\leq b)=F(b)-F(a)$.
+
+## Číselné charakteristiky
+
+Rozdělení lze shrnout několika čísly, která říkají, kde leží „střed“ a jak velký je rozptyl.
+
+**Střední hodnota** $E(X)=\mu$ je očekávaný výsledek při velmi mnoha opakováních:
+
+$$E(X)=\sum_k x_k\, p_k.$$
+
+**Rozptyl** $\operatorname{Var}(X)=\sigma^2$ měří, jak moc se hodnoty rozptylují kolem střední hodnoty:
+
+$$\operatorname{Var}(X)=\sum_k \bigl(x_k-\mu\bigr)^2\, p_k,
+\qquad \sigma=\sqrt{\operatorname{Var}(X)}.$$
+
+**Medián** je hodnota, která rozděluje rozdělení na dvě poloviny: $P(X\leq m)\geq 0{,}5$ a $P(X\geq m)\geq 0{,}5$.
+
+```{ojs}
+//| echo: false
+mean32 = d3.sum(kostka32, d => d.x * d.p)
+var32 = d3.sum(kostka32, d => (d.x - mean32) ** 2 * d.p)
+```
+
+Pro naši kostku vychází $E(X)=$ ${mean32.toFixed(3).replace(".", ",")} a $\operatorname{Var}(X)=$ ${var32.toFixed(3).replace(".", ",")}, tedy $\sigma\approx$ ${Math.sqrt(var32).toFixed(3).replace(".", ",")}. Střední hodnota $16/3$ není hodnotou, které kostka může nabýt. Jde o průměr při velmi mnoha hodech, ne o „nejčastější výsledek“.
+
+U mediánu je kostka poučná: $F(5)=0{,}5$ přesně, takže podmínce vyhovuje každé číslo z intervalu $[5,6]$. Obvykle se volí střed tohoto intervalu, tedy $5{,}5$.
