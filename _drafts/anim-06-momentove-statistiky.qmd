@@ -1,0 +1,201 @@
+# Momentové statistiky – páka, čtverce odchylek, tvar rozdělení
+
+*Draft k posouzení. Cílová kapitola: `02-statistika/02-deskriptivni-statistiky-momenty.qmd`. Podklad: `INTERAKCE_ANIMACE.md`, bod 6.*
+
+## Páka a těžiště, čtverce odchylek
+
+Body na ose jsou závaží. Podpěra se sama posouvá a páka se naklání, dokud podpěra nestojí v průměru.
+Body lze myší přetahovat. Pod osou je ke každému bodu čtverec o straně $e_i = x_i - \bar{x}$.
+Součet ploch čtverců dělený $n$ je rozptyl (v draftu populační, tedy dělený $n$).
+
+```{ojs}
+//| echo: false
+import {C, plotStyle} from "../assets/jhrules.js"
+```
+
+```{ojs}
+//| echo: false
+import {animation, drawText, clamp, ease} from "../assets/anim.js"
+```
+
+```{ojs}
+//| echo: false
+{
+  const H = 400, beamY = 90, axisY = 190;
+  const u = Math.min(38, (width - 80) / 10);        // pixelů na jednotku osy
+  const L0 = (width - 10 * u) / 2;
+  const start = [1.5, 2.5, 3, 5, 8, 9];
+  const mean = (v) => d3.mean(v);
+  const theta = (s) => clamp(0.1 * (mean(s.x) - s.pivot), -0.22, 0.22);
+  // bod na páce otočený kolem podpěry
+  const place = (s, xv, rise) => {
+    const px = L0 + xv * u, pv = L0 + s.pivot * u, a = theta(s);
+    const dx = px - pv, dy = -rise;
+    return [pv + dx * Math.cos(a) - dy * Math.sin(a), beamY + dx * Math.sin(a) + dy * Math.cos(a)];
+  };
+
+  return animation({
+    width, height: H,
+    setup: (prev) => ({x: prev ? start.slice() : start.slice(), pivot: 0.5, grab: -1}),
+    step: (s) => {
+      s.pivot += (mean(s.x) - s.pivot) * 0.025;
+    },
+    pointer: (s, ev) => {
+      if (ev.type === "down") {
+        s.grab = -1;
+        let best = 18;
+        s.x.forEach((xv, i) => {
+          const [px, py] = place(s, xv, 12);
+          const d = Math.hypot(px - ev.x, py - ev.y);
+          if (d < best) { best = d; s.grab = i; }
+        });
+      } else if (ev.type === "move" && ev.pressed && s.grab >= 0) {
+        s.x[s.grab] = clamp((ev.x - L0) / u, 0, 10);
+      } else if (ev.type === "up") {
+        s.grab = -1;
+      }
+    },
+    draw: (ctx, s) => {
+      const m = mean(s.x);
+      const a = theta(s);
+      const pv = L0 + s.pivot * u;
+      // páka
+      const [bx0, by0] = place(s, 0, 0), [bx1, by1] = place(s, 10, 0);
+      ctx.strokeStyle = C.context; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.moveTo(bx0, by0); ctx.lineTo(bx1, by1); ctx.stroke();
+      // podpěra (akcent: průměr)
+      ctx.fillStyle = C.accent;
+      ctx.beginPath();
+      ctx.moveTo(pv, beamY + 4); ctx.lineTo(pv - 14, beamY + 40); ctx.lineTo(pv + 14, beamY + 40);
+      ctx.closePath(); ctx.fill();
+      // závaží
+      s.x.forEach((xv) => {
+        const [px, py] = place(s, xv, 12);
+        ctx.fillStyle = C.primary;
+        ctx.beginPath(); ctx.arc(px, py, 9, 0, 2 * Math.PI); ctx.fill();
+      });
+      drawText(ctx, "páka: podpěra hledá těžiště", L0, 20, {bold: true});
+
+      // osa s body a čtverci odchylek
+      ctx.strokeStyle = C.context; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(L0, axisY); ctx.lineTo(L0 + 10 * u, axisY); ctx.stroke();
+      for (let t = 0; t <= 10; t += 2) {
+        ctx.beginPath(); ctx.moveTo(L0 + t * u, axisY); ctx.lineTo(L0 + t * u, axisY - 5); ctx.stroke();
+        drawText(ctx, String(t), L0 + t * u, axisY - 10, {align: "center", size: 11});
+      }
+      s.x.forEach((xv) => {
+        const e = xv - m, side = Math.abs(e) * u;
+        const left = e < 0 ? L0 + xv * u : L0 + m * u;
+        ctx.fillStyle = C.primary; ctx.globalAlpha = 0.18;
+        ctx.fillRect(left, axisY + 4, side, side);
+        ctx.globalAlpha = 1;
+        ctx.strokeStyle = C.primary; ctx.lineWidth = 1;
+        ctx.strokeRect(left, axisY + 4, side, side);
+        ctx.fillStyle = C.primary;
+        ctx.beginPath(); ctx.arc(L0 + xv * u, axisY, 5, 0, 2 * Math.PI); ctx.fill();
+      });
+      ctx.strokeStyle = C.accent; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(L0 + m * u, axisY - 22); ctx.lineTo(L0 + m * u, axisY + 4 + 5 * u); ctx.stroke();
+      drawText(ctx, `x̄ = ${m.toFixed(2).replace(".", ",")}`, L0 + m * u, axisY - 28, {align: "center", bold: true, color: C.accent});
+    },
+    readout: (s) => {
+      const m = mean(s.x);
+      const ss = d3.sum(s.x, (v) => (v - m) ** 2);
+      return `Součet čtverců = ${ss.toFixed(2).replace(".", ",")}, rozptyl = součet / n = ${(ss / s.x.length).toFixed(2).replace(".", ",")}. Přetáhněte body a sledujte, jak se plochy mění.`;
+    }
+  });
+}
+```
+
+## Vektor odchylek se zkracuje k průměru
+
+Pro zvolené $b_0$ je odchylka každého bodu $e_i = y_i - b_0$. Délka vektoru $\mathbf{e}$ je nejmenší
+právě pro $b_0 = \bar{y}$ (viz kapitola o rozkladu rozptylu).
+
+```{ojs}
+//| echo: false
+y6 = [2, 4, 9, 3, 7]
+ybar6 = d3.mean(y6)
+viewof b06 = Inputs.range([0, 10], {step: 0.1, value: 1, label: "b₀"})
+```
+
+```{ojs}
+//| echo: false
+{
+  const ss = (b) => d3.sum(y6, (v) => (v - b) ** 2);
+  const xs = d3.range(0, 10.01, 0.1);
+  const pts = y6.map((v, i) => ({i: i + 1, v}));
+  const top = Plot.plot({
+    width, height: 190, style: plotStyle,
+    x: {domain: [0, 10], label: "y"},
+    y: {axis: null, domain: [0, 6]},
+    marks: [
+      Plot.link(pts, {x1: "v", x2: b06, y1: "i", y2: "i", stroke: C.context}),
+      Plot.dot(pts, {x: "v", y: "i", r: 6, fill: C.primary}),
+      Plot.ruleX([b06], {stroke: C.accent, strokeWidth: 2}),
+      Plot.text([b06], {x: b06, y: 6, text: (d) => `b₀ = ${d.toFixed(1).replace(".", ",")}`, fill: C.accent, fontWeight: "bold", dy: -6})
+    ]
+  });
+  const bottom = Plot.plot({
+    width, height: 220, style: plotStyle,
+    x: {domain: [0, 10], label: "b₀"},
+    y: {grid: true, label: "‖e‖² = Σ (yᵢ − b₀)²"},
+    marks: [
+      Plot.line(xs.map((b) => ({b, s: ss(b)})), {x: "b", y: "s", stroke: C.primary, strokeWidth: 2}),
+      Plot.dot([{b: ybar6, s: ss(ybar6)}], {x: "b", y: "s", r: 4, fill: C.context}),
+      Plot.dot([{b: b06, s: ss(b06)}], {x: "b", y: "s", r: 7, fill: C.accent})
+    ]
+  });
+  return html`${top}${bottom}<div style="font-size:13px">‖e‖ = ${Math.sqrt(ss(b06)).toFixed(2).replace(".", ",")}, minimum je v průměru ȳ = ${ybar6.toFixed(1).replace(".", ",")} (šedá tečka).</div>`;
+}
+```
+
+## Šikmost a špičatost deformují křivku
+
+Rodina sinh-arcsinh: parametr $\varepsilon$ posouvá hmotu na jednu stranu (šikmost), $\delta$ mění
+těžké konce (špičatost). Šedá čárkovaná čára je normální křivka se stejným průměrem a směrodatnou odchylkou.
+Šikmost a špičatost se počítají numerickou integrací z tvaru křivky.
+
+```{ojs}
+//| echo: false
+viewof eps6 = Inputs.range([-1.5, 1.5], {step: 0.05, value: 0, label: "Asymetrie (ε)"})
+viewof del6 = Inputs.range([0.6, 1.8], {step: 0.05, value: 1, label: "Konce (δ)"})
+```
+
+```{ojs}
+//| echo: false
+shape6 = {
+  const xs = d3.range(-12, 12.001, 0.02);
+  const phi = (z) => Math.exp(-z * z / 2) / Math.sqrt(2 * Math.PI);
+  const f = xs.map((x) => {
+    const z = Math.sinh(del6 * Math.asinh(x) - eps6);
+    return phi(z) * del6 * Math.cosh(del6 * Math.asinh(x) - eps6) / Math.sqrt(1 + x * x);
+  });
+  const h = 0.02, mass = d3.sum(f) * h;
+  const dens = f.map((v) => v / mass);
+  const mu = d3.sum(xs, (x, i) => x * dens[i]) * h;
+  const mom = (k) => d3.sum(xs, (x, i) => (x - mu) ** k * dens[i]) * h;
+  const sd = Math.sqrt(mom(2));
+  return {
+    curve: xs.map((x, i) => ({x, d: dens[i]})),
+    normal: xs.map((x) => ({x, d: phi((x - mu) / sd) / sd})),
+    mu, sd, skew: mom(3) / sd ** 3, kurt: mom(4) / sd ** 4 - 3
+  };
+}
+
+Plot.plot({
+  width, height: 280, style: plotStyle,
+  x: {domain: [-6, 6], label: "x"},
+  y: {axis: null},
+  marks: [
+    Plot.areaY(shape6.curve, {x: "x", y: "d", fill: C.primary, fillOpacity: 0.35}),
+    Plot.line(shape6.curve, {x: "x", y: "d", stroke: C.primary, strokeWidth: 2}),
+    Plot.line(shape6.normal, {x: "x", y: "d", stroke: C.context, strokeDasharray: "5,4"}),
+    Plot.ruleX([shape6.mu], {stroke: C.accent, strokeWidth: 2}),
+    Plot.ruleY([0], {stroke: C.context})
+  ]
+})
+```
+
+Průměr (oranžová svislice) ${shape6.mu.toFixed(2).replace(".", ",")}, směrodatná odchylka ${shape6.sd.toFixed(2).replace(".", ",")},
+šikmost ${shape6.skew.toFixed(2).replace(".", ",")}, nadbytečná špičatost ${shape6.kurt.toFixed(2).replace(".", ",")}.

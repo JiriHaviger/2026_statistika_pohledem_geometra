@@ -1,0 +1,123 @@
+# Klasická pravděpodobnost – animace
+
+*Draft k posouzení. Cílová kapitola: `01-pravdepodobnost/01-klasicka-prst.qmd`. Podklad: `INTERAKCE_ANIMACE.md`, bod 1.*
+
+## Padající body do pásu ε
+
+Každý hod je bod, který padá do sloupce Panna / Orel. Sloupce mají výšku relativní četnosti,
+šedomodrý pás kolem teoretické hodnoty (oranžová čárkovaná čára) je tolerance ε.
+Vpravo se vykresluje trajektorie relativní četnosti Panny. Šedý trychtýř je $\pm 1/\sqrt{n}$.
+Posuvník $\pi$ ukazuje, že četnost konverguje k jiné hodnotě, když mince není spravedlivá
+(šestka na kostce by byla $\pi = 1/6$, tady lze nastavit nejbližší $0{,}15$).
+
+```{ojs}
+//| echo: false
+import {C, plotStyle} from "../assets/jhrules.js"
+```
+
+```{ojs}
+//| echo: false
+import {animation, drawText, clamp} from "../assets/anim.js"
+```
+
+```{ojs}
+//| echo: false
+viewof pi1 = Inputs.range([0.05, 0.95], {step: 0.05, value: 0.5, label: "Prst Panny (π)"})
+viewof eps1 = Inputs.range([0.01, 0.2], {step: 0.01, value: 0.05, label: "Tolerance ε"})
+```
+
+```{ojs}
+//| echo: false
+{
+  const H = 340, top = 24, bot = H - 40, nMax = 600;
+  const yOf = (v) => bot - (bot - top) * v;
+  const xA0 = 50, xA1 = width * 0.30;
+  const xB0 = width * 0.40, xB1 = width - 15;
+  const colW = (xA1 - xA0) / 2;
+  const xOfN = (n) => xB0 + (xB1 - xB0) * n / nMax;
+  const cz = (x) => x.toFixed(3).replace(".", ",");
+
+  return animation({
+    width, height: H,
+    setup: () => ({n: 0, heads: 0, hist: [], drops: []}),
+    step: (s) => {
+      const k = s.n < 30 ? 1 : s.n < 100 ? 2 : 4;
+      for (let i = 0; i < k && s.n < nMax; i++) {
+        const head = Math.random() < pi1;
+        s.n++;
+        if (head) s.heads++;
+        s.hist.push(s.heads / s.n);
+        if (s.drops.length < 30) {
+          s.drops.push({side: head ? 0 : 1, y: top - 6, dx: (Math.random() - 0.5) * colW * 0.5});
+        }
+      }
+      const f = s.n ? s.heads / s.n : 0;
+      for (const d of s.drops) d.y += 18;
+      s.drops = s.drops.filter((d) => d.y < yOf(d.side === 0 ? f : 1 - f));
+    },
+    draw: (ctx, s) => {
+      const f = s.n ? s.heads / s.n : 0;
+      // mřížka a osa y (společná pro oba panely)
+      for (const v of [0, 0.5, 1]) {
+        ctx.strokeStyle = C.grid; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(xA0, yOf(v)); ctx.lineTo(xB1, yOf(v)); ctx.stroke();
+        drawText(ctx, String(v).replace(".", ","), xA0 - 8, yOf(v) + 4, {align: "right"});
+      }
+      // pás π ± ε v obou panelech
+      const bandTop = yOf(Math.min(1, pi1 + eps1)), bandBot = yOf(Math.max(0, pi1 - eps1));
+      ctx.fillStyle = C.primaryLight; ctx.globalAlpha = 0.35;
+      ctx.fillRect(xA0, bandTop, xA1 - xA0, bandBot - bandTop);
+      ctx.fillRect(xB0, bandTop, xB1 - xB0, bandBot - bandTop);
+      ctx.globalAlpha = 1;
+      // teoretická hodnota
+      ctx.strokeStyle = C.accent; ctx.lineWidth = 1.5; ctx.setLineDash([6, 4]);
+      ctx.beginPath(); ctx.moveTo(xA0, yOf(pi1)); ctx.lineTo(xA1, yOf(pi1));
+      ctx.moveTo(xB0, yOf(pi1)); ctx.lineTo(xB1, yOf(pi1)); ctx.stroke();
+      ctx.setLineDash([]);
+      drawText(ctx, `π = ${String(pi1).replace(".", ",")}`, xB1, yOf(pi1) - 6, {align: "right", color: C.accent, bold: true});
+      // sloupce Panna / Orel
+      [[0, f, "Panna"], [1, 1 - f, "Orel"]].forEach(([side, v, label]) => {
+        const cx = xA0 + colW * (side + 0.5);
+        ctx.fillStyle = C.primary;
+        ctx.fillRect(cx - colW * 0.3, yOf(v), colW * 0.6, bot - yOf(v));
+        drawText(ctx, label, cx, bot + 16, {align: "center"});
+      });
+      // padající body
+      ctx.fillStyle = C.primary;
+      for (const d of s.drops) {
+        ctx.beginPath();
+        ctx.arc(xA0 + colW * (d.side + 0.5) + d.dx, d.y, 3, 0, 2 * Math.PI);
+        ctx.fill();
+      }
+      // trychtýř ±1/√n
+      ctx.strokeStyle = C.context; ctx.lineWidth = 1;
+      for (const sign of [1, -1]) {
+        ctx.beginPath();
+        for (let n = 4; n <= nMax; n += 2) {
+          const v = clamp(pi1 + sign * 1 / Math.sqrt(n), 0, 1);
+          if (n === 4) ctx.moveTo(xOfN(n), yOf(v)); else ctx.lineTo(xOfN(n), yOf(v));
+        }
+        ctx.stroke();
+      }
+      // trajektorie relativní četnosti
+      ctx.strokeStyle = C.primary; ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      s.hist.forEach((v, i) => {
+        if (i === 0) ctx.moveTo(xOfN(1), yOf(v)); else ctx.lineTo(xOfN(i + 1), yOf(v));
+      });
+      ctx.stroke();
+      // popisky os
+      drawText(ctx, "Relativní četnost", xA0, 14, {bold: true});
+      drawText(ctx, "Vývoj relativní četnosti Panny", xB0, 14, {bold: true});
+      for (const n of [0, 200, 400, 600]) drawText(ctx, String(n), xOfN(n), bot + 16, {align: "center"});
+      drawText(ctx, "počet hodů n", (xB0 + xB1) / 2, bot + 32, {align: "center"});
+    },
+    readout: (s) => {
+      const f = s.n ? s.heads / s.n : 0;
+      const inside = Math.abs(f - pi1) <= eps1;
+      return `n = ${s.n}, Panna ${s.heads}×, relativní četnost ${cz(f)} – ` +
+        (s.n === 0 ? "čeká na první hod" : inside ? "uvnitř pásu π ± ε" : "mimo pás π ± ε");
+    }
+  });
+}
+```

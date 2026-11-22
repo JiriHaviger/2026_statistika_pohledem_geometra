@@ -1,0 +1,80 @@
+# Deskriptivní statistiky z tabulky – stoupající kumulativní četnost
+
+*Draft k posouzení. Cílová kapitola: `02-statistika/04-deskriptivy-z-tabulky.qmd`. Podklad: `INTERAKCE_ANIMACE.md`, bod 8.*
+
+Hledání kvantilu z tabulky: vodorovná hladina stoupá od 0 k zvolenému řádu $p$.
+Sloupec, který jako první dosáhne $F \ge p$, je kvantil (oranžový). Tabulka je ta z kapitoly (hodnocení 1 až 10).
+
+```{ojs}
+//| echo: false
+import {C, plotStyle} from "../assets/jhrules.js"
+```
+
+```{ojs}
+//| echo: false
+import {animation, drawText, clamp, ease} from "../assets/anim.js"
+```
+
+```{ojs}
+//| echo: false
+{
+  const H = 330, L0 = 50, bot = H - 40, top = 28;
+  const xv = d3.range(1, 11);
+  const nv = [2, 3, 5, 10, 15, 25, 30, 40, 45, 25];
+  const N = d3.sum(nv);
+  let c = 0;
+  const F = nv.map((k) => (c += k) / N);
+  const levels = {"0,25 (1. kvartil)": 0.25, "0,50 (medián)": 0.5, "0,75 (3. kvartil)": 0.75};
+
+  return animation({
+    width, height: H,
+    setup: (prev) => ({p: prev ? prev.p : 0.5, level: 0}),
+    step: (s) => {
+      s.level = Math.min(s.p, s.level + 0.006);
+    },
+    controls: (ctl) => {
+      const names = Object.keys(levels);
+      const radio = Inputs.radio(names, {value: names.find((k) => levels[k] === ctl.state.p), label: "Řád p"});
+      radio.addEventListener("input", () => {
+        ctl.state.p = levels[radio.value];
+        ctl.state.level = 0;
+        ctl.running = true;
+      });
+      return radio;
+    },
+    draw: (ctx, s, w) => {
+      const R1 = w - 20, slot = (R1 - L0) / xv.length;
+      const yOf = (v) => bot - (bot - top) * v;
+      // první sloupec, který hladinu dosáhl
+      const hit = F.findIndex((f) => f >= s.level - 1e-9);
+      for (const v of [0, 0.25, 0.5, 0.75, 1]) {
+        ctx.strokeStyle = C.grid; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(L0, yOf(v)); ctx.lineTo(R1, yOf(v)); ctx.stroke();
+        drawText(ctx, String(v).replace(".", ","), L0 - 8, yOf(v) + 4, {align: "right"});
+      }
+      F.forEach((f, i) => {
+        const x = L0 + slot * i;
+        // pod hladinou modře, první sloupec, který hladinu dosáhl, oranžově, zbytek šedě
+        ctx.fillStyle = s.level === 0 || i < hit ? C.primary : i === hit ? C.accent : C.contextLight;
+        ctx.fillRect(x + slot * 0.1, yOf(f), slot * 0.8, bot - yOf(f));
+        drawText(ctx, String(xv[i]), x + slot / 2, bot + 16, {align: "center"});
+      });
+      // hladina
+      ctx.strokeStyle = C.accent; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(L0, yOf(s.level)); ctx.lineTo(R1, yOf(s.level)); ctx.stroke();
+      drawText(ctx, `hladina ${s.level.toFixed(2).replace(".", ",")}`, R1, yOf(s.level) - 6, {align: "right", bold: true, color: C.accent});
+      drawText(ctx, "kumulativní relativní četnost F", L0, 16, {bold: true});
+    },
+    readout: (s) => {
+      const hit = F.findIndex((f) => f >= s.p - 1e-9);
+      return s.level >= s.p - 1e-9
+        ? `Kvantil řádu ${String(s.p).replace(".", ",")} je ${xv[hit]}: F(${xv[hit]}) = ${F[hit].toFixed(2).replace(".", ",")} ≥ ${String(s.p).replace(".", ",")}.`
+        : "Hladina stoupá a zastaví se na první hodnotě, kde F dosáhne řádu p …";
+    }
+  });
+}
+```
+
+Poznámka: u mediánu a kvartilů z tabulky se v některých definicích při přesné shodě $F = p$ průměrují dvě sousední
+hodnoty. Draft používá jednoduché pravidlo „první hodnota s $F \ge p$“, před zařazením do kapitoly je třeba sladit
+s definicí, kterou kapitola používá.

@@ -1,0 +1,156 @@
+# Rozdělení diskrétní veličiny – od PMF k CDF
+
+*Draft k posouzení. Cílová kapitola: `01-pravdepodobnost/032-rozdeleni-diskretni-veliciny.qmd`. Podklad: `INTERAKCE_ANIMACE.md`, bod 3b.*
+
+Vyberte kostku. Sloupce PMF se jeden po druhém „stohují“ do schodovité CDF. Potom se z hodů
+simuluje empirická CDF a přilepí se k teoretické. Pro „vlastní“ kostku zadejte váhy stěn,
+program je přepočítá tak, aby součet pravděpodobností byl 1.
+
+```{ojs}
+//| echo: false
+import {C, plotStyle} from "../assets/jhrules.js"
+```
+
+```{ojs}
+//| echo: false
+import {animation, drawText, clamp, ease} from "../assets/anim.js"
+```
+
+```{ojs}
+//| echo: false
+viewof model32 = Inputs.select(
+  ["Spravedlivá kostka", "Falešná kostka (šestka 3× častější)", "Dvě kostky – součet", "Vlastní váhy"],
+  {label: "Rozdělení"}
+)
+viewof weights32 = Inputs.form(
+  [1, 2, 3, 4, 5, 6].map((k) => Inputs.range([0, 10], {step: 1, value: 1, label: `váha stěny ${k}`}))
+)
+```
+
+```{ojs}
+//| echo: false
+dist32 = {
+  let vals, w;
+  if (model32.startsWith("Dvě")) {
+    vals = d3.range(2, 13);
+    w = vals.map((s) => 6 - Math.abs(s - 7));
+  } else {
+    vals = [1, 2, 3, 4, 5, 6];
+    w = model32.startsWith("Falešná") ? [1, 1, 1, 1, 1, 3]
+      : model32 === "Vlastní váhy" ? weights32 : [1, 1, 1, 1, 1, 1];
+  }
+  const total = d3.sum(w);
+  // všechny váhy nulové: vrátíme spravedlivé, ať se nedělí nulou
+  const p = total > 0 ? w.map((x) => x / total) : w.map(() => 1 / w.length);
+  const cdf = p.map((_, i) => d3.sum(p.slice(0, i + 1)));
+  return {vals, p, cdf};
+}
+```
+
+```{ojs}
+//| echo: false
+{
+  const H = 330, top = 28, bot = H - 40;
+  const {vals, p, cdf} = dist32;
+  const K = vals.length;
+  const yOf = (v, ymax) => bot - (bot - top) * v / ymax;
+  const stackTicks = 40;           // délka stohování jednoho sloupce
+  const cz = (x) => x.toFixed(3).replace(".", ",");
+
+  return animation({
+    width, height: H,
+    setup: () => ({t: 0, n: 0, counts: new Array(K).fill(0)}),
+    step: (s) => {
+      if (s.t < K * stackTicks) {
+        s.t += 1;
+      } else {
+        const per = s.n < 50 ? 1 : s.n < 300 ? 3 : 8;
+        for (let i = 0; i < per && s.n < 3000; i++) {
+          let u = Math.random(), j = 0;
+          while (j < K - 1 && u > cdf[j]) j++;
+          s.counts[j]++;
+          s.n++;
+        }
+      }
+    },
+    draw: (ctx, s, w) => {
+      const gap = 60;
+      const half = (w - gap - 60) / 2;
+      const L0 = 50, R0 = L0 + half + gap;
+      const bw = half / K;
+      const pmax = Math.max(...p, 0.01) * 1.15;
+      const stacking = s.t < K * stackTicks;
+      const cur = Math.min(K - 1, Math.floor(s.t / stackTicks));
+      const frac = ease((s.t % stackTicks) / stackTicks);
+
+      // PMF vlevo
+      drawText(ctx, "PMF  P(X = x)", L0, 16, {bold: true});
+      ctx.strokeStyle = C.grid; ctx.lineWidth = 1;
+      for (const v of [0, pmax / 1.15]) {
+        ctx.beginPath(); ctx.moveTo(L0, yOf(v, pmax)); ctx.lineTo(L0 + half, yOf(v, pmax)); ctx.stroke();
+        drawText(ctx, v.toFixed(2).replace(".", ","), L0 - 6, yOf(v, pmax) + 4, {align: "right"});
+      }
+      vals.forEach((v, i) => {
+        const x = L0 + bw * i;
+        ctx.fillStyle = stacking && i === cur ? C.accent : C.primary;
+        ctx.fillRect(x + bw * 0.12, yOf(p[i], pmax), bw * 0.76, bot - yOf(p[i], pmax));
+        drawText(ctx, String(v), x + bw / 2, bot + 16, {align: "center"});
+      });
+
+      // CDF vpravo
+      drawText(ctx, "CDF  F(x) = P(X ≤ x)", R0, 16, {bold: true});
+      ctx.strokeStyle = C.grid;
+      for (const v of [0, 0.5, 1]) {
+        ctx.beginPath(); ctx.moveTo(R0, yOf(v, 1.05)); ctx.lineTo(R0 + half, yOf(v, 1.05)); ctx.stroke();
+        drawText(ctx, String(v).replace(".", ","), R0 - 6, yOf(v, 1.05) + 4, {align: "right"});
+      }
+      vals.forEach((v, i) => drawText(ctx, String(v), R0 + bw * i + bw / 2, bot + 16, {align: "center"}));
+
+      // stohované sloupce: i-tý roste z F(i-1) do F(i)
+      const lastDone = stacking ? cur : K;
+      for (let i = 0; i < lastDone; i++) {
+        const lo = i === 0 ? 0 : cdf[i - 1];
+        ctx.fillStyle = C.primary; ctx.globalAlpha = 0.85;
+        ctx.fillRect(R0 + bw * i + bw * 0.12, yOf(cdf[i], 1.05), bw * 0.76, yOf(lo, 1.05) - yOf(cdf[i], 1.05));
+        ctx.globalAlpha = 1;
+      }
+      if (stacking) {
+        const lo = cur === 0 ? 0 : cdf[cur - 1];
+        const hi = lo + p[cur] * frac;
+        ctx.fillStyle = C.accent;
+        ctx.fillRect(R0 + bw * cur + bw * 0.12, yOf(hi, 1.05), bw * 0.76, yOf(lo, 1.05) - yOf(hi, 1.05));
+      }
+      // schodovitá čára teoretické CDF
+      const stairs = (F, color, width2, dash) => {
+        ctx.strokeStyle = color; ctx.lineWidth = width2; ctx.setLineDash(dash);
+        ctx.beginPath();
+        ctx.moveTo(R0, yOf(0, 1.05));
+        F.forEach((v, i) => {
+          ctx.lineTo(R0 + bw * i, yOf(i === 0 ? 0 : F[i - 1], 1.05));
+          ctx.lineTo(R0 + bw * i, yOf(v, 1.05));
+          ctx.lineTo(R0 + bw * (i + 1), yOf(v, 1.05));
+        });
+        ctx.stroke();
+        ctx.setLineDash([]);
+      };
+      if (!stacking) {
+        stairs(cdf, C.context, 1.5, [5, 4]);
+        if (s.n > 0) {
+          let c = 0;
+          const emp = s.counts.map((k) => (c += k) / s.n);
+          stairs(emp, C.accent, 2.5, []);
+        }
+      }
+    },
+    readout: (s) => {
+      if (s.t < K * stackTicks) return "Sloupce PMF se stohují do CDF: F(x) je součet pravděpodobností až do x.";
+      let c = 0, d = 0;
+      s.counts.forEach((k, i) => {
+        c += k;
+        d = Math.max(d, Math.abs(c / s.n - cdf[i]));
+      });
+      return `Simulace: n = ${s.n} hodů, největší vzdálenost empirické a teoretické CDF = ${cz(d)}.`;
+    }
+  });
+}
+```

@@ -1,0 +1,198 @@
+# Typická diskrétní rozdělení – Galtonova deska a Poissonovy body
+
+*Draft k posouzení. Cílová kapitola: `01-pravdepodobnost/04-prst-diskretni.qmd`. Podklad: `INTERAKCE_ANIMACE.md`, bod 4.*
+
+## Galtonova deska (binomické rozdělení)
+
+Kulička v každé řadě hřebíků spadne vpravo s pravděpodobností $\pi$, jinak vlevo.
+Počet odrazů vpravo z $n$ řad je binomická veličina. Oranžové kroužky jsou teoretický počet kuliček
+v přihrádce, modrý sloupec je skutečný počet.
+
+```{ojs}
+//| echo: false
+import {C, plotStyle} from "../assets/jhrules.js"
+```
+
+```{ojs}
+//| echo: false
+import {animation, drawText, clamp, ease} from "../assets/anim.js"
+```
+
+```{ojs}
+//| echo: false
+viewof n4 = Inputs.range([3, 14], {step: 1, value: 8, label: "Počet řad (n)"})
+viewof pi4 = Inputs.range([0.1, 0.9], {step: 0.05, value: 0.5, label: "Prst vpravo (π)"})
+```
+
+```{ojs}
+//| echo: false
+{
+  const H = 420, top = 24;
+  const rowsH = H * 0.5, ly = rowsH / n4;
+  const binTop = top + rowsH + 8, binBot = H - 24;
+  const dx = Math.min((width - 40) / (n4 + 2), 42);
+  const cx = width / 2;
+  const pegX = (r, k) => cx + (k - r / 2) * dx;     // střed kuličky po r řadách a k odrazech vpravo
+  const pegY = (r) => top + r * ly;
+  const maxBalls = 1500, ticksPerRow = 7;
+  // binomická pravděpodobnost
+  const logC = (n, k) => d3.sum(d3.range(1, k + 1), (i) => Math.log((n - i + 1) / i));
+  const pmf = d3.range(0, n4 + 1).map((k) => Math.exp(logC(n4, k) + k * Math.log(pi4) + (n4 - k) * Math.log(1 - pi4)));
+
+  return animation({
+    width, height: H,
+    setup: () => ({balls: [], counts: new Array(n4 + 1).fill(0), launched: 0, tick: 0}),
+    step: (s) => {
+      s.tick++;
+      if (s.tick % 3 === 0 && s.launched < maxBalls) {
+        const bits = d3.range(n4).map(() => Math.random() < pi4 ? 1 : 0);
+        s.balls.push({bits, age: 0});
+        s.launched++;
+      }
+      for (const b of s.balls) b.age++;
+      const alive = [];
+      for (const b of s.balls) {
+        if (b.age >= n4 * ticksPerRow) s.counts[d3.sum(b.bits)]++;
+        else alive.push(b);
+      }
+      s.balls = alive;
+    },
+    draw: (ctx, s) => {
+      // hřebíky
+      ctx.fillStyle = C.contextLight;
+      for (let r = 0; r < n4; r++) {
+        for (let k = 0; k <= r; k++) {
+          ctx.beginPath();
+          ctx.arc(pegX(r, k), pegY(r) + 3, 2.5, 0, 2 * Math.PI);
+          ctx.fill();
+        }
+      }
+      // přihrádky: skutečné počty a teorie
+      const N = s.counts.reduce((a, b) => a + b, 0);
+      const maxCount = Math.max(10, ...s.counts, ...pmf.map((q) => q * N));
+      const u = (binBot - binTop) / maxCount;
+      s.counts.forEach((c, k) => {
+        const x = pegX(n4, k);
+        ctx.fillStyle = C.primary;
+        ctx.fillRect(x - dx * 0.4, binBot - c * u, dx * 0.8, c * u);
+        ctx.strokeStyle = C.accent; ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(x, binBot - pmf[k] * N * u, 4, 0, 2 * Math.PI);
+        ctx.stroke();
+        drawText(ctx, String(k), x, binBot + 15, {align: "center"});
+      });
+      ctx.strokeStyle = C.context; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(pegX(n4, 0) - dx / 2, binBot); ctx.lineTo(pegX(n4, n4) + dx / 2, binBot); ctx.stroke();
+      // kuličky v pohybu
+      ctx.fillStyle = C.primary;
+      for (const b of s.balls) {
+        const row = Math.min(n4 - 1, Math.floor(b.age / ticksPerRow));
+        const f = ((b.age % ticksPerRow) / ticksPerRow);
+        const k = d3.sum(b.bits.slice(0, row));
+        const x0 = pegX(row, k), x1 = pegX(row + 1, k + b.bits[row]);
+        const x = x0 + (x1 - x0) * ease(f);
+        const y = pegY(row) + ly * f - Math.sin(Math.PI * f) * 4;
+        ctx.beginPath(); ctx.arc(x, y, 3.5, 0, 2 * Math.PI); ctx.fill();
+      }
+    },
+    readout: (s) => {
+      const N = s.counts.reduce((a, b) => a + b, 0);
+      return `Kuliček v přihrádkách: ${N}. Teorie: Bi(${n4}; ${String(pi4).replace(".", ",")}), střední hodnota ${(n4 * pi4).toFixed(2).replace(".", ",")}.`;
+    }
+  });
+}
+```
+
+## Poissonovo rozdělení: body padají do časových intervalů
+
+Události přicházejí náhodně v čase (v průměru $\lambda$ na interval). Kurzor jede po ose
+a po každém intervalu se spočítá, kolik bodů v něm bylo. Dole roste histogram těchto počtů,
+oranžové kroužky jsou teoretická Poissonova PMF.
+
+```{ojs}
+//| echo: false
+viewof lam4 = Inputs.range([0.5, 10], {step: 0.5, value: 3, label: "Průměr na interval (λ)"})
+```
+
+```{ojs}
+//| echo: false
+{
+  const H = 340, T = 20, maxK = 20;
+  const L0 = 40, L1 = width - 20;
+  const xT = (t) => L0 + (L1 - L0) * t / T;
+  const axisY = 70, histTop = 130, histBot = H - 28;
+  const logFact = (k) => d3.sum(d3.range(1, k + 1), Math.log);
+  const pmf = d3.range(0, maxK + 1).map((k) => Math.exp(-lam4 + k * Math.log(lam4) - logFact(k)));
+  const speed = 0.12;                    // intervalů na jeden krok
+
+  // události jednoho kola (exponenciální mezery)
+  const newRound = () => {
+    const ev = [];
+    let t = -Math.log(1 - Math.random()) / lam4;
+    while (t < T) {
+      ev.push({t, jitter: Math.random()});
+      t += -Math.log(1 - Math.random()) / lam4;
+    }
+    return ev;
+  };
+
+  return animation({
+    width, height: H,
+    setup: () => ({time: 0, events: newRound(), hist: new Array(maxK + 1).fill(0), done: 0, bins: 0}),
+    step: (s) => {
+      s.time += speed;
+      // intervaly, které právě skončily
+      while (s.done < Math.floor(s.time) && s.done < T) {
+        const c = s.events.filter((e) => e.t >= s.done && e.t < s.done + 1).length;
+        s.hist[Math.min(c, maxK)]++;
+        s.bins++;
+        s.done++;
+      }
+      if (s.time >= T + 1) {
+        s.time = 0; s.done = 0; s.events = newRound();
+      }
+    },
+    draw: (ctx, s) => {
+      // osa času s hranicemi intervalů
+      ctx.strokeStyle = C.context; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(L0, axisY); ctx.lineTo(L1, axisY); ctx.stroke();
+      for (let i = 0; i <= T; i++) {
+        ctx.strokeStyle = C.contextLight; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(xT(i), axisY - 36); ctx.lineTo(xT(i), axisY + 6); ctx.stroke();
+      }
+      drawText(ctx, "čas (intervaly)", L0, 16, {bold: true});
+      // body: padají na osu
+      ctx.fillStyle = C.primary;
+      for (const e of s.events) {
+        if (e.t > s.time) continue;
+        const f = clamp((s.time - e.t) / 0.5, 0, 1);
+        const y = axisY - 32 + (24 + e.jitter * 4) * ease(f);
+        ctx.beginPath(); ctx.arc(xT(e.t), y, 3.5, 0, 2 * Math.PI); ctx.fill();
+      }
+      // kurzor
+      ctx.strokeStyle = C.accent; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(xT(Math.min(s.time, T)), axisY - 40); ctx.lineTo(xT(Math.min(s.time, T)), axisY + 10); ctx.stroke();
+
+      // histogram počtů za interval
+      const bw = (L1 - L0) / (maxK + 1);
+      const maxv = Math.max(0.05, ...pmf) * 1.15;
+      const prop = (c) => (s.bins ? c / s.bins : 0);
+      drawText(ctx, "počet bodů v intervalu", L0, histTop - 14, {bold: true});
+      s.hist.forEach((c, k) => {
+        const x = L0 + bw * k;
+        const h = (histBot - histTop) * prop(c) / maxv;
+        ctx.fillStyle = C.primary;
+        ctx.fillRect(x + bw * 0.1, histBot - h, bw * 0.8, h);
+        ctx.strokeStyle = C.accent; ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(x + bw / 2, histBot - (histBot - histTop) * pmf[k] / maxv, 4, 0, 2 * Math.PI);
+        ctx.stroke();
+        drawText(ctx, String(k), x + bw / 2, histBot + 15, {align: "center", size: 11});
+      });
+      ctx.strokeStyle = C.context; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(L0, histBot); ctx.lineTo(L1, histBot); ctx.stroke();
+    },
+    readout: (s) => `Spočítaných intervalů: ${s.bins}. Teorie: Po(${String(lam4).replace(".", ",")}).`
+  });
+}
+```

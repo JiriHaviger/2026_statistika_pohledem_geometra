@@ -1,0 +1,246 @@
+# Rozklad rozptylu geometricky – prototyp kroků 1 až 5
+
+*Draft k posouzení. Cílová kapitola: `02-statistika/05-analyza-rozptylu-geometricky.qmd`. Podklad: `INTERAKCE_ANIMACE.md`, sekce „Geometrická řada“.*
+
+Dvě pozorování $y_1, y_2$ jsou jeden bod (vektor $\mathbf{y}$) v rovině. Statistiky jsou délky a projekce.
+Tlačítky **Zpět / Přehrát / Další** (nebo tečkami) se prochází pět kroků, tabulka vedle obrázku se mění spolu s ním.
+V kroku 5 lze koncový bod $\mathbf{y}$ myší táhnout. Kroky 6 až 8 (skupiny, 3D pohled s $\mathbf{b}$ a $\mathbf{w}$)
+v tomto prototypu nejsou, podle podkladu se nejdřív ukáže tato část.
+
+```{ojs}
+//| echo: false
+import {C, plotStyle} from "../assets/jhrules.js"
+```
+
+```{ojs}
+//| echo: false
+import {animation, drawText, clamp, ease} from "../assets/anim.js"
+```
+
+```{ojs}
+//| echo: false
+{
+  const H = 380, lo = -8, hi = 12;
+  const P = Math.min(360, width * 0.6);              // strana čtvercové roviny v px
+  const u = P / (hi - lo);
+  const ox = 10, oy = 10;                            // levý horní roh roviny
+  const X = (v) => ox + (v - lo) * u;
+  const Y = (v) => oy + (hi - v) * u;
+  const cz = (v) => v.toFixed(2).replace(".", ",");
+  const stepTitles = [
+    "1. Data jako vektor", "2. Podprostor „samé stejné hodnoty“", "3. Nejbližší bod je průměr",
+    "4. Pythagorova věta", "5. Táhněte bodem y"
+  ];
+  const stepNotes = [
+    "Dvě pozorování y₁, y₂ jsou jediný bod (šipka z počátku). Délka šipky: ‖y‖² = Σ yᵢ².",
+    "Přímka ve směru 1 = (1, 1): každé pozorování má stejné číslo b₀. Posuvníkem pohybujte bodem b₀·1.",
+    "Vzdálenost bodu y od b₀·1 je nejmenší v patě kolmice, a to je průměr ȳ. Tam je Σ d = 0.",
+    "Trojúhelník y, ȳ·1, d je pravoúhlý, plochy čtverců na stranách: ‖y‖² = n·ȳ² + Σ d².",
+    "Měňte y a sledujte: rozptyl (Σ d² / n) je čtverec vzdálenosti od diagonály dělený n."
+  ];
+  let bSlider, bBox, dots = [];
+
+  const ybar = (s) => (s.y[0] + s.y[1]) / 2;
+  const goTo = (s, k) => {
+    s.step = clamp(k, 1, 5);
+    s.t = 0; s.hold = 0;
+    if (s.step === 3) s.b0 = s.play ? 0.5 : s.b0;
+    if (s.step >= 4) s.b0 = ybar(s);
+    sync(s);
+  };
+  const sync = (s) => { if (bSlider) bSlider.value = s.b0; };
+
+  // čtverec na straně P→Q, vně od třetího vrcholu
+  const square = (ctx, p, q, away, fill, alpha, label) => {
+    const v = [q[0] - p[0], q[1] - p[1]];
+    let n = [-v[1], v[0]];
+    if (n[0] * (away[0] - p[0]) + n[1] * (away[1] - p[1]) > 0) n = [-n[0], -n[1]];
+    const pts = [p, q, [q[0] + n[0], q[1] + n[1]], [p[0] + n[0], p[1] + n[1]]];
+    ctx.beginPath();
+    pts.forEach(([a, b], i) => i ? ctx.lineTo(X(a), Y(b)) : ctx.moveTo(X(a), Y(b)));
+    ctx.closePath();
+    ctx.fillStyle = fill; ctx.globalAlpha = alpha; ctx.fill(); ctx.globalAlpha = 1;
+    ctx.strokeStyle = fill; ctx.lineWidth = 1; ctx.stroke();
+    const cx = (pts[0][0] + pts[2][0]) / 2, cy = (pts[0][1] + pts[2][1]) / 2;
+    drawText(ctx, label, X(cx), Y(cy) + 4, {align: "center", bold: true, size: 11});
+  };
+  const rightAngle = (ctx, m, dirA, dirB) => {
+    const k = 0.7, a = [m[0] + dirA[0] * k, m[1] + dirA[1] * k], b = [m[0] + dirB[0] * k, m[1] + dirB[1] * k];
+    ctx.strokeStyle = C.text; ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(X(a[0]), Y(a[1]));
+    ctx.lineTo(X(a[0] + dirB[0] * k), Y(a[1] + dirB[1] * k));
+    ctx.lineTo(X(b[0]), Y(b[1]));
+    ctx.stroke();
+  };
+
+  return animation({
+    width, height: H, buttons: false,
+    setup: (prev) => {
+      const s = {step: prev ? prev.step : 1, t: 0, hold: 0, play: false, y: [7, 3], b0: 2, grab: false};
+      return s;
+    },
+    step: (s) => {
+      s.t = Math.min(1, s.t + 0.05);
+      if (s.step === 3 && s.play && Math.abs(s.b0 - ybar(s)) > 0.01) {
+        s.b0 += Math.sign(ybar(s) - s.b0) * Math.min(0.04, Math.abs(ybar(s) - s.b0));
+        sync(s);
+      } else if (s.play) {
+        s.hold++;
+        if (s.hold > 90) {
+          if (s.step < 5) goTo(s, s.step + 1); else s.play = false;
+        }
+      }
+    },
+    pointer: (s, ev) => {
+      if (s.step !== 5) return;
+      if (ev.type === "down") s.grab = Math.hypot(X(s.y[0]) - ev.x, Y(s.y[1]) - ev.y) < 18;
+      else if (ev.type === "move" && ev.pressed && s.grab) {
+        s.y = [clamp(lo + (ev.x - ox) / u, 0, 10), clamp(hi - (ev.y - oy) / u, 0, 10)];
+        s.b0 = ybar(s);
+      } else if (ev.type === "up") s.grab = false;
+    },
+    controls: (ctl) => {
+      const box = document.createElement("div");
+      box.style.cssText = "display:flex;gap:10px;align-items:center;flex-wrap:wrap";
+      const mk = (label, fn) => {
+        const b = document.createElement("button");
+        b.type = "button"; b.textContent = label;
+        b.style.cssText = `font:13px Arial;padding:3px 12px;cursor:pointer;border:1px solid ${C.contextLight};border-radius:3px;background:${C.bg};color:${C.text}`;
+        b.addEventListener("click", fn);
+        return b;
+      };
+      const dotBox = document.createElement("span");
+      dots = [1, 2, 3, 4, 5].map((k) => {
+        const d = document.createElement("span");
+        d.style.cssText = "display:inline-block;width:10px;height:10px;border-radius:50%;margin:0 3px;cursor:pointer";
+        d.addEventListener("click", () => { ctl.state.play = false; goTo(ctl.state, k); });
+        dotBox.append(d);
+        return d;
+      });
+      bSlider = Inputs.range([0, 10], {step: 0.05, value: ctl.state.b0, label: "b₀"});
+      bSlider.addEventListener("input", () => {
+        // ruční posun: vypne přehrávání a nechá hodnotu být
+        if (ctl.state.step === 2 || ctl.state.step === 3) {
+          if (+bSlider.value !== ctl.state.b0) ctl.state.play = false;
+          ctl.state.b0 = +bSlider.value;
+        }
+      });
+      bBox = bSlider;
+      box.append(
+        mk("Zpět", () => { ctl.state.play = false; goTo(ctl.state, ctl.state.step - 1); }),
+        mk("Přehrát", () => { ctl.state.play = true; ctl.state.hold = 0; if (ctl.state.step === 5) goTo(ctl.state, 1); }),
+        mk("Další", () => { ctl.state.play = false; goTo(ctl.state, ctl.state.step + 1); }),
+        dotBox, bSlider
+      );
+      return box;
+    },
+    draw: (ctx, s, w) => {
+      const [y1, y2] = s.y, yb = ybar(s), m = [yb, yb], b = [s.b0, s.b0];
+      const a = ease(s.t);
+      // osy a mřížka
+      ctx.strokeStyle = C.grid; ctx.lineWidth = 1;
+      for (let t = lo; t <= hi; t += 2) {
+        ctx.beginPath(); ctx.moveTo(X(t), Y(lo)); ctx.lineTo(X(t), Y(hi)); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(X(lo), Y(t)); ctx.lineTo(X(hi), Y(t)); ctx.stroke();
+      }
+      ctx.strokeStyle = C.context; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(X(lo), Y(0)); ctx.lineTo(X(hi), Y(0)); ctx.moveTo(X(0), Y(lo)); ctx.lineTo(X(0), Y(hi)); ctx.stroke();
+      drawText(ctx, "y₁", X(hi) - 6, Y(0) - 6, {align: "right"});
+      drawText(ctx, "y₂", X(0) + 6, Y(hi) + 12);
+      for (let t = 2; t <= 10; t += 2) {
+        drawText(ctx, String(t), X(t), Y(0) + 14, {align: "center", size: 11});
+        drawText(ctx, String(t), X(0) - 6, Y(t) + 4, {align: "right", size: 11});
+      }
+      // čtverce (krok 4 a 5), pod šipkami
+      if (s.step >= 4) {
+        ctx.save();
+        ctx.globalAlpha = a;
+        square(ctx, [0, 0], m, [y1, y2], C.primaryLight, 0.45, `n·ȳ² = ${cz(2 * yb * yb)}`);
+        square(ctx, m, [y1, y2], [0, 0], C.primary, 0.45, `Σd² = ${cz((y1 - yb) ** 2 + (y2 - yb) ** 2)}`);
+        square(ctx, [0, 0], [y1, y2], m, C.contextLight, 0.5, `‖y‖² = ${cz(y1 * y1 + y2 * y2)}`);
+        ctx.restore();
+      }
+      // přímka ve směru 1
+      if (s.step >= 2) {
+        ctx.strokeStyle = C.context; ctx.lineWidth = 1.5; ctx.setLineDash([6, 4]);
+        ctx.beginPath(); ctx.moveTo(X(lo), Y(lo)); ctx.lineTo(X(hi), Y(hi)); ctx.stroke();
+        ctx.setLineDash([]);
+        drawText(ctx, "směr 1", X(hi - 2.2), Y(hi - 2.2) - 10, {color: C.context, align: "right"});
+      }
+      // vektor d (krok 3 a dál): od b₀·1 (v kroku 3) nebo od ȳ·1 (4, 5) k y
+      const foot = s.step === 3 ? b : m;
+      if (s.step >= 3) {
+        ctx.strokeStyle = C.primary; ctx.lineWidth = 2.5;
+        ctx.beginPath(); ctx.moveTo(X(foot[0]), Y(foot[1])); ctx.lineTo(X(y1), Y(y2)); ctx.stroke();
+        drawText(ctx, "d", X((foot[0] + y1) / 2) + 10, Y((foot[1] + y2) / 2) + 4, {color: C.primaryText, bold: true});
+      }
+      // pravý úhel v patě kolmice
+      if (s.step >= 4 || (s.step === 3 && Math.abs(s.b0 - yb) < 0.08)) {
+        const inv = Math.SQRT1_2;
+        const toY = [(y1 - yb), (y2 - yb)], len = Math.hypot(toY[0], toY[1]) || 1;
+        rightAngle(ctx, m, [inv, inv], [toY[0] / len, toY[1] / len]);
+      }
+      // šipka y
+      ctx.strokeStyle = C.text; ctx.lineWidth = 2.5;
+      ctx.beginPath(); ctx.moveTo(X(0), Y(0)); ctx.lineTo(X(y1), Y(y2)); ctx.stroke();
+      ctx.fillStyle = C.text;
+      ctx.beginPath(); ctx.arc(X(y1), Y(y2), s.step === 5 ? 8 : 5, 0, 2 * Math.PI); ctx.fill();
+      drawText(ctx, "y", X(y1) + 10, Y(y2) - 8, {bold: true});
+      // vektor ȳ·1 (krok 4, 5)
+      if (s.step >= 4) {
+        ctx.strokeStyle = C.accent; ctx.lineWidth = 2.5;
+        ctx.beginPath(); ctx.moveTo(X(0), Y(0)); ctx.lineTo(X(yb), Y(yb)); ctx.stroke();
+        ctx.fillStyle = C.accent; ctx.beginPath(); ctx.arc(X(yb), Y(yb), 5, 0, 2 * Math.PI); ctx.fill();
+        drawText(ctx, "ȳ·1", X(yb) - 8, Y(yb) + 18, {color: C.accent, bold: true, align: "right"});
+      }
+      // bod b₀·1 (krok 2, 3) – akcent
+      if (s.step === 2 || s.step === 3) {
+        ctx.fillStyle = C.accent;
+        ctx.beginPath(); ctx.arc(X(b[0]), Y(b[1]), 6, 0, 2 * Math.PI); ctx.fill();
+        drawText(ctx, "b₀·1", X(b[0]) + 10, Y(b[1]) + 18, {color: C.accent, bold: true});
+      }
+      // vložený graf Σ d² jako funkce b₀ (krok 3)
+      if (s.step === 3) {
+        const gx0 = P + 60, gx1 = w - 15, gy0 = 80, gy1 = 260;
+        if (gx1 - gx0 > 100) {
+          const ss = (v) => (y1 - v) ** 2 + (y2 - v) ** 2;
+          const gX = (v) => gx0 + (gx1 - gx0) * v / 10, gY = (v) => gy1 - (gy1 - gy0) * v / 60;
+          drawText(ctx, "‖y − b₀·1‖² podle b₀", gx0, gy0 - 20, {bold: true});
+          ctx.strokeStyle = C.context; ctx.lineWidth = 1;
+          ctx.beginPath(); ctx.moveTo(gx0, gy1); ctx.lineTo(gx1, gy1); ctx.stroke();
+          ctx.strokeStyle = C.primary; ctx.lineWidth = 2;
+          ctx.beginPath();
+          for (let v = 0; v <= 10.001; v += 0.1) v === 0 ? ctx.moveTo(gX(v), gY(ss(v))) : ctx.lineTo(gX(v), gY(ss(v)));
+          ctx.stroke();
+          ctx.fillStyle = C.context; ctx.beginPath(); ctx.arc(gX(yb), gY(ss(yb)), 4, 0, 2 * Math.PI); ctx.fill();
+          ctx.fillStyle = C.accent; ctx.beginPath(); ctx.arc(gX(s.b0), gY(ss(s.b0)), 6, 0, 2 * Math.PI); ctx.fill();
+          drawText(ctx, "minimum v ȳ", gX(yb), gY(ss(yb)) + 18, {align: "center", size: 11, color: C.context});
+          drawText(ctx, "b₀", gx1, gy1 + 16, {align: "right"});
+        }
+      }
+      drawText(ctx, stepTitles[s.step - 1], P + 60 > w - 100 ? 14 : P + 30, 20, {bold: true, size: 14});
+    },
+    readout: (s) => {
+      bBox.style.display = (s.step === 2 || s.step === 3) ? "" : "none";
+      dots.forEach((d, i) => d.style.background = i + 1 === s.step ? C.accent : C.contextLight);
+      const yb = ybar(s), d = s.y.map((v) => v - (s.step === 3 ? s.b0 : yb));
+      const cols = [];
+      cols.push({h: "y", v: s.y, hi: s.step === 1});
+      if (s.step === 2 || s.step === 3) cols.push({h: "b₀·1", v: [s.b0, s.b0], hi: s.step === 2});
+      if (s.step >= 4) cols.push({h: "ȳ·1", v: [yb, yb], hi: s.step === 4});
+      if (s.step >= 3) cols.push({h: "d", v: d, hi: s.step === 3});
+      const sum = (v) => v[0] + v[1], sq = (v) => v[0] ** 2 + v[1] ** 2;
+      const cell = (c, t) => `padding:2px 14px;text-align:right;color:${c.hi ? C.accent : C.text}${t || ""}`;
+      return html`<div style="font-size:13px;margin-bottom:6px">${stepNotes[s.step - 1]}</div>
+      <table style="font-size:13px;border-collapse:collapse">
+        <tr>${cols.map((c) => html`<th style="${cell(c)};font-weight:bold">${c.h}</th>`)}</tr>
+        ${[0, 1].map((i) => html`<tr>${cols.map((c) => html`<td style="${cell(c)}">${cz(c.v[i])}</td>`)}</tr>`)}
+        <tr style="border-top:1px solid ${C.contextLight}">${cols.map((c) => html`<td style="${cell(c)}">Σ ${cz(sum(c.v))}</td>`)}</tr>
+        <tr>${cols.map((c) => html`<td style="${cell(c)}">Σ² ${cz(sq(c.v))}</td>`)}</tr>
+      </table>
+      ${s.step >= 4 ? html`<div style="font-size:13px;margin-top:6px">Kontrola: ${cz(sq(s.y))} = ${cz(sq([yb, yb]))} + ${cz(sq(d))}, rozptyl = Σd² / n = ${cz(sq(d) / 2)}.</div>` : ""}`;
+    }
+  });
+}
+```

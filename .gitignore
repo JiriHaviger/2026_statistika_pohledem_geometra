@@ -31,3 +31,6 @@ Thumbs.db
 
 # Zbloudilé HTML vykreslené přímo do složek s kapitolami (kniha jde do _book)
 /0*/*.html
+
+# Vyrenderovane HTML nahledy draftu
+/_drafts/html/

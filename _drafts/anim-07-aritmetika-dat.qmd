@@ -1,0 +1,105 @@
+# Aritmetika dat – posun a roztažení
+
+*Draft k posouzení. Cílová kapitola: `02-statistika/03-aritmetika-dat.qmd`. Podklad: `INTERAKCE_ANIMACE.md`, bod 7.*
+
+Transformace $y = a \cdot x + b$. Horní řada jsou původní hodnoty, dolní nové, tenké čáry spojují stejné pozorování.
+Přičtení $b$ jen posune (vzdálenosti se nemění), násobení $a$ vzdálenosti roztáhne. Tlačítka nastaví
+$a$ a $b$ a body se plynule přesunou. Směrodatná odchylka je výběrová (dělená $n-1$), kvartily lineární interpolací.
+
+```{ojs}
+//| echo: false
+import {C, plotStyle} from "../assets/jhrules.js"
+```
+
+```{ojs}
+//| echo: false
+x7 = [34, 41, 45, 48, 52, 55, 58, 63, 67, 72, 80, 95]
+
+stat7 = (v) => {
+  const s = v.slice().sort((p, q) => p - q);
+  return {
+    mean: d3.mean(v), median: d3.median(v), sd: d3.deviation(v),
+    q1: d3.quantile(s, 0.25), q3: d3.quantile(s, 0.75)
+  };
+}
+
+orig7 = stat7(x7)
+
+viewof a7 = Inputs.range([-2, 3], {step: 0.05, value: 1, label: "a (násobek)"})
+viewof b7 = Inputs.range([-100, 100], {step: 1, value: 0, label: "b (posun)"})
+```
+
+```{ojs}
+//| echo: false
+// tlačítka: plynulý přesun posuvníků na cílové hodnoty
+{
+  const tween = (el, to) => {
+    const from = el.value, t0 = performance.now(), dur = 700;
+    const frame = (t) => {
+      const k = Math.min(1, (t - t0) / dur), e = k * k * (3 - 2 * k);
+      el.value = from + (to - from) * e;
+      el.dispatchEvent(new Event("input", {bubbles: true}));
+      if (k < 1) requestAnimationFrame(frame);
+    };
+    requestAnimationFrame(frame);
+  };
+  const go = (a, b) => { tween(viewof a7, a); tween(viewof b7, b); };
+  const iqr = orig7.q3 - orig7.q1;
+  const mm = d3.extent(x7);
+  return html`<div style="display:flex;gap:8px;flex-wrap:wrap">
+    ${Inputs.button("Původní", {reduce: () => go(1, 0)})}
+    ${Inputs.button("z-skór", {reduce: () => go(1 / orig7.sd, -orig7.mean / orig7.sd)})}
+    ${Inputs.button("Robustní (medián, IQR)", {reduce: () => go(1 / iqr, -orig7.median / iqr)})}
+    ${Inputs.button("Normalizace 0–1", {reduce: () => go(1 / (mm[1] - mm[0]), -mm[0] / (mm[1] - mm[0]))})}
+  </div>`;
+}
+```
+
+```{ojs}
+//| echo: false
+y7 = x7.map((v) => a7 * v + b7)
+new7 = stat7(y7)
+
+{
+  const rows = [
+    ...x7.map((v, i) => ({i, v, row: 1})),
+    ...y7.map((v, i) => ({i, v, row: 0}))
+  ];
+  const all = [...x7, ...y7];
+  const span = d3.extent(all);
+  const pad = (span[1] - span[0]) * 0.05 + 0.5;
+  const mark = (st, row) => [
+    Plot.ruleX([st.mean], {y1: row - 0.3, y2: row + 0.3, stroke: C.accent, strokeWidth: 2}),
+    Plot.ruleY([row - 0.4], {x1: st.q1, x2: st.q3, stroke: row === 1 ? C.context : C.primary, strokeWidth: 4})
+  ];
+  return Plot.plot({
+    width, height: 230, style: plotStyle, marginLeft: 70,
+    x: {domain: [span[0] - pad, span[1] + pad], grid: true, label: null},
+    y: {domain: [-0.7, 1.5], ticks: [0, 1], tickFormat: (d) => d === 1 ? "původní x" : "nové y", label: null},
+    marks: [
+      Plot.link(x7.map((v, i) => ({x1: v, x2: y7[i]})), {x1: "x1", x2: "x2", y1: 1, y2: 0, stroke: C.contextLight}),
+      Plot.dot(rows, {x: "v", y: "row", r: 5, fill: (d) => d.row === 1 ? C.context : C.primary}),
+      ...mark(orig7, 1), ...mark(new7, 0)
+    ]
+  });
+}
+```
+
+```{ojs}
+//| echo: false
+{
+  const f = (v) => v.toFixed(2).replace(".", ",");
+  const lines = [
+    ["Průměr", orig7.mean, new7.mean], ["Medián", orig7.median, new7.median],
+    ["Směrodatná odchylka", orig7.sd, new7.sd], ["IQR", orig7.q3 - orig7.q1, new7.q3 - new7.q1]
+  ];
+  return html`<table style="font-size:14px;border-collapse:collapse">
+    <tr><th style="text-align:left;padding-right:24px"></th><th style="padding-right:24px">původní</th><th>nové</th></tr>
+    ${lines.map(([n, p, q]) => html`<tr><td style="padding-right:24px">${n}</td>
+      <td style="text-align:right;padding-right:24px">${f(p)}</td><td style="text-align:right">${f(q)}</td></tr>`)}
+  </table>`;
+}
+```
+
+Oranžová svislice je průměr, tlustá úsečka pod body je rozpětí od prvního po třetí kvartil.
+U z-skóru dostane průměr hodnotu 0 a směrodatná odchylka hodnotu 1.
