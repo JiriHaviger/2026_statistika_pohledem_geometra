@@ -32,82 +32,231 @@ Uvedený příklad vychází z tradičního pojetí. O tom, jak bylo toto pojet�
 Pravděpodobnost často chápeme intuitivně jako míru nejistoty v náhodných jevech – například pravděpodobnost, že při hodu férovou mincí padne panna. Ale co přesně znamená pravděpodobnost 50%? [Jacob Bernoulli (1655-1705)]{.smallcaps}, jeden z prvních matematiků, kteří se tímto problémem systematicky zabývali, navrhl, že pravděpodobnost je něco, co se projevuje v dlouhodobém opakování pokusu. Představte si, že házíte mincí tisíckrát: i když v prvních deseti hodech může padnout lev osmkrát, s rostoucím počtem hodů se poměr lvů výrazně blíží k 1/2. 
 
 
-Přidávejte si počet hodů a sledujte, jak se "roztřesená" pozorovaná data postupně uklidňují na teoretické hodnotě $p = 0.5$.
+Vyberte situaci (mince, kostka, kostka s nestejnými stranami nebo písmena v textu) a řekněte, co je „úspěch“. Každý výsledek se zapíše do posloupnosti nahoře, úspěch je oranžový, a dole se z posloupnosti počítá relativní četnost úspěchu (úspěchy děleno pokusy). Přidávejte pokusy a sledujte, jak se „roztřesená“ pozorovaná data postupně uklidňují.
 
+U mince a kostky se výsledky losují a cílová hodnota $\pi$ je dána situací: pás kolem ní má šířku $\pm 0{,}05$ a šedý trychtýř je $\pm 1/\sqrt{n}$. Osa počtu pokusů je odmocninová, aby byl vidět začátek i konec.
+
+U písmen se nic nelosuje. Písmena se čtou popořadě z textu Karla Čapka *R.U.R.* (1920, volné dílo, [Wikisource](https://cs.wikisource.org/wiki/R.U.R.)) a cílovou hodnotu předem neznáme, takže se nekreslí. Text je rozdělen na tři stejné části, které se čtou současně: první modře, druhá a třetí šedě. Všechny tři četnosti se mají ustálit na téže hodnotě. Světlý pás kolem modré čáry je $\pm 2\sqrt{f(1-f)/n}$, počítané jen z dat, a s rostoucím $n$ se zužuje.
 
 ```{ojs}
 //| echo: false
-import {C} from "../assets/jhrules.js"
+import {C, plotStyle} from "../assets/jhrules.js"
 ```
 
 ```{ojs}
 //| echo: false
+import {animation, drawText, clamp, ease, makeButton} from "../assets/anim.js"
+```
 
-// 1. PROMĚNNÉ PRO STAV
-mutable n = 0;
-mutable heads = 0;
-mutable history = [];
+```{ojs}
+//| echo: false
+import {textCz} from "../assets/text-cz.js"
+```
 
-// 2. MODRÁ TLAČÍTKA V JEDNÉ ŘADĚ
-// styl .button-row je v hag_custom.scss
-viewof controls = html`<div class="button-row">
-  ${Inputs.button("🗑️ Reset", {value: null})}
-  ${Inputs.button("+1 hod", {value: null})}
-  ${Inputs.button("+10 hodů", {value: null})}
-  ${Inputs.button("+100 hodů", {value: null})}
-</div>`
+```{ojs}
+//| echo: false
+situations1 = [
+  {name: "Mince", faces: ["P", "O"]},
+  {name: "Kostka 1–6", faces: [1, 2, 3, 4, 5, 6]},
+  {name: "Kostka 5-5-5-4-4-3", faces: [5, 5, 5, 4, 4, 3]},
+  {name: "Písmena v českém textu", text: true}
+]
 
-// 3. LOGIKA AKTUALIZACE
-update = {
-  const lastBtn = controls; 
-  const label = document.activeElement ? document.activeElement.innerText : "";
+// jen písmena, popořadě
+letters1 = Array.from(textCz).filter((ch) => /\p{L}/u.test(ch))
 
-  if (label === "🗑️ Reset") {
-    mutable n = 0;
-    mutable heads = 0;
-    mutable history = [];
-  } else if (label.includes("+")) {
-    let add = label.includes("100") ? 100 : (label.includes("10") ? 10 : 1);
-    
-    let currentN = mutable n;
-    let currentHeads = mutable heads;
-    let currentHistory = [...mutable history];
+viewof model1 = Inputs.select(situations1.map((s) => s.name), {label: "Situace"})
+sit1 = situations1.find((s) => s.name === model1)
 
-    for (let i = 0; i < add; i++) {
-      currentN++;
-      if (Math.random() < 0.5) currentHeads++;
-      currentHistory.push({ n: currentN, freq: currentHeads / currentN });
-    }
-
-    mutable n = currentN;
-    mutable heads = currentHeads;
-    mutable history = currentHistory;
+// možné definice úspěchu: popisek a test jednoho výsledku
+successDefs1 = {
+  if (sit1.text) {
+    const vowels = "aeiouyáéíóúůýě";
+    // osm písmen: častější (e, o, n, t, h) i vzácnější (b, z, g)
+    return [
+      ...["e", "o", "n", "t", "h", "b", "z", "g"].map((l) => ({label: `písmeno „${l}“`, test: (x) => x === l})),
+      {label: "samohláska", test: (x) => vowels.includes(x)},
+      {label: "souhláska", test: (x) => !vowels.includes(x)}
+    ];
   }
+  if (sit1.name === "Mince") {
+    return [{label: "Panna", test: (x) => x === "P"}, {label: "Orel", test: (x) => x === "O"}];
+  }
+  if (sit1.name === "Kostka 1–6") {
+    return [
+      {label: "padne 1", test: (x) => x === 1},
+      {label: "padne číslo < 3", test: (x) => x < 3},
+      {label: "padne sudé číslo", test: (x) => x % 2 === 0}
+    ];
+  }
+  return [...new Set(sit1.faces)].sort().map((f) => ({label: `padne ${f}`, test: (x) => x === f}));
 }
 
-// 4. NASTAVENÍ TOLERANCE
-viewof epsilon = Inputs.range([0.01, 0.1], {value: 0.05, step: 0.01, label: "Tolerance (ε):"})
+viewof success1 = Inputs.select(successDefs1.map((d) => d.label), {label: "Úspěch"})
+succ1 = successDefs1.find((d) => d.label === success1) ?? successDefs1[0]
 
-// 5. VIZUALIZACE
-Plot.plot({
-  width: 800,
-  height: 400,
-  y: { domain: [0, 1], label: "Relativní četnost", grid: true },
-  x: { label: "Počet pokusů (n)", grid: true },
-  marks: [
-    Plot.rectY([{y1: 0.5 - epsilon, y2: 0.5 + epsilon}], {
-      y1: "y1", y2: "y2", fill: C.primary, fillOpacity: 0.1
-    }),
-    Plot.ruleY([0.5], {stroke: C.accent, strokeWidth: 2}),
-    Plot.line(history, {x: "n", y: "freq", stroke: C.primary, strokeWidth: 2}),
-    Plot.dot(history.slice(-1), {x: "n", y: "freq", fill: C.primary, r: 4}),
-    Plot.text(history.slice(-1), {x: "n", y: "freq", text: d => "n=" + d.n, dy: -15, fontWeight: "bold"})
-  ]
-})
+// teoretická prst úspěchu určená situací
+pi1 = sit1.text
+  ? letters1.filter(succ1.test).length / letters1.length
+  : sit1.faces.filter(succ1.test).length / sit1.faces.length
+```
 
-// 6. DYNAMICKÝ TEXT
-md`### Aktuální stav
-**n = ${n}** | **Líců: ${heads}** | **Četnost: ${(n > 0 ? (heads/n)*100 : 0).toFixed(2)} %**`
+```{ojs}
+//| echo: false
+{
+  const H = 340, eps = 0.05;
+  const third = Math.floor(letters1.length / 3);          // text se dělí na tři stejné části
+  const nMax = sit1.text ? Math.min(4000, third) : 1000;
+  const cw = 24, stripY = 34, stripH = 30;
+  const x0 = 50, x1 = width - 20, top = 130, bot = H - 40;
+  const ymax = sit1.text && pi1 < 0.3 ? 0.5 : 1;   // mince a kostka vždy 0 až 1, jednotlivá písmena 0 až 0,5
+  const yOf = (v) => bot - (bot - top) * v / ymax;
+  const xOf = (n) => x0 + (x1 - x0) * Math.sqrt(n / nMax);
+  const ticks = sit1.text ? [0, 10, 100, 1000, nMax] : [0, 10, 100, 500, 1000];
+  const cz = (x, d = 3) => x.toFixed(d).replace(".", ",");
+  let toggleBtn;
+
+  // jeden pokus
+  const advance = (s, k) => {
+    for (let i = 0; i < k && s.n < nMax; i++) {
+      const sym = sit1.text ? letters1[s.n] : sit1.faces[Math.floor(Math.random() * sit1.faces.length)];
+      s.seq.push(sym);
+      s.n++;
+      if (succ1.test(sym)) s.hits++;
+      s.hist.push(s.hits / s.n);
+      s.pop = 0;
+      // u textu se současně čtou i druhá a třetí třetina (každá od svého začátku)
+      s.extra.forEach((r, j) => {
+        if (succ1.test(letters1[(j + 1) * third + s.n - 1])) r.hits++;
+        r.hist.push(r.hits / s.n);
+      });
+    }
+  };
+  // zpočátku pomalu, aby bylo vidět každé písmeno či hod
+  const rate = (n) => n < 20 ? 0.12 : n < 60 ? 0.5 : n < 200 ? 1.5 : 4;
+
+  return animation({
+    width, height: H, buttons: false,
+    setup: () => ({n: 0, hits: 0, hist: [], seq: [], acc: 0, pop: 9,
+                   extra: sit1.text ? [{hits: 0, hist: []}, {hits: 0, hist: []}] : []}),
+    step: (s) => {
+      s.pop++;
+      s.acc += rate(s.n);
+      while (s.acc >= 1) { advance(s, 1); s.acc -= 1; }
+    },
+    controls: (ctl) => {
+      const box = document.createElement("div");
+      box.style.cssText = "display:flex;gap:8px;flex-wrap:wrap";
+      toggleBtn = makeButton("Plynule", () => { ctl.running = !ctl.running; });
+      box.append(
+        toggleBtn,
+        makeButton("+10", () => { ctl.running = false; advance(ctl.state, 10); ctl.redraw(); }),
+        makeButton("+100", () => { ctl.running = false; advance(ctl.state, 100); ctl.redraw(); }),
+        makeButton("Restart", () => { ctl.reset(); })
+      );
+      return box;
+    },
+    draw: (ctx, s, w) => {
+      const f = s.n ? s.hits / s.n : 0;
+      // posloupnost výsledků: úspěch oranžově
+      const K = Math.floor((w - 2 * 10) / cw);
+      const shown = s.seq.slice(-K);
+      drawText(ctx, sit1.text ? "Písmena 1. třetiny textu (úspěch oranžově)" : "Posloupnost výsledků (úspěch oranžově)",
+               10, 22, {bold: true});
+      shown.forEach((sym, i) => {
+        const hit = succ1.test(sym);
+        const isNewest = i === shown.length - 1;
+        const x = 10 + i * cw, y = stripY;
+        ctx.save();
+        if (isNewest) {
+          const sc = 0.4 + 0.6 * ease(s.pop / 4);
+          ctx.translate(x + cw / 2, y + stripH / 2); ctx.scale(sc, sc); ctx.translate(-(x + cw / 2), -(y + stripH / 2));
+        }
+        if (hit) {
+          ctx.fillStyle = C.accent;
+          ctx.fillRect(x + 1, y, cw - 2, stripH);
+        }
+        drawText(ctx, String(sym), x + cw / 2, y + stripH / 2 + 1,
+                 {align: "center", baseline: "middle", size: 16, bold: hit, color: hit ? C.bg : C.context});
+        ctx.restore();
+      });
+      // počty
+      drawText(ctx, `úspěchů ${s.hits} z ${s.n} pokusů`, 10, 94, {size: 15, bold: true});
+      drawText(ctx, `relativní četnost = ${s.hits} / ${s.n} = ${s.n ? cz(f) : "—"}`, 10, 116, {size: 15});
+
+      // mřížka a osa y
+      for (const v of [0, ymax / 2, ymax]) {
+        ctx.strokeStyle = C.grid; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(x0, yOf(v)); ctx.lineTo(x1, yOf(v)); ctx.stroke();
+        drawText(ctx, cz(v, 2), x0 - 8, yOf(v) + 4, {align: "right"});
+      }
+      if (!sit1.text) {
+        // pás π ± ε a trychtýř ±1/√n: jen tam, kde je π dáno situací
+        const bTop = yOf(Math.min(ymax, pi1 + eps)), bBot = yOf(Math.max(0, pi1 - eps));
+        ctx.fillStyle = C.primaryLight; ctx.globalAlpha = 0.35;
+        ctx.fillRect(x0, bTop, x1 - x0, bBot - bTop);
+        ctx.globalAlpha = 1;
+        ctx.strokeStyle = C.text; ctx.lineWidth = 1.2; ctx.setLineDash([6, 4]);
+        ctx.beginPath(); ctx.moveTo(x0, yOf(pi1)); ctx.lineTo(x1, yOf(pi1)); ctx.stroke();
+        ctx.setLineDash([]);
+        drawText(ctx, `π = ${cz(pi1, 3)}`, x1, yOf(pi1) - 6, {align: "right", bold: true});
+        ctx.strokeStyle = C.context; ctx.lineWidth = 1;
+        for (const sign of [1, -1]) {
+          ctx.beginPath();
+          for (let i = 0; i <= 300; i++) {
+            const n = Math.max(4, nMax * (i / 300) ** 2);
+            const v = clamp(pi1 + sign / Math.sqrt(n), 0, ymax);
+            if (i === 0) ctx.moveTo(xOf(n), yOf(v)); else ctx.lineTo(xOf(n), yOf(v));
+          }
+          ctx.stroke();
+        }
+      } else if (s.n > 1) {
+        // text: pás ±2√(f(1−f)/n) kolem odhadu z 1. třetiny, počítaný jen z dat
+        const half = (i) => 2 * Math.sqrt(s.hist[i] * (1 - s.hist[i]) / (i + 1));
+        ctx.fillStyle = C.primaryLight; ctx.globalAlpha = 0.4;
+        ctx.beginPath();
+        s.hist.forEach((v, i) => { const px = xOf(i + 1), py = yOf(Math.min(ymax, v + half(i))); i ? ctx.lineTo(px, py) : ctx.moveTo(px, py); });
+        for (let i = s.hist.length - 1; i >= 0; i--) ctx.lineTo(xOf(i + 1), yOf(Math.max(0, s.hist[i] - half(i))));
+        ctx.closePath(); ctx.fill();
+        ctx.globalAlpha = 1;
+        // 2. a 3. třetina šedě jako kontext
+        ctx.strokeStyle = C.context; ctx.lineWidth = 1.5;
+        for (const r of s.extra) {
+          ctx.beginPath();
+          r.hist.forEach((v, i) => { const px = xOf(i + 1), py = yOf(Math.min(v, ymax)); i ? ctx.lineTo(px, py) : ctx.moveTo(px, py); });
+          ctx.stroke();
+        }
+        drawText(ctx, "1. třetina modře, 2. a 3. šedě; světlý pás je ± 2 směrodatné chyby odhadu z 1. třetiny",
+                 x1, top - 8, {align: "right", size: 11, color: C.context});
+      }
+      // trajektorie
+      ctx.strokeStyle = C.primary; ctx.lineWidth = 2;
+      ctx.beginPath();
+      s.hist.forEach((v, i) => {
+        const px = xOf(i + 1), py = yOf(Math.min(v, ymax));
+        if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+      });
+      ctx.stroke();
+      if (s.n) {
+        ctx.fillStyle = C.primary;
+        ctx.beginPath(); ctx.arc(xOf(s.n), yOf(Math.min(f, ymax)), 4, 0, 2 * Math.PI); ctx.fill();
+      }
+      for (const n of ticks) drawText(ctx, String(n), xOf(n), bot + 16, {align: "center"});
+      drawText(ctx, "počet pokusů n (odmocninová osa)", (x0 + x1) / 2, bot + 32, {align: "center"});
+    },
+    readout: (s, ctl) => {
+      toggleBtn.textContent = ctl.running ? "Pauza" : "Plynule";
+      const f = s.n ? s.hits / s.n : 0;
+      const inside = Math.abs(f - pi1) <= eps;
+      const fs = sit1.text ? [f, ...s.extra.map((r) => (s.n ? r.hits / s.n : 0))] : [];
+      const base = s.n === 0 ? "Zatím žádný pokus." :
+        sit1.text
+          ? `Po ${s.n} písmenech: 1. třetina ${cz(fs[0])}, 2. třetina ${cz(fs[1])}, 3. třetina ${cz(fs[2])}, rozpětí ${cz(Math.max(...fs) - Math.min(...fs))}.`
+          : `Relativní četnost ${cz(f)} je ${inside ? "uvnitř" : "mimo"} pásu π ± 0,05.`;
+      return base + (s.n >= nMax ? " Konec textu / limit pokusů, použijte Restart." : "");
+    }
+  });
+}
 ```
 
 V simulaci vidíte postupné relativní četnosti které se s přibývajícím počtem pokusů přibližují k jedné hodnotě, pravděpodobnosti že nastane nějaký jev $A$. Matematicky to popisujeme jako $P(A) \approx \frac{n_A}{n}$ nebo přesněji pomocí limity

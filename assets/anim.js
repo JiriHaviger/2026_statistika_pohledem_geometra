@@ -30,7 +30,7 @@ export function drawText(ctx, s, x, y, {align = "left", color = C.text, bold = f
   ctx.fillText(s, x, y);
 }
 
-function makeButton(label, onclick) {
+export function makeButton(label, onclick) {
   const b = document.createElement("button");
   b.type = "button";
   b.textContent = label;
