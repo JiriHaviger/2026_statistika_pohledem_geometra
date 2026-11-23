@@ -34,3 +34,4 @@ Thumbs.db
 
 # Vyrenderovane HTML nahledy draftu
 /_drafts/html/
+/_drafts/*.html
