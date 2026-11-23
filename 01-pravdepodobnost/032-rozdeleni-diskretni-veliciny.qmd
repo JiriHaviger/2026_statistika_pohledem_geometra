@@ -137,7 +137,13 @@ z krátkého úseku textu tedy kolísá, ale s přibývajícími slovy se k celk
 
 ```{ojs}
 //| echo: false
-import {animation, drawText, makeButton} from "../assets/anim.js"
+import {columnWidth, animation, drawText, makeButton} from "../assets/anim.js"
+```
+
+```{ojs}
+//| echo: false
+// šířka textového sloupce místo vestavěné šířky celé plochy (grafy jinak přetékají doprava)
+width = columnWidth(Generators)
 ```
 
 ```{ojs}

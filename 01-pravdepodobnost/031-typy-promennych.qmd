@@ -29,7 +29,13 @@ Nominální a ordinální proměnné jsou **kvalitativní** (kategoriální). Ob
 
 ```{ojs}
 //| echo: false
-import {animation, drawText, ease, makeButton} from "../assets/anim.js"
+import {columnWidth, animation, drawText, ease, makeButton} from "../assets/anim.js"
+```
+
+```{ojs}
+//| echo: false
+// šířka textového sloupce místo vestavěné šířky celé plochy (grafy jinak přetékají doprava)
+width = columnWidth(Generators)
 ```
 
 Osm lidí je zvážených na poměrové stupnici (nahoře, číslo je hmotnost v kg, barva značí skupinu A, B nebo C). Tlačítky vyberte úroveň měření: kopie bodů se přesunou na dolní osu a v popiscích zůstane jen to, co daná úroveň měření zachovává.

@@ -14,7 +14,27 @@
 
 import {C} from "./jhrules.js";
 
-export const clamp = (x, lo, hi) => Math.max(lo, Math.min(hi, x));
+// Šířka sloupce s textem. Vestavěná OJS proměnná `width` v knize měří celou plochu včetně okraje
+// (asi dvojnásobek), takže grafy přetékaly doprava. V kapitole se používá jako
+//   width = columnWidth(Generators)
+// a všechny buňky pak dostávají šířku textového sloupce (sleduje se i změna velikosti okna).
+export function columnWidth(Generators) {
+  return Generators.observe((notify) => {
+    const root = document.querySelector("#quarto-document-content") || document.body;
+    const measure = () => {
+      const p = Array.from(root.querySelectorAll("p"))
+        .find((el) => !el.closest(".column-margin, .callout, aside, table, figure"));
+      const w = (p && p.clientWidth) || root.clientWidth || window.innerWidth;
+      notify(Math.max(280, Math.floor(w)));
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(root);
+    return () => ro.disconnect();
+  });
+}
+
+export const clamp =(x, lo, hi) => Math.max(lo, Math.min(hi, x));
 
 // plynulý náběh 0 → 1
 export const ease = (t) => {

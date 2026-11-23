@@ -32,7 +32,13 @@ import {C} from "../assets/jhrules.js"
 
 ```{ojs}
 //| echo: false
-import {animation, drawText, clamp, ease, makeButton} from "../assets/anim.js"
+import {columnWidth, animation, drawText, clamp, ease, makeButton} from "../assets/anim.js"
+```
+
+```{ojs}
+//| echo: false
+// šířka textového sloupce místo vestavěné šířky celé plochy (grafy jinak přetékají doprava)
+width = columnWidth(Generators)
 ```
 
 ```{ojs}
@@ -229,60 +235,140 @@ Plot.plot({
 })
 ```
 
-Podobný způsob vizualizace můžeme provést i pro větší množství dat z proměnné kardinální. Tam může nastat problém, že každá hodnota je unikátní, takže vykreslení každé hodnoty by nám mnoho nepomohlo. Pro takovéto případy se hodnoty **agregují**, tedy slučují do několika **kategorií** (*bins*) a následně se vykresluje četnost v dané kategorii. V následujícím grafu si můžete vyzkoušt různá data (body u osy x) a různý počet kategorií a histogram vytvořený podle těchto kdategorií. 
+Podobný způsob vizualizace můžeme provést i pro větší množství dat z proměnné kardinální. Tam může nastat problém, že každá hodnota je unikátní, takže vykreslení každé hodnoty by nám mnoho nepomohlo. Pro takovéto případy se hodnoty **agregují**, tedy slučují do několika **kategorií** (*bins*) a následně se vykresluje četnost v dané kategorii. V následující ukázce padá každé pozorování (bod) svisle do své kategorie a sloupec o jedno pozorování naroste. Nabídkou můžete změnit tvar rozdělení (souměrné, rovnoměrné, zešikmené, dvouvrcholové) a posuvníkem počet kategorií. Pod histogramem je na stejné ose boxplot týchž pozorování; jeho význam vysvětlíme níže v části o odlehlých hodnotách. 
 
 ```{ojs}
-// 1. Generování dat na základě výběru
-data02 = {
-  let v;
-  const n = 500;
-  if (distType02 === "Normální") {
-    v = Array.from({length: n}, d3.randomNormal(0, 1));
-  } else if (distType02 === "Zešikmené") {
-    // Log-normální rozdělení je přirozeně zešikmené
-    v = Array.from({length: n}, d3.randomLogNormal(0, 0.5));
-  } else if (distType02 === "Uniformní") {
-    v = Array.from({length: n}, d3.randomUniform(-2, 2));
-  }
-  return v.map(d => ({val: d}));
+//| echo: false
+{
+  const H = 400, N = 300, L0 = 48, bot = H - 120, top = 24;
+  // pevná generace dat (stejná při každém spuštění), tři tvary
+  const rnd = d3.randomLcg(7);
+  const norm = d3.randomNormal.source(rnd)(0, 1);
+  const unif = d3.randomUniform.source(rnd)(0, 1);
+  const raw = {
+    "souměrné": d3.range(N).map(() => norm()),
+    "zešikmené": d3.range(N).map(() => Math.exp(0.6 * norm())),
+    "dvouvrcholové": d3.range(N).map(() => (unif() < 0.5 ? -1.6 : 1.6) + 0.7 * norm()),
+    "rovnoměrné": d3.range(N).map(() => unif())
+  };
+  const shapes = ["souměrné", "rovnoměrné", "zešikmené", "dvouvrcholové"];   // pořadí v nabídce
+  const cz = (v, d = 2) => v.toFixed(d).replace(".", ",");
+  const R1 = width - 20;
+
+  // rozsah dat a zařazení do přihrádky pro aktuální počet intervalů
+  const geom = (s) => {
+    const data = raw[s.shape];
+    const [lo, hi] = d3.extent(data);
+    const binOf = (v) => Math.min(s.bins - 1, Math.floor((v - lo) / (hi - lo) * s.bins));
+    return {data, lo, hi, binOf};
+  };
+
+  return animation({
+    width, height: H,
+    setup: (prev) => ({
+      shape: prev ? prev.shape : shapes[0], bins: prev ? prev.bins : 12,
+      pts: [], added: 0, hb: null, hbBins: 0, ymax: 10
+    }),
+    step: (s) => {
+      const g = geom(s);
+      // nové body vstupují shora
+      for (let k = 0; k < 2 && s.added < N; k++) s.pts.push({i: s.added++, y: top - 6, landed: false});
+      if (!s.hb || s.hbBins !== s.bins) { s.hb = new Array(s.bins).fill(0); s.hbBins = s.bins; }
+      // cílové výšky sloupců = počty již dopadlých bodů; měřítko podle konečných počtů
+      const landedCounts = new Array(s.bins).fill(0), full = new Array(s.bins).fill(0);
+      g.data.forEach((v) => full[g.binOf(v)]++);
+      s.pts.forEach((p) => { if (p.landed) landedCounts[g.binOf(g.data[p.i])]++; });
+      s.ymax += (Math.max(...full) * 1.08 - s.ymax) * 0.2;
+      for (let b = 0; b < s.bins; b++) s.hb[b] += (landedCounts[b] - s.hb[b]) * 0.3;
+      // padání: bod dopadne, až dosáhne horní hladiny svého sloupce
+      s.pts.forEach((p) => {
+        if (p.landed) return;
+        p.y += 12;
+        const topY = bot - (bot - top) * s.hb[g.binOf(g.data[p.i])] / s.ymax;
+        if (p.y >= topY) p.landed = true;
+      });
+    },
+    controls: (ctl) => {
+      const box = document.createElement("div");
+      box.style.cssText = "display:flex;gap:16px;flex-wrap:wrap";
+      const sel = Inputs.select(shapes, {value: ctl.state.shape, label: "Tvar"});
+      const bins = Inputs.range([2, 100], {step: 1, value: ctl.state.bins, label: "Intervaly"});
+      sel.addEventListener("input", () => { ctl.state.shape = sel.value; ctl.reset(); ctl.running = true; });
+      bins.addEventListener("input", () => { ctl.state.bins = +bins.value; ctl.redraw(); });
+      box.append(sel, bins);
+      return box;
+    },
+    draw: (ctx, s, w) => {
+      const g = geom(s);
+      const xOf = (v) => L0 + (R1 - L0) * (v - g.lo) / (g.hi - g.lo);
+      const bw = (R1 - L0) / s.bins;
+      const yOf = (c) => bot - (bot - top) * c / s.ymax;
+      const hb = s.hb && s.hbBins === s.bins ? s.hb : new Array(s.bins).fill(0);
+
+      // osa y (počty) a osa x
+      const tickMax = Math.floor(s.ymax / 1.08);
+      for (const c of [0, Math.round(tickMax / 2), tickMax]) {
+        ctx.strokeStyle = C.grid; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(L0, yOf(c)); ctx.lineTo(R1, yOf(c)); ctx.stroke();
+        drawText(ctx, String(c), L0 - 8, yOf(c) + 4, {align: "right"});
+      }
+      drawText(ctx, "počet pozorování", L0, 14, {bold: true});
+      // sloupce odděleny tenkou čarou barvy pozadí
+      hb.forEach((c, b) => {
+        ctx.fillStyle = C.primary;
+        ctx.fillRect(L0 + bw * b, yOf(c), bw, bot - yOf(c));
+        ctx.strokeStyle = C.bg; ctx.lineWidth = 1.5;
+        ctx.strokeRect(L0 + bw * b, yOf(c), bw, bot - yOf(c));
+      });
+      ctx.strokeStyle = C.context; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(L0, bot); ctx.lineTo(R1, bot); ctx.stroke();
+      for (const e of [0, Math.floor(s.bins / 2), s.bins]) {
+        const edge = g.lo + (g.hi - g.lo) * e / s.bins;
+        drawText(ctx, cz(edge, 1), L0 + bw * e, bot + 16, {align: "center"});
+      }
+      // padající body (svisle nad vlastní přihrádkou)
+      ctx.fillStyle = C.primaryText;
+      s.pts.forEach((p) => {
+        if (p.landed) return;
+        ctx.beginPath(); ctx.arc(xOf(g.data[p.i]), p.y, 3, 0, 2 * Math.PI); ctx.fill();
+      });
+
+      // boxplot dopadlých pozorování na stejné ose x
+      const yB = bot + 72, hB = 26;
+      drawText(ctx, "Boxplot stejných dat", L0, bot + 42, {bold: true});
+      const landed = s.pts.filter((p) => p.landed).map((p) => g.data[p.i]).sort((a, b) => a - b);
+      s.box = null;
+      if (landed.length >= 4) {
+        const q1 = d3.quantile(landed, 0.25), med = d3.quantile(landed, 0.5), q3 = d3.quantile(landed, 0.75);
+        const iqr = q3 - q1;
+        const wLo = d3.min(landed.filter((x) => x >= q1 - 1.5 * iqr));
+        const wHi = d3.max(landed.filter((x) => x <= q3 + 1.5 * iqr));
+        ctx.strokeStyle = C.primary; ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(xOf(wLo), yB); ctx.lineTo(xOf(q1), yB);
+        ctx.moveTo(xOf(q3), yB); ctx.lineTo(xOf(wHi), yB);
+        ctx.moveTo(xOf(wLo), yB - hB / 4); ctx.lineTo(xOf(wLo), yB + hB / 4);
+        ctx.moveTo(xOf(wHi), yB - hB / 4); ctx.lineTo(xOf(wHi), yB + hB / 4);
+        ctx.stroke();
+        ctx.fillStyle = C.primaryLight; ctx.globalAlpha = 0.5;
+        ctx.fillRect(xOf(q1), yB - hB / 2, xOf(q3) - xOf(q1), hB);
+        ctx.globalAlpha = 1;
+        ctx.strokeRect(xOf(q1), yB - hB / 2, xOf(q3) - xOf(q1), hB);
+        ctx.strokeStyle = C.accent; ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.moveTo(xOf(med), yB - hB / 2); ctx.lineTo(xOf(med), yB + hB / 2); ctx.stroke();
+        ctx.fillStyle = C.primary;
+        const out = landed.filter((x) => x < wLo || x > wHi);
+        for (const x of out) { ctx.beginPath(); ctx.arc(xOf(x), yB, 3, 0, 2 * Math.PI); ctx.fill(); }
+        s.box = {q1, med, q3, out: out.length};
+      }
+    },
+    readout: (s) => {
+      const b = s.box, landed = s.pts.filter((p) => p.landed).length;
+      return `Dopadlo ${landed} z ${N} pozorování, ${s.bins} intervalů.` +
+        (b ? ` Q1 = ${cz(b.q1)}, medián = ${cz(b.med)}, Q3 = ${cz(b.q3)}, odlehlých hodnot ${b.out}.` : "");
+    }
+  });
 }
-
-// 2. Ovládací prvky
-viewof distType02 = Inputs.select(
-  ["Normální", "Zešikmené", "Uniformní"], 
-  {label: "Typ rozdělení"}
-)
-
-viewof binCount = Inputs.range([2, 200], {value: 20, step: 1, label: "Počet bins"})
-
-// 3. Graf
-Plot.plot({
-  height: 400,
-  grid: true,
-  marks: [
-    // Histogram (Density)
-    Plot.rectY(data02, Plot.binX({y: "count"}, {x: "val", thresholds: binCount, fill: C.primary, fillOpacity: 0.7})),
-    
-  // dodgeY vytvoří "mrak" bodů, anchor: "bottom" je drží u spodní hrany
-    Plot.dot(data02, Plot.dodgeY({
-      x: "val", 
-      anchor: "bottom", 
-      padding: 0.5, // Tímto zvětšuješ/zmenšuješ rozestupy mezi body
-      r: 2, 
-      fill: C.text,
-      fillOpacity: 0.4
-    })),
-    
-    Plot.ruleY([0])
-  ],
-  y: {
-    label: "Četnost / Hustota",
-    tickFormat: "d"
-  },
-  x: {
-    label: "Hodnota x"
-  }
-})
 ```
 
 Pro málo kategorií nám graf příliš neřekne, pro příliš mnoho je pak nezachycuje trend v datech ale spíše odchylky od trendu. Proto se stanovilo několik pravidel, jak "optimálně" nastavit počet kategorií. Nejčastěji využívané je Sturgessovo pravidlo $k=\lfloor 1+\log_2(n)\rfloor$, kde uvedené závorky značí zaokrouhlení na celá čísla dolů. Toto pravilo je však někdy nahrazováno jinými, viz [@R-hist-bins]
@@ -747,144 +833,6 @@ Plot.plot({
     Plot.dot(outliers.map(d => ({x: d})), {x: "x", y: 0, r: 4, fill: C.accent})
   ]
 })
-```
-
-### Histogram a boxplot stejných dat {.unnumbered .unlisted}
-
-Histogram i boxplot popisují tatáž data. V následující ukázce padají pozorování svisle do přihrádek histogramu a pod ním se na stejné ose průběžně počítá boxplot z právě dopadlých pozorování: krabice sahá od $Q_1$ po $Q_3$, oranžová čára je medián, vousy končí u nejzazších hodnot uvnitř hradeb a body za nimi jsou odlehlé hodnoty. Posuvníkem se mění počet intervalů a nabídkou tvar rozdělení (souměrné, rovnoměrné, zešikmené, dvouvrcholové). U rovnoměrného rozdělení odlehlé hodnoty nevznikají, u zešikmeného jen na jedné straně.
-
-```{ojs}
-//| echo: false
-{
-  const H = 400, N = 300, L0 = 48, bot = H - 120, top = 24;
-  // pevná generace dat (stejná při každém spuštění), tři tvary
-  const rnd = d3.randomLcg(7);
-  const norm = d3.randomNormal.source(rnd)(0, 1);
-  const unif = d3.randomUniform.source(rnd)(0, 1);
-  const raw = {
-    "souměrné": d3.range(N).map(() => norm()),
-    "zešikmené": d3.range(N).map(() => Math.exp(0.6 * norm())),
-    "dvouvrcholové": d3.range(N).map(() => (unif() < 0.5 ? -1.6 : 1.6) + 0.7 * norm()),
-    "rovnoměrné": d3.range(N).map(() => unif())
-  };
-  const shapes = ["souměrné", "rovnoměrné", "zešikmené", "dvouvrcholové"];   // pořadí v nabídce
-  const cz = (v, d = 2) => v.toFixed(d).replace(".", ",");
-  const R1 = width - 20;
-
-  // rozsah dat a zařazení do přihrádky pro aktuální počet intervalů
-  const geom = (s) => {
-    const data = raw[s.shape];
-    const [lo, hi] = d3.extent(data);
-    const binOf = (v) => Math.min(s.bins - 1, Math.floor((v - lo) / (hi - lo) * s.bins));
-    return {data, lo, hi, binOf};
-  };
-
-  return animation({
-    width, height: H,
-    setup: (prev) => ({
-      shape: prev ? prev.shape : shapes[0], bins: prev ? prev.bins : 12,
-      pts: [], added: 0, hb: null, hbBins: 0, ymax: 10
-    }),
-    step: (s) => {
-      const g = geom(s);
-      // nové body vstupují shora
-      for (let k = 0; k < 2 && s.added < N; k++) s.pts.push({i: s.added++, y: top - 6, landed: false});
-      if (!s.hb || s.hbBins !== s.bins) { s.hb = new Array(s.bins).fill(0); s.hbBins = s.bins; }
-      // cílové výšky sloupců = počty již dopadlých bodů; měřítko podle konečných počtů
-      const landedCounts = new Array(s.bins).fill(0), full = new Array(s.bins).fill(0);
-      g.data.forEach((v) => full[g.binOf(v)]++);
-      s.pts.forEach((p) => { if (p.landed) landedCounts[g.binOf(g.data[p.i])]++; });
-      s.ymax += (Math.max(...full) * 1.08 - s.ymax) * 0.2;
-      for (let b = 0; b < s.bins; b++) s.hb[b] += (landedCounts[b] - s.hb[b]) * 0.3;
-      // padání: bod dopadne, až dosáhne horní hladiny svého sloupce
-      s.pts.forEach((p) => {
-        if (p.landed) return;
-        p.y += 12;
-        const topY = bot - (bot - top) * s.hb[g.binOf(g.data[p.i])] / s.ymax;
-        if (p.y >= topY) p.landed = true;
-      });
-    },
-    controls: (ctl) => {
-      const box = document.createElement("div");
-      box.style.cssText = "display:flex;gap:16px;flex-wrap:wrap";
-      const sel = Inputs.select(shapes, {value: ctl.state.shape, label: "Tvar"});
-      const bins = Inputs.range([3, 30], {step: 1, value: ctl.state.bins, label: "Intervaly"});
-      sel.addEventListener("input", () => { ctl.state.shape = sel.value; ctl.reset(); ctl.running = true; });
-      bins.addEventListener("input", () => { ctl.state.bins = +bins.value; ctl.redraw(); });
-      box.append(sel, bins);
-      return box;
-    },
-    draw: (ctx, s, w) => {
-      const g = geom(s);
-      const xOf = (v) => L0 + (R1 - L0) * (v - g.lo) / (g.hi - g.lo);
-      const bw = (R1 - L0) / s.bins;
-      const yOf = (c) => bot - (bot - top) * c / s.ymax;
-      const hb = s.hb && s.hbBins === s.bins ? s.hb : new Array(s.bins).fill(0);
-
-      // osa y (počty) a osa x
-      const tickMax = Math.floor(s.ymax / 1.08);
-      for (const c of [0, Math.round(tickMax / 2), tickMax]) {
-        ctx.strokeStyle = C.grid; ctx.lineWidth = 1;
-        ctx.beginPath(); ctx.moveTo(L0, yOf(c)); ctx.lineTo(R1, yOf(c)); ctx.stroke();
-        drawText(ctx, String(c), L0 - 8, yOf(c) + 4, {align: "right"});
-      }
-      drawText(ctx, "počet pozorování", L0, 14, {bold: true});
-      // sloupce odděleny tenkou čarou barvy pozadí
-      hb.forEach((c, b) => {
-        ctx.fillStyle = C.primary;
-        ctx.fillRect(L0 + bw * b, yOf(c), bw, bot - yOf(c));
-        ctx.strokeStyle = C.bg; ctx.lineWidth = 1.5;
-        ctx.strokeRect(L0 + bw * b, yOf(c), bw, bot - yOf(c));
-      });
-      ctx.strokeStyle = C.context; ctx.lineWidth = 1.5;
-      ctx.beginPath(); ctx.moveTo(L0, bot); ctx.lineTo(R1, bot); ctx.stroke();
-      for (const e of [0, Math.floor(s.bins / 2), s.bins]) {
-        const edge = g.lo + (g.hi - g.lo) * e / s.bins;
-        drawText(ctx, cz(edge, 1), L0 + bw * e, bot + 16, {align: "center"});
-      }
-      // padající body (svisle nad vlastní přihrádkou)
-      ctx.fillStyle = C.primaryText;
-      s.pts.forEach((p) => {
-        if (p.landed) return;
-        ctx.beginPath(); ctx.arc(xOf(g.data[p.i]), p.y, 3, 0, 2 * Math.PI); ctx.fill();
-      });
-
-      // boxplot dopadlých pozorování na stejné ose x
-      const yB = bot + 72, hB = 26;
-      drawText(ctx, "Boxplot stejných dat", L0, bot + 42, {bold: true});
-      const landed = s.pts.filter((p) => p.landed).map((p) => g.data[p.i]).sort((a, b) => a - b);
-      s.box = null;
-      if (landed.length >= 4) {
-        const q1 = d3.quantile(landed, 0.25), med = d3.quantile(landed, 0.5), q3 = d3.quantile(landed, 0.75);
-        const iqr = q3 - q1;
-        const wLo = d3.min(landed.filter((x) => x >= q1 - 1.5 * iqr));
-        const wHi = d3.max(landed.filter((x) => x <= q3 + 1.5 * iqr));
-        ctx.strokeStyle = C.primary; ctx.lineWidth = 1.5;
-        ctx.beginPath();
-        ctx.moveTo(xOf(wLo), yB); ctx.lineTo(xOf(q1), yB);
-        ctx.moveTo(xOf(q3), yB); ctx.lineTo(xOf(wHi), yB);
-        ctx.moveTo(xOf(wLo), yB - hB / 4); ctx.lineTo(xOf(wLo), yB + hB / 4);
-        ctx.moveTo(xOf(wHi), yB - hB / 4); ctx.lineTo(xOf(wHi), yB + hB / 4);
-        ctx.stroke();
-        ctx.fillStyle = C.primaryLight; ctx.globalAlpha = 0.5;
-        ctx.fillRect(xOf(q1), yB - hB / 2, xOf(q3) - xOf(q1), hB);
-        ctx.globalAlpha = 1;
-        ctx.strokeRect(xOf(q1), yB - hB / 2, xOf(q3) - xOf(q1), hB);
-        ctx.strokeStyle = C.accent; ctx.lineWidth = 3;
-        ctx.beginPath(); ctx.moveTo(xOf(med), yB - hB / 2); ctx.lineTo(xOf(med), yB + hB / 2); ctx.stroke();
-        ctx.fillStyle = C.primary;
-        const out = landed.filter((x) => x < wLo || x > wHi);
-        for (const x of out) { ctx.beginPath(); ctx.arc(xOf(x), yB, 3, 0, 2 * Math.PI); ctx.fill(); }
-        s.box = {q1, med, q3, out: out.length};
-      }
-    },
-    readout: (s) => {
-      const b = s.box, landed = s.pts.filter((p) => p.landed).length;
-      return `Dopadlo ${landed} z ${N} pozorování, ${s.bins} intervalů.` +
-        (b ? ` Q1 = ${cz(b.q1)}, medián = ${cz(b.med)}, Q3 = ${cz(b.q3)}, odlehlých hodnot ${b.out}.` : "");
-    }
-  });
-}
 ```
 
 ## Klíčové poznatky {.unnumbered}

@@ -45,7 +45,13 @@ import {C, plotStyle} from "../assets/jhrules.js"
 
 ```{ojs}
 //| echo: false
-import {animation, drawText, clamp, ease, makeButton} from "../assets/anim.js"
+import {columnWidth, animation, drawText, clamp, ease, makeButton} from "../assets/anim.js"
+```
+
+```{ojs}
+//| echo: false
+// šířka textového sloupce místo vestavěné šířky celé plochy (grafy jinak přetékají doprava)
+width = columnWidth(Generators)
 ```
 
 ```{ojs}
