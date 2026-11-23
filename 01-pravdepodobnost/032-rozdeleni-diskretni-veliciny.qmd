@@ -126,6 +126,254 @@ Plot.plot({
 
 Všimněte si, že CDF je **spojitá zprava**. V bodě $x=5$ graf „vyskočí“ na hodnotu $F(5)=3/6$ a plné kolečko leží na horním schodu. Prázdné kolečko ukazuje limitu zleva, která je $1/6$. Důvod je, že $P(X\leq 5)=P(X\leq 5{,}5)$: mezi $5$ a $5{,}5$ nepřibyla žádná možná hodnota, takže se pravděpodobnost nezměnila. Výška každého schodu je přesně hodnota $p_k$ v daném bodě.
 
+### Simulace: od PMF a CDF k hodům
+
+Vyberte rozdělení a pouštějte hody. Nahoře se vypisují výsledky, v grafech je oranžově teorie
+(pravděpodobnostní funkce PMF a distribuční funkce CDF) a modře to, co vychází z hodů. S přibývajícími hody
+se modrá přibližuje k oranžové. U délky slov z *R.U.R.* žádná teorie neexistuje, oranžově je tam rozdělení délek
+v celém díle a modře rozdělení z právě přečtených slov. I dvě poloviny téhož textu se mírně liší: největší rozdíl
+relativní četnosti některé délky mezi první a druhou polovinou díla je asi 0,02 (u šestipísmenných slov). Rozdělení
+z krátkého úseku textu tedy kolísá, ale s přibývajícími slovy se k celku přibližuje.
+
+```{ojs}
+//| echo: false
+import {animation, drawText, makeButton} from "../assets/anim.js"
+```
+
+```{ojs}
+//| echo: false
+import {textCz} from "../assets/text-cz.js"
+```
+
+```{ojs}
+//| echo: false
+{
+  const cw = 24, stripY = 36;
+  const H = 375, gt = 160, gb = 320, nMax = 3000;
+  const cz = (x) => x.toFixed(3).replace(".", ",");
+  const cz2 = (x) => x.toFixed(2).replace(".", ",");
+
+  // každé rozdělení je seznam stejně pravděpodobných výsledků pokusu
+  const pairs = d3.cross(d3.range(1, 7), d3.range(1, 7));
+  const models = [
+    {name: "Kostka", two: false,
+     out: d3.range(1, 7).map((x) => ({x, txt: `${x}`}))},
+    {name: "Kostka 3-4-4-5-5-5", two: false,
+     out: [3, 4, 4, 5, 5, 5].map((x) => ({x, txt: `${x}`}))},
+    {name: "Dvě kostky: součet", two: true, title: "Dvě kostky (nahoře a uprostřed) a jejich součet (dole)",
+     out: pairs.map(([a, b]) => ({a, b, x: a + b, txt: `${a} + ${b} = ${a + b}`}))},
+    {name: "Dvě kostky: minimum", two: true, title: "Dvě kostky (nahoře a uprostřed) a menší z nich (dole)",
+     out: pairs.map(([a, b]) => ({a, b, x: Math.min(a, b), txt: `min(${a}, ${b}) = ${Math.min(a, b)}`}))}
+  ];
+  // délka slova v textu R.U.R.: „výsledek pokusu“ je náhodně vybrané slovo, délky nad 10 se slučují do „10+“
+  const lenCap = 10;
+  const letterWord = (w) => Array.from(w).filter((ch) => /\p{L}/u.test(ch)).join("");
+  const words = textCz.split(/\s+/).map(letterWord).filter((w) => w.length > 0);
+  const plural = (k) => k === 1 ? "písmeno" : k < 5 ? "písmena" : "písmen";
+  models.push({
+    name: "Délka slova (R.U.R.)", two: false, pick: "slovo", unit: "slov",
+    refLabel: "celé dílo", dataLabel: "z přečtených slov", distTxt: "CDF z přečtených slov a CDF celého díla",
+    words: true,    // slova se čtou popořadě z textu a prvních 20 je vidět i s délkami
+    title: "Délky slov v pořadí, v jakém jdou v Čapkově R.U.R. za sebou",
+    out: words.map((w) => ({x: Math.min(w.length, lenCap), show: w.length, word: w,
+                            txt: `„${w}“ (${w.length} ${plural(w.length)})`}))
+  });
+  const valLabel = (v) => v >= lenCap ? `${lenCap}+` : String(v);
+  models.forEach((m) => {
+    m.pick = m.pick ?? "hod"; m.unit = m.unit ?? "hodů";
+    m.refLabel = m.refLabel ?? "teorie"; m.dataLabel = m.dataLabel ?? "z hodů";
+    m.distTxt = m.distTxt ?? "empirické a teoretické CDF";
+    m.vals = Array.from(new Set(m.out.map((o) => o.x))).sort((a, b) => a - b);
+    m.p = m.vals.map((v) => m.out.filter((o) => o.x === v).length / m.out.length);
+    m.cdf = m.p.map((_, i) => d3.sum(m.p.slice(0, i + 1)));
+  });
+
+  const resetState = (s, mi) => {
+    const K = models[mi].vals.length;
+    s.m = mi; s.n = 0; s.acc = 0; s.seq = []; s.last = null;
+    s.counts = new Array(K).fill(0);
+    s.disp = new Array(K).fill(0);      // zobrazená (plynule doskakující) relativní četnost
+  };
+  const advance = (s, k) => {
+    const m = models[s.m];
+    for (let i = 0; i < k && s.n < nMax; i++) {
+      // slova popořadě, ostatní pokusy náhodně
+      const o = m.words ? m.out[s.n % m.out.length] : m.out[Math.floor(Math.random() * m.out.length)];
+      s.counts[m.vals.indexOf(o.x)]++;
+      s.seq.push(o);
+      s.last = o;
+      s.n++;
+    }
+  };
+  const target = (s) => s.counts.map((k) => (s.n ? k / s.n : 0));
+  // zpočátku pomalu, aby bylo vidět každý hod
+  const rate = (n) => n < 20 ? 0.12 : n < 60 ? 0.5 : n < 200 ? 1.5 : n < 600 ? 4 : 10;
+  let toggleBtn, ctlRef;
+  const modelBtns = [];
+
+  const node = animation({
+    width, height: H, buttons: false,
+    setup: () => { const s = {}; resetState(s, 0); return s; },
+    step: (s) => {
+      s.acc += rate(s.n);
+      while (s.acc >= 1) { advance(s, 1); s.acc -= 1; }
+      const f = target(s);
+      s.disp = s.disp.map((v, i) => v + (f[i] - v) * 0.25);
+    },
+    controls: (ctl) => {
+      ctlRef = ctl;
+      const instant = () => { ctl.state.disp = target(ctl.state); ctl.redraw(); };
+      const box = document.createElement("div");
+      box.style.cssText = "display:flex;gap:8px;flex-wrap:wrap;align-items:center";
+      toggleBtn = makeButton("Plynule", () => { ctl.running = !ctl.running; });
+      box.append(
+        toggleBtn,
+        makeButton("+10", () => { ctl.running = false; advance(ctl.state, 10); instant(); }),
+        makeButton("+100", () => { ctl.running = false; advance(ctl.state, 100); instant(); }),
+        makeButton("Restart", () => { resetState(ctl.state, ctl.state.m); ctl.redraw(); })
+      );
+      return box;
+    },
+    draw: (ctx, s, w) => {
+      const m = models[s.m];
+      const K = m.vals.length;
+      const f = target(s);
+      modelBtns.forEach((b, k) => {
+        b.style.borderColor = k === s.m ? C.text : C.contextLight;
+        b.style.fontWeight = k === s.m ? "bold" : "normal";
+      });
+
+      // u slov je nahoře navíc blok s prvními 20 slovy, plátno se o něj zvětší
+      const oy = m.words ? 80 : 0;
+      const need = H + oy;
+      if (ctx.canvas.dataset.h !== String(need)) {
+        const dpr = window.devicePixelRatio || 1;
+        ctx.canvas.height = Math.round(need * dpr);
+        ctx.canvas.style.height = need + "px";
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.canvas.dataset.h = String(need);
+      }
+      ctx.clearRect(0, 0, w, need);
+      if (m.words) {
+        drawText(ctx, "Prvních 20 slov a jejich délky", 10, 22, {bold: true});
+        const cellW = (w - 20) / 10, fs = w < 700 ? 11 : 13;
+        s.seq.slice(0, 20).forEach((o, i) => {
+          const cx = 10 + (i % 10) * cellW + cellW / 2, cy = 44 + Math.floor(i / 10) * 36;
+          drawText(ctx, o.word, cx, cy, {align: "center", size: fs});
+          drawText(ctx, String(o.show), cx, cy + 15, {align: "center", size: 12, bold: true, color: C.primaryText});
+        });
+        ctx.save();
+        ctx.translate(0, oy);
+      }
+
+      // posloupnost výsledků (u dvou kostek obě hodnoty nad sebou a pod nimi výsledek)
+      const Kshown = Math.floor((w - 20) / cw);
+      drawText(ctx, m.title ?? "Posloupnost výsledků", 10, 22, {bold: true});
+      s.seq.slice(-Kshown).forEach((o, i, arr) => {
+        const newest = i === arr.length - 1;
+        const cx = 10 + i * cw + cw / 2;
+        if (m.two) {
+          drawText(ctx, String(o.a), cx, stripY + 8, {align: "center", baseline: "middle", size: 13, color: C.context});
+          drawText(ctx, String(o.b), cx, stripY + 24, {align: "center", baseline: "middle", size: 13, color: C.context});
+          ctx.strokeStyle = C.contextLight; ctx.lineWidth = 1;
+          ctx.beginPath(); ctx.moveTo(cx - 8, stripY + 34); ctx.lineTo(cx + 8, stripY + 34); ctx.stroke();
+          drawText(ctx, String(o.x), cx, stripY + 49, {align: "center", baseline: "middle", size: 16, bold: true, color: newest ? C.primary : C.text});
+        } else {
+          drawText(ctx, String(o.show ?? o.x), cx, stripY + 28, {align: "center", baseline: "middle", size: 16, bold: newest, color: newest ? C.primary : C.context});
+        }
+      });
+      drawText(ctx, `${m.unit}: ${s.n}`, 10, 118, {size: 15, bold: true});
+      // legenda
+      ctx.strokeStyle = C.accent; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.moveTo(w - 330, 113); ctx.lineTo(w - 314, 113); ctx.stroke();
+      drawText(ctx, m.refLabel, w - 308, 118, {color: C.accent, bold: true});
+      ctx.fillStyle = C.primary;
+      ctx.beginPath(); ctx.arc(w - 215, 113, 4.5, 0, 2 * Math.PI); ctx.fill();
+      drawText(ctx, m.dataLabel, w - 206, 118, {color: C.primaryText, bold: true});
+      // geometrie dvou grafů
+      const gap = 70, L0 = 50, half = (w - L0 - gap - 20) / 2, R0 = L0 + half + gap;
+      const xi = (x0, i) => x0 + half * (i + 0.5) / K;
+      const pmax = Math.max(...m.p) * 1.3;
+      const yP = (v) => gb - (gb - gt) * v / pmax;
+      const yF = (v) => gb - (gb - gt) * v / 1.05;
+
+      // PMF
+      drawText(ctx, "PMF  P(X = x)", L0, gt - 14, {bold: true});
+      ctx.strokeStyle = C.grid; ctx.lineWidth = 1;
+      for (const v of [0, Math.max(...m.p)]) {
+        ctx.beginPath(); ctx.moveTo(L0, yP(v)); ctx.lineTo(L0 + half, yP(v)); ctx.stroke();
+        drawText(ctx, cz2(v), L0 - 6, yP(v) + 4, {align: "right", size: 11});
+      }
+      m.vals.forEach((v, i) => {
+        const x = xi(L0, i);
+        drawText(ctx, valLabel(v), x, gb + 16, {align: "center", size: 11});
+        ctx.strokeStyle = C.primary; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(x, yP(0)); ctx.lineTo(x, yP(s.disp[i])); ctx.stroke();
+        ctx.fillStyle = C.primary;
+        ctx.beginPath(); ctx.arc(x, yP(s.disp[i]), 4.5, 0, 2 * Math.PI); ctx.fill();
+        ctx.strokeStyle = C.accent; ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.moveTo(x - 9, yP(m.p[i])); ctx.lineTo(x + 9, yP(m.p[i])); ctx.stroke();
+      });
+
+      // CDF: jen vodorovné úsečky, plné body vlevo a prázdná kolečka vpravo
+      drawText(ctx, "CDF  F(x) = P(X ≤ x)", R0, gt - 14, {bold: true});
+      ctx.strokeStyle = C.grid; ctx.lineWidth = 1;
+      for (const v of [0, 0.5, 1]) {
+        ctx.beginPath(); ctx.moveTo(R0, yF(v)); ctx.lineTo(R0 + half, yF(v)); ctx.stroke();
+        drawText(ctx, String(v).replace(".", ","), R0 - 6, yF(v) + 4, {align: "right", size: 11});
+      }
+      m.vals.forEach((v, i) => drawText(ctx, valLabel(v), xi(R0, i), gb + 16, {align: "center", size: 11}));
+      const segments = (F, color, lw) => {
+        ctx.strokeStyle = color; ctx.lineWidth = lw;
+        const seg = (xa, xb, v) => { ctx.beginPath(); ctx.moveTo(xa, yF(v)); ctx.lineTo(xb, yF(v)); ctx.stroke(); };
+        seg(R0, xi(R0, 0), 0);
+        F.forEach((v, i) => seg(xi(R0, i), i < K - 1 ? xi(R0, i + 1) : R0 + half, v));
+      };
+      let acc = 0;
+      const empF = s.disp.map((v) => (acc += v));
+      segments(m.cdf, C.accent, 2.5);
+      if (s.n > 0) segments(empF, C.primary, 1.6);
+      m.vals.forEach((v, i) => {
+        const lo = i === 0 ? 0 : m.cdf[i - 1];
+        ctx.fillStyle = C.accent;
+        ctx.beginPath(); ctx.arc(xi(R0, i), yF(m.cdf[i]), 3.5, 0, 2 * Math.PI); ctx.fill();
+        ctx.fillStyle = C.bg; ctx.strokeStyle = C.accent; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.arc(xi(R0, i), yF(lo), 3.5, 0, 2 * Math.PI); ctx.fill(); ctx.stroke();
+      });
+      if (m.words) ctx.restore();
+    },
+    readout: (s, ctl) => {
+      toggleBtn.textContent = ctl.running ? "Pauza" : "Plynule";
+      if (!s.n) return "Zatím nic nevybráno. Spusťte Plynule, nebo +10.";
+      const m = models[s.m];
+      let c = 0, d = 0;
+      s.counts.forEach((k, i) => {
+        c += k;
+        d = Math.max(d, Math.abs(c / s.n - m.cdf[i]));
+      });
+      return `Poslední ${m.pick}: ${s.last.txt}. Největší vzdálenost: ${m.distTxt} = ${cz(d)}.` +
+        (s.n >= nMax ? " Limit hodů, použijte Restart." : "");
+    }
+  });
+
+  // výběr rozdělení nad grafem
+  const row = document.createElement("div");
+  row.style.cssText = "display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:6px";
+  const label = document.createElement("span");
+  label.textContent = "Rozdělení:";
+  label.style.cssText = "font:bold 13px Arial,Helvetica,sans-serif";
+  row.append(label);
+  models.forEach((m, k) => {
+    const b = makeButton(m.name, () => { resetState(ctlRef.state, k); ctlRef.redraw(); });
+    modelBtns.push(b);
+    row.append(b);
+  });
+  const wrap = document.createElement("div");
+  wrap.append(row, node);
+  return wrap;
+}
+```
+
 ### Vlastnosti
 
 Pro PMF platí

@@ -27,6 +27,156 @@ Nominální a ordinální proměnné jsou **kvalitativní** (kategoriální). Ob
 - [intervalová]{.highlight-term} proměnná nemá pevnou nulu, mají smysl rozdíly, ale ne podíly. Příkladem je teplota ve stupních Celsia: $20\,^\circ\mathrm{C}$ není „dvakrát tepleji“ než $10\,^\circ\mathrm{C}$.
 - [poměrová]{.highlight-term} proměnná má nulu danou věcně (věk, příjem, hmotnost, rychlost), takže smysl mají i podíly: $20$ kg je dvakrát víc než $10$ kg.
 
+```{ojs}
+//| echo: false
+import {animation, drawText, ease, makeButton} from "../assets/anim.js"
+```
+
+Osm lidí je zvážených na poměrové stupnici (nahoře, číslo je hmotnost v kg, barva značí skupinu A, B nebo C). Tlačítky vyberte úroveň měření: kopie bodů se přesunou na dolní osu a v popiscích zůstane jen to, co daná úroveň měření zachovává.
+Původní body nahoře se nemění.
+
+```{ojs}
+//| echo: false
+{
+  const H = 330, m = 40;
+  const kg = [52, 58, 66, 73, 81, 90, 104, 124];
+  const grp = ["A", "B", "A", "C", "B", "C", "A", "B"];     // příslušnost ke skupině
+  const rank = kg.map((v) => Math.floor((v - 40) / 20) + 1); // kategorie po 20 kg (1 = 40–59), některé hodnoty se opakují
+  const n = kg.length;
+  const gColor = {A: C.primary, B: C.contextLight, C: C.context};
+  const slot = {A: 0.7, B: 0.25, C: 0.5};                    // pořadí skupin nic neznamená
+  const cz = (x) => String(Number(x.toFixed(2))).replace(".", ",");
+  const mean = kg.reduce((a, b) => a + b, 0) / n;
+
+  const modes = [
+    {name: "nominální", kind: "nom"},
+    {name: "ordinální", kind: "ord"},
+    {name: "intervalová (nula = 50 kg)", kind: "int", zeroLabel: "nula = 50 kg",
+     f: (w) => w - 50, lo: -10, hi: 80, ticks: [0, 20, 40, 60, 80]},
+    {name: "intervalová (nula = průměr)", kind: "int", zeroLabel: `nula = průměr (${cz(mean)} kg)`,
+     f: (w) => w - mean, lo: -40, hi: 50, ticks: [-40, -20, 0, 20, 40]}
+  ];
+
+  // pořadí bodu ve skupině / v kategorii (pro nakupení nad sebe)
+  const stackIndex = (keys) => {
+    const seen = {};
+    return keys.map((k) => (seen[k] = (seen[k] ?? -1) + 1));
+  };
+  const kGrp = stackIndex(grp), kRank = stackIndex(rank);
+
+  // cílová poloha na dolní ose: v (0–1) a patro k
+  const target = (mode, i) => {
+    if (mode.kind === "nom") return {v: slot[grp[i]], k: kGrp[i]};
+    if (mode.kind === "ord") return {v: (rank[i] - 0.5) / 5, k: kRank[i]};
+    return {v: (mode.f(kg[i]) - mode.lo) / (mode.hi - mode.lo), k: 0};
+  };
+  const label = (mode, i) => {
+    if (mode.kind === "int") return cz(mode.f(kg[i])).replace("-", "−");
+    return "";
+  };
+
+  const yT = 100, yB = 255;
+
+  return animation({
+    width, height: H, buttons: false,
+    setup: () => ({sel: 0, t: 0}),
+    step: (s) => { if (s.t < 1) s.t = Math.min(1, s.t + 0.03); },
+    controls: (ctl) => {
+      const box = document.createElement("div");
+      box.style.cssText = "display:flex;gap:8px;flex-wrap:wrap;align-items:center";
+      const title = document.createElement("span");
+      title.textContent = "Úroveň měření:";
+      title.style.cssText = "font:bold 13px Arial,Helvetica,sans-serif";
+      box.append(title);
+      const buttons = modes.map((d, k) => makeButton(d.name, () => {
+        ctl.state.sel = k;
+        ctl.state.t = 0;
+        paint(k);
+      }));
+      const paint = (active) => buttons.forEach((b, k) => {
+        b.style.borderColor = k === active ? C.text : C.contextLight;
+        b.style.fontWeight = k === active ? "bold" : "normal";
+      });
+      paint(ctl.state.sel);
+      box.append(...buttons);
+      return box;
+    },
+    draw: (ctx, s, w) => {
+      const mode = modes[s.sel];
+      const e = ease(s.t);
+      const X = (v) => m + v * (w - 2 * m);
+      ctx.lineWidth = 1.5;
+
+      // horní osa: poměrová stupnice (skutečná nula)
+      drawText(ctx, "Poměrové měřítko: hmotnost v kg, nula je skutečná", m, 22, {bold: true, size: 13});
+      ctx.strokeStyle = C.context;
+      ctx.beginPath(); ctx.moveTo(X(0), yT); ctx.lineTo(X(1), yT); ctx.stroke();
+      for (let t = 0; t <= 140; t += 20) {
+        ctx.beginPath(); ctx.moveTo(X(t / 140), yT); ctx.lineTo(X(t / 140), yT + 5); ctx.stroke();
+        drawText(ctx, String(t), X(t / 140), yT + 19, {align: "center", size: 11});
+      }
+      // původní body zůstávají nahoře
+      kg.forEach((val, i) => {
+        const xx = X(val / 140), yy = yT - 12;
+        ctx.fillStyle = gColor[grp[i]];
+        ctx.strokeStyle = C.context; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.arc(xx, yy, 8, 0, 2 * Math.PI); ctx.fill(); ctx.stroke();
+        drawText(ctx, String(kg[i]), xx, yy - 13, {align: "center", size: 11});
+      });
+      ctx.lineWidth = 1.5;
+
+      // dolní osa podle vybraného měřítka
+      drawText(ctx, mode.name.charAt(0).toUpperCase() + mode.name.slice(1) + " měřítko", m, yB - 62, {bold: true, size: 13});
+      ctx.strokeStyle = C.context;
+      if (mode.kind === "nom") {
+        for (const g of ["A", "B", "C"]) drawText(ctx, `skupina ${g}`, X(slot[g]), yB + 19, {align: "center", size: 12});
+      } else {
+        ctx.beginPath(); ctx.moveTo(X(0), yB); ctx.lineTo(X(1), yB); ctx.stroke();
+        if (mode.kind === "ord") {
+          for (let r = 1; r <= 5; r++) {
+            const v = (r - 0.5) / 5;
+            ctx.beginPath(); ctx.moveTo(X(v), yB); ctx.lineTo(X(v), yB + 5); ctx.stroke();
+            drawText(ctx, String(r), X(v), yB + 19, {align: "center", size: 12});
+            drawText(ctx, `${20 + 20 * r}–${39 + 20 * r}`, X(v), yB + 33, {align: "center", size: 10, color: C.context});
+          }
+          drawText(ctx, "kategorie hmotnosti a její rozsah v kg (1 = nejlehčí)", X(0.5), yB + 50, {align: "center", size: 11, color: C.context});
+        } else {
+          for (const t of mode.ticks) {
+            const v = (t - mode.lo) / (mode.hi - mode.lo);
+            ctx.beginPath(); ctx.moveTo(X(v), yB); ctx.lineTo(X(v), yB + 5); ctx.stroke();
+            drawText(ctx, String(t).replace("-", "−"), X(v), yB + 19, {align: "center", size: 12});
+          }
+          const v0 = (0 - mode.lo) / (mode.hi - mode.lo);
+          drawText(ctx, mode.zeroLabel, X(v0), yB + 38, {align: "center", size: 11, bold: true, color: C.context});
+        }
+      }
+
+      // kopie bodů se z horní osy přesouvají na dolní
+      kg.forEach((val, i) => {
+        const tg = target(mode, i);
+        const xx = X((val / 140) + (tg.v - val / 140) * e);
+        const yy = (yT - 12) + ((yB - 14 - tg.k * 20) - (yT - 12)) * e;
+        ctx.fillStyle = gColor[grp[i]];
+        ctx.strokeStyle = C.context; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.arc(xx, yy, 8, 0, 2 * Math.PI); ctx.fill(); ctx.stroke();
+        // popisek kopie se objeví, až dorazí (a jen pokud ho úroveň měření zachovává)
+        const text = e >= 0.99 ? label(mode, i) : "";
+        if (text) drawText(ctx, text, xx, yy - 13, {align: "center", size: 11});
+      });
+    },
+    readout: (s) => {
+      const mode = modes[s.sel];
+      if (mode.kind === "nom") return "Zůstala jen příslušnost ke skupině: dva lidé jsou ve stejné, nebo v různé skupině. Pořadí skupin A, B, C nic neznamená.";
+      if (mode.kind === "ord") return "Zůstalo pořadí kategorií (ve stejné kategorii jsou si lidé rovni). Víme, kdo je těžší, ne o kolik.";
+      const a = 104, b = 52;   // dva lidé ze souboru
+      return `Rozdíl dvou lidí (${a} a ${b} kg) je na každé stupnici stejný: ${cz(mode.f(a) - mode.f(b))} kg. ` +
+        `Podíl ne: na této stupnici ${cz(mode.f(a))} / ${cz(mode.f(b))} = ${cz(mode.f(a) / mode.f(b))}, ` +
+        `na poměrové ${a} / ${b} = ${cz(a / b)}. Podíl závisí na zvolené nule.`;
+    }
+  });
+}
+```
+
 ## Co s jednotlivými typy smíme
 
 Každý další typ „umí“ všechno, co předchozí, a něco navíc.
@@ -41,6 +191,68 @@ Každý další typ „umí“ všechno, co předchozí, a něco navíc.
 : Povolené operace a vhodné statistiky podle typu proměnné {#tbl-typy}
 
 Průměr pořadí v závodě nebo průměr krevních skupin nemá smysl, i když počítač ochotně vypočítá číslo.
+
+U každé položky vyberte typ proměnné. Vpravo se hned ukáže, zda sedí, a jaké operace a statistiky daný typ dovoluje
+(tučně je to, co přibývá oproti nižšímu typu).
+
+```{ojs}
+//| echo: false
+items31 = [
+  {text: "Barva očí", type: "nominální"},
+  {text: "Teplota vzduchu ve °C", type: "intervalová"},
+  {text: "Pořadí v cíli závodu", type: "ordinální"},
+  {text: "Počet dětí v rodině", type: "poměrová"},
+  {text: "Teplota v kelvinech", type: "poměrová"},
+  {text: "Poštovní směrovací číslo", type: "nominální"},
+  {text: "Známka ve škole (1–5)", type: "ordinální"},
+  {text: "Rok narození", type: "intervalová"}
+]
+
+types31 = ["nominální", "ordinální", "intervalová", "poměrová"]
+
+// co typ dovoluje: každý vyšší typ umí vše z nižších a navíc nové (levels31[i] je novinka typu i)
+levels31 = [
+  {sym: ["=", "≠"], stat: ["modus"]},
+  {sym: ["<", ">"], stat: ["medián"]},
+  {sym: ["−"], stat: ["průměr"]},
+  {sym: ["÷"], stat: ["podíl"]}
+]
+```
+
+```{ojs}
+//| echo: false
+{
+  const tbl = html`<table style="font-size:14px;border-collapse:collapse"></table>`;
+  // jednotlivé symboly: nové tučně, zděděné šedě
+  const spans = (level, key) => levels31.slice(0, level + 1).flatMap((lv, i) =>
+    lv[key].map((x) => html`<span style="margin-right:10px;${i === level ? `font-weight:bold;color:${C.primaryText}` : `color:${C.context}`}">${x}</span>`));
+
+  items31.forEach((it) => {
+    const sel = html`<select>${["—", ...types31].map((t) => html`<option>${t}</option>`)}</select>`;
+    const verdict = html`<td style="padding:4px 14px 4px 0;white-space:nowrap"></td>`;
+    const ops = html`<td style="padding:4px 0"></td>`;
+    const update = () => {
+      const a = sel.value;
+      const done = a !== "—", ok = a === it.type;
+      verdict.textContent = !done ? "" : ok ? "✓ správně" : "✗ zkuste to znovu";
+      verdict.style.color = ok ? C.primaryText : C.warning;
+      ops.replaceChildren();
+      if (ok) {
+        const level = types31.indexOf(a);
+        ops.append(html`<div style="font-size:16px">${spans(level, "sym")}</div>`,
+                   html`<div style="font-size:12px">${spans(level, "stat")}</div>`);
+      }
+    };
+    sel.addEventListener("change", update);
+    tbl.append(html`<tr style="vertical-align:middle">
+      <td style="padding:4px 14px 4px 0">${it.text}</td>
+      <td style="padding:4px 14px 4px 0">${sel}</td>
+      ${verdict}${ops}
+    </tr>`);
+  });
+  return tbl;
+}
+```
 
 ## Popisná statistika z dat: tabulka četností
 
