@@ -32,6 +32,11 @@ import {C} from "../assets/jhrules.js"
 
 ```{ojs}
 //| echo: false
+import {animation, drawText, clamp, ease, makeButton} from "../assets/anim.js"
+```
+
+```{ojs}
+//| echo: false
 // 1. Příprava dat
 dataZdroj = [0, 1, 1.8, 2.3, 3, 3.5, 4, 5, 8, 10]
 
@@ -407,6 +412,176 @@ Plot.plot({
 ```
 :::
 
+Celý postup si můžete projít po krocích na dvanácti jiných hodnotách, než jsou data o domácnostech výše. Tlačítky **Zpět / Přehrát / Další** (nebo tečkami) se prochází pět kroků: data v pořadí měření, přeřazení od nejmenšího (body se spojí úsečkami), medián, kvartily a libovolný percentil zvolený posuvníkem. Čára ke kvantilu vede od osy $x$ (s pozicí $k$) svisle až k bodu na úsečce mezi dvěma sousedními body a odtud vodorovně k ose $y$, kde se objeví hodnota. Tlačítkem *Nová data* se hodnoty vylosují znovu.
+
+```{ojs}
+//| echo: false
+{
+  const H = 380, n = 12, L0 = 60, top = 34, bot = H - 56;
+  const notes = [
+    "Data v pořadí, v jakém byla naměřena.",
+    "Přeřazení od nejmenšího; body se spojí úsečkami, protože mezi dvěma sousedními hodnotami budeme interpolovat.",
+    "Medián je na pozici (n + 1) / 2 = 6,5, tedy uprostřed úsečky mezi 6. a 7. bodem.",
+    "Q1 je na pozici 1 + 11·0,25 = 3,75 (tři čtvrtiny cesty od 3. ke 4. bodu), Q3 na pozici 9,25.",
+    "Libovolný percentil: posuvníkem měníte řád p, pozice je k = 1 + (n − 1)·p a hodnota vždy leží na úsečce mezi dvěma body."
+  ];
+  let dots = [], pBox;
+
+  const goTo = (s, k) => {
+    s.step = clamp(k, 1, 5);
+    s.t = 0;
+    s.hold = 0;
+  };
+  // kvantil lineární interpolací: pozice k, sousední body lo a hi, váha fr
+  const quant = (sorted, p) => {
+    const h = 1 + (sorted.length - 1) * p;
+    const lo = Math.floor(h), hi = Math.ceil(h), fr = h - lo;
+    return {h, lo, hi, fr, val: sorted[lo - 1] * (1 - fr) + sorted[hi - 1] * fr};
+  };
+  const cz = (v, d = 1) => v.toFixed(d).replace(".", ",");
+
+  return animation({
+    width, height: H, buttons: false,
+    setup: () => {
+      const v = d3.range(n).map(() => 15 + Math.round(Math.random() * 80));
+      const order = d3.range(n).sort((a, b) => v[a] - v[b]);
+      const rank = new Array(n);
+      order.forEach((idx, r) => rank[idx] = r + 1);
+      return {v, rank, sorted: order.map((i) => v[i]), step: 1, t: 0, hold: 0, play: false, p: 0.9};
+    },
+    step: (s) => {
+      // přeřazení je rychlejší, vedení čar ke kvantilu pomalejší, ať je cesta vidět
+      s.t = Math.min(1, s.t + (s.step <= 2 ? 0.025 : 0.012));
+      if (s.play && s.t >= 1) {
+        s.hold++;
+        if (s.hold > 50) {
+          if (s.step < 5) goTo(s, s.step + 1); else s.play = false;
+        }
+      }
+    },
+    controls: (ctl) => {
+      const box = document.createElement("div");
+      box.style.cssText = "display:flex;gap:10px;align-items:center;flex-wrap:wrap";
+      const dotBox = document.createElement("span");
+      dots = [1, 2, 3, 4, 5].map((k) => {
+        const d = document.createElement("span");
+        d.style.cssText = "display:inline-block;width:10px;height:10px;border-radius:50%;margin:0 3px;cursor:pointer";
+        d.addEventListener("click", () => { ctl.state.play = false; goTo(ctl.state, k); });
+        dotBox.append(d);
+        return d;
+      });
+      box.append(
+        makeButton("Zpět", () => { ctl.state.play = false; goTo(ctl.state, ctl.state.step - 1); }),
+        makeButton("Přehrát", () => { ctl.state.play = true; goTo(ctl.state, 1); }),
+        makeButton("Další", () => { ctl.state.play = false; goTo(ctl.state, ctl.state.step + 1); }),
+        dotBox,
+        makeButton("Nová data", () => ctl.reset())
+      );
+      // posuvník percentilu (vidět jen v kroku 5); změna se projeví hned, bez nového přehrání cesty
+      const slider = Inputs.range([0, 100], {step: 1, value: Math.round(ctl.state.p * 100), label: "Percentil (%)"});
+      slider.addEventListener("input", () => {
+        ctl.state.p = +slider.value / 100;
+        ctl.state.play = false;
+        ctl.state.t = 1;
+        ctl.redraw();
+      });
+      pBox = slider;
+      box.append(slider);
+      return box;
+    },
+    draw: (ctx, s, w) => {
+      const R1 = w - 130;
+      const xOf = (p) => L0 + (R1 - L0) * (p - 0.5) / n;       // pozice 1..n
+      const yOf = (v) => bot - (bot - top) * v / 100;
+      const mv = s.step === 1 ? 0 : s.step === 2 ? ease(s.t) : 1;   // přesun do uspořádaného pořadí
+      const lineA = s.step === 1 ? 0 : s.step === 2 ? ease((s.t - 0.75) / 0.25) : 1;
+
+      // osy
+      ctx.strokeStyle = C.grid; ctx.lineWidth = 1;
+      for (const v of [0, 50, 100]) {
+        ctx.beginPath(); ctx.moveTo(L0, yOf(v)); ctx.lineTo(R1, yOf(v)); ctx.stroke();
+        drawText(ctx, String(v), L0 - 8, yOf(v) + 4, {align: "right"});
+      }
+      ctx.strokeStyle = C.context; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(L0, bot); ctx.lineTo(R1, bot); ctx.stroke();
+      for (let p = 1; p <= n; p++) drawText(ctx, String(p), xOf(p), bot + 16, {align: "center", size: 11});
+      drawText(ctx, s.step === 1 ? "pořadí měření" : "pořadí po seřazení", (L0 + R1) / 2, bot + 34, {align: "center"});
+
+      // úsečky mezi seřazenými body
+      if (lineA > 0) {
+        ctx.strokeStyle = C.primary; ctx.globalAlpha = lineA; ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        s.sorted.forEach((v, i) => i ? ctx.lineTo(xOf(i + 1), yOf(v)) : ctx.moveTo(xOf(1), yOf(v)));
+        ctx.stroke();
+        ctx.globalAlpha = 1;
+      }
+      // kvantily: vodorovná čára k ose y, svislá k ose x, marker na úsečce
+      const pName = `P${Math.round(s.p * 100)}`;
+      const defs = s.step === 3 ? [["medián", 0.5, C.accent]]
+        : s.step === 4 ? [["Q1", 0.25, C.primaryText], ["medián", 0.5, C.accent], ["Q3", 0.75, C.primaryText]]
+        : s.step === 5 ? [[pName, s.p, C.accent]] : [];
+      const labels = [];
+      defs.forEach(([name, p, col]) => {
+        const q = quant(s.sorted, p);
+        // postup v kroku 4: Q1 první polovina, Q3 druhá polovina, medián už je hotový
+        const span = s.step === 4 ? (name === "Q1" ? [0, 0.5] : [0.5, 1]) : [0, 1];
+        const a = s.step === 4 && name === "medián" ? 1 : clamp((s.t - span[0]) / (span[1] - span[0]), 0, 1);
+        const a1 = ease(clamp(a * 2, 0, 1));          // 1. půlka: od osy x svisle k bodu na úsečce
+        const a2 = ease(clamp(a * 2 - 1, 0, 1));      // 2. půlka: vodorovně k ose y
+        const px = xOf(q.h), py = yOf(q.val);
+        ctx.strokeStyle = col; ctx.lineWidth = 2; ctx.setLineDash([6, 4]);
+        if (a > 0) { ctx.beginPath(); ctx.moveTo(px, bot); ctx.lineTo(px, bot + (py - bot) * a1); ctx.stroke(); }
+        if (a2 > 0) { ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(px + (L0 - px) * a2, py); ctx.stroke(); }
+        ctx.setLineDash([]);
+        // pozice na ose x
+        if (a > 0) drawText(ctx, `k = ${cz(q.h, 2)}`, px + 6, bot - 8, {size: 11, bold: true, color: col});
+        if (a1 >= 1) {
+          // sousední body, mezi kterými se interpoluje, a výsledný bod na úsečce
+          for (const k of new Set([q.lo, q.hi])) {
+            ctx.strokeStyle = col; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.arc(xOf(k), yOf(s.sorted[k - 1]), 9, 0, 2 * Math.PI); ctx.stroke();
+          }
+          ctx.fillStyle = col;
+          ctx.beginPath(); ctx.arc(px, py, 6.5, 0, 2 * Math.PI); ctx.fill();
+        }
+        // hodnota na ose y (překryje případný popisek stupnice)
+        if (a2 >= 1) {
+          ctx.fillStyle = C.bg; ctx.fillRect(L0 - 44, py - 8, 40, 16);
+          drawText(ctx, cz(q.val), L0 - 8, py + 4, {align: "right", bold: true, color: col});
+        }
+        labels.push({name, col, q, y: py});
+      });
+      // popisky v pravém okraji (dva řádky), seřazené shora a rozsunuté
+      let lastY = -99;
+      labels.sort((u, v) => u.y - v.y).forEach((l) => {
+        const ly = Math.max(l.y + 4, lastY + 46);
+        lastY = ly;
+        drawText(ctx, `${l.name} = ${cz(l.q.val)}`, R1 + 10, ly, {color: l.col, bold: true});
+        drawText(ctx, `pozice k = ${cz(l.q.h, 2)}`, R1 + 10, ly + 14, {size: 11, color: C.context});
+        drawText(ctx, `${cz(1 - l.q.fr, 2)}·${s.sorted[l.q.lo - 1]} + ${cz(l.q.fr, 2)}·${s.sorted[l.q.hi - 1]}`,
+                 R1 + 10, ly + 27, {size: 11, color: C.context});
+      });
+      // body (původní pořadí → seřazené)
+      s.v.forEach((v, i) => {
+        const p = (i + 1) + (s.rank[i] - (i + 1)) * mv;
+        ctx.fillStyle = C.primary;
+        ctx.beginPath(); ctx.arc(xOf(p), yOf(v), 5, 0, 2 * Math.PI); ctx.fill();
+      });
+    },
+    readout: (s) => {
+      dots.forEach((d, i) => d.style.background = i + 1 === s.step ? C.accent : C.contextLight);
+      pBox.style.display = s.step === 5 ? "" : "none";
+      let txt = `${s.step}. krok z 5: ${notes[s.step - 1]}`;
+      if (s.step === 5) {
+        const q = quant(s.sorted, s.p);
+        txt += ` Teď p = ${Math.round(s.p * 100)} %: k = 1 + 11·${cz(s.p, 2)} = ${cz(q.h, 2)}, hodnota ${cz(q.val)}.`;
+      }
+      return txt;
+    }
+  });
+}
+```
+
 Pokud využijeme vzorce pro celý rozsah dat, získáme **kvantilovou funkci** $q = Q(p)$, která popisuje empirircky (z dat) popisuje vztah hodnotou **$q$** nazývanou **kvantil, percentil, ...** a hodnotou **$p\in(0,1)$** nazývaný **hladina, (kumulativní) pravděpodobnost, percentuální podíl, ...**.  Z pohledu pravděpodobnosti je tedy $q$ taková hodnota, že pravděpodobnost že při náhodném výběru je vybrané hodnota x menší nebo rovna $q$ je rovna $p$.
 
 $$ Q(p)=q \Longleftrightarrow P(x\leq q)=p$$
@@ -572,6 +747,144 @@ Plot.plot({
     Plot.dot(outliers.map(d => ({x: d})), {x: "x", y: 0, r: 4, fill: C.accent})
   ]
 })
+```
+
+### Histogram a boxplot stejných dat {.unnumbered .unlisted}
+
+Histogram i boxplot popisují tatáž data. V následující ukázce padají pozorování svisle do přihrádek histogramu a pod ním se na stejné ose průběžně počítá boxplot z právě dopadlých pozorování: krabice sahá od $Q_1$ po $Q_3$, oranžová čára je medián, vousy končí u nejzazších hodnot uvnitř hradeb a body za nimi jsou odlehlé hodnoty. Posuvníkem se mění počet intervalů a nabídkou tvar rozdělení (souměrné, rovnoměrné, zešikmené, dvouvrcholové). U rovnoměrného rozdělení odlehlé hodnoty nevznikají, u zešikmeného jen na jedné straně.
+
+```{ojs}
+//| echo: false
+{
+  const H = 400, N = 300, L0 = 48, bot = H - 120, top = 24;
+  // pevná generace dat (stejná při každém spuštění), tři tvary
+  const rnd = d3.randomLcg(7);
+  const norm = d3.randomNormal.source(rnd)(0, 1);
+  const unif = d3.randomUniform.source(rnd)(0, 1);
+  const raw = {
+    "souměrné": d3.range(N).map(() => norm()),
+    "zešikmené": d3.range(N).map(() => Math.exp(0.6 * norm())),
+    "dvouvrcholové": d3.range(N).map(() => (unif() < 0.5 ? -1.6 : 1.6) + 0.7 * norm()),
+    "rovnoměrné": d3.range(N).map(() => unif())
+  };
+  const shapes = ["souměrné", "rovnoměrné", "zešikmené", "dvouvrcholové"];   // pořadí v nabídce
+  const cz = (v, d = 2) => v.toFixed(d).replace(".", ",");
+  const R1 = width - 20;
+
+  // rozsah dat a zařazení do přihrádky pro aktuální počet intervalů
+  const geom = (s) => {
+    const data = raw[s.shape];
+    const [lo, hi] = d3.extent(data);
+    const binOf = (v) => Math.min(s.bins - 1, Math.floor((v - lo) / (hi - lo) * s.bins));
+    return {data, lo, hi, binOf};
+  };
+
+  return animation({
+    width, height: H,
+    setup: (prev) => ({
+      shape: prev ? prev.shape : shapes[0], bins: prev ? prev.bins : 12,
+      pts: [], added: 0, hb: null, hbBins: 0, ymax: 10
+    }),
+    step: (s) => {
+      const g = geom(s);
+      // nové body vstupují shora
+      for (let k = 0; k < 2 && s.added < N; k++) s.pts.push({i: s.added++, y: top - 6, landed: false});
+      if (!s.hb || s.hbBins !== s.bins) { s.hb = new Array(s.bins).fill(0); s.hbBins = s.bins; }
+      // cílové výšky sloupců = počty již dopadlých bodů; měřítko podle konečných počtů
+      const landedCounts = new Array(s.bins).fill(0), full = new Array(s.bins).fill(0);
+      g.data.forEach((v) => full[g.binOf(v)]++);
+      s.pts.forEach((p) => { if (p.landed) landedCounts[g.binOf(g.data[p.i])]++; });
+      s.ymax += (Math.max(...full) * 1.08 - s.ymax) * 0.2;
+      for (let b = 0; b < s.bins; b++) s.hb[b] += (landedCounts[b] - s.hb[b]) * 0.3;
+      // padání: bod dopadne, až dosáhne horní hladiny svého sloupce
+      s.pts.forEach((p) => {
+        if (p.landed) return;
+        p.y += 12;
+        const topY = bot - (bot - top) * s.hb[g.binOf(g.data[p.i])] / s.ymax;
+        if (p.y >= topY) p.landed = true;
+      });
+    },
+    controls: (ctl) => {
+      const box = document.createElement("div");
+      box.style.cssText = "display:flex;gap:16px;flex-wrap:wrap";
+      const sel = Inputs.select(shapes, {value: ctl.state.shape, label: "Tvar"});
+      const bins = Inputs.range([3, 30], {step: 1, value: ctl.state.bins, label: "Intervaly"});
+      sel.addEventListener("input", () => { ctl.state.shape = sel.value; ctl.reset(); ctl.running = true; });
+      bins.addEventListener("input", () => { ctl.state.bins = +bins.value; ctl.redraw(); });
+      box.append(sel, bins);
+      return box;
+    },
+    draw: (ctx, s, w) => {
+      const g = geom(s);
+      const xOf = (v) => L0 + (R1 - L0) * (v - g.lo) / (g.hi - g.lo);
+      const bw = (R1 - L0) / s.bins;
+      const yOf = (c) => bot - (bot - top) * c / s.ymax;
+      const hb = s.hb && s.hbBins === s.bins ? s.hb : new Array(s.bins).fill(0);
+
+      // osa y (počty) a osa x
+      const tickMax = Math.floor(s.ymax / 1.08);
+      for (const c of [0, Math.round(tickMax / 2), tickMax]) {
+        ctx.strokeStyle = C.grid; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(L0, yOf(c)); ctx.lineTo(R1, yOf(c)); ctx.stroke();
+        drawText(ctx, String(c), L0 - 8, yOf(c) + 4, {align: "right"});
+      }
+      drawText(ctx, "počet pozorování", L0, 14, {bold: true});
+      // sloupce odděleny tenkou čarou barvy pozadí
+      hb.forEach((c, b) => {
+        ctx.fillStyle = C.primary;
+        ctx.fillRect(L0 + bw * b, yOf(c), bw, bot - yOf(c));
+        ctx.strokeStyle = C.bg; ctx.lineWidth = 1.5;
+        ctx.strokeRect(L0 + bw * b, yOf(c), bw, bot - yOf(c));
+      });
+      ctx.strokeStyle = C.context; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(L0, bot); ctx.lineTo(R1, bot); ctx.stroke();
+      for (const e of [0, Math.floor(s.bins / 2), s.bins]) {
+        const edge = g.lo + (g.hi - g.lo) * e / s.bins;
+        drawText(ctx, cz(edge, 1), L0 + bw * e, bot + 16, {align: "center"});
+      }
+      // padající body (svisle nad vlastní přihrádkou)
+      ctx.fillStyle = C.primaryText;
+      s.pts.forEach((p) => {
+        if (p.landed) return;
+        ctx.beginPath(); ctx.arc(xOf(g.data[p.i]), p.y, 3, 0, 2 * Math.PI); ctx.fill();
+      });
+
+      // boxplot dopadlých pozorování na stejné ose x
+      const yB = bot + 72, hB = 26;
+      drawText(ctx, "Boxplot stejných dat", L0, bot + 42, {bold: true});
+      const landed = s.pts.filter((p) => p.landed).map((p) => g.data[p.i]).sort((a, b) => a - b);
+      s.box = null;
+      if (landed.length >= 4) {
+        const q1 = d3.quantile(landed, 0.25), med = d3.quantile(landed, 0.5), q3 = d3.quantile(landed, 0.75);
+        const iqr = q3 - q1;
+        const wLo = d3.min(landed.filter((x) => x >= q1 - 1.5 * iqr));
+        const wHi = d3.max(landed.filter((x) => x <= q3 + 1.5 * iqr));
+        ctx.strokeStyle = C.primary; ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(xOf(wLo), yB); ctx.lineTo(xOf(q1), yB);
+        ctx.moveTo(xOf(q3), yB); ctx.lineTo(xOf(wHi), yB);
+        ctx.moveTo(xOf(wLo), yB - hB / 4); ctx.lineTo(xOf(wLo), yB + hB / 4);
+        ctx.moveTo(xOf(wHi), yB - hB / 4); ctx.lineTo(xOf(wHi), yB + hB / 4);
+        ctx.stroke();
+        ctx.fillStyle = C.primaryLight; ctx.globalAlpha = 0.5;
+        ctx.fillRect(xOf(q1), yB - hB / 2, xOf(q3) - xOf(q1), hB);
+        ctx.globalAlpha = 1;
+        ctx.strokeRect(xOf(q1), yB - hB / 2, xOf(q3) - xOf(q1), hB);
+        ctx.strokeStyle = C.accent; ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.moveTo(xOf(med), yB - hB / 2); ctx.lineTo(xOf(med), yB + hB / 2); ctx.stroke();
+        ctx.fillStyle = C.primary;
+        const out = landed.filter((x) => x < wLo || x > wHi);
+        for (const x of out) { ctx.beginPath(); ctx.arc(xOf(x), yB, 3, 0, 2 * Math.PI); ctx.fill(); }
+        s.box = {q1, med, q3, out: out.length};
+      }
+    },
+    readout: (s) => {
+      const b = s.box, landed = s.pts.filter((p) => p.landed).length;
+      return `Dopadlo ${landed} z ${N} pozorování, ${s.bins} intervalů.` +
+        (b ? ` Q1 = ${cz(b.q1)}, medián = ${cz(b.med)}, Q3 = ${cz(b.q3)}, odlehlých hodnot ${b.out}.` : "");
+    }
+  });
+}
 ```
 
 ## Klíčové poznatky {.unnumbered}
