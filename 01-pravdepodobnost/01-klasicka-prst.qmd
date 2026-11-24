@@ -2,11 +2,20 @@
 title: "Teoretická a experimentální pravděpodobnost"
 ---
 
+```{ojs}
+// Společný základ OJS buněk kapitoly (cesty jsou relativní k souboru kapitoly)
+import {C, gradient, plotStyle} from "../assets/jhrules.js"
+import {columnWidth, animation, drawText, clamp, ease, makeButton} from "../assets/anim.js"
+
+// šířka textového sloupce místo vestavěné šířky celé plochy (grafy jinak přetékají doprava)
+width = columnWidth(Generators)
+```
+
 Meteorolog oznámí, že zítra bude pršet s pravděpodobností 30 %. Znamená to, že na 30 % území prší, že bude pršet 30 % dne, nebo něco jiného? Slovo „pravděpodobnost“ používáme denně, ale jeho význam je překvapivě jemný. Existují dva základní způsoby, jak ho chápat: z logiky úlohy (klasický přístup) a z pozorovaných dat (experimentální přístup).
 
 ## Klasický školský přístup
 
-Ve školách se pravděpodobnost učí na příkladech házení kostky a řeší se například jaká je pravděpodobnost, že padne sudé číslo. Pokud házíme kostkou, pak může padnout šest hodnot: $\Omega= \{1,2,3,4,5,6\}$, a sudá čísla z toho jsou tři: $A=\{2,4,6\}$. Pravděpodobnost se pak spočítá jako počet příznivých možností děleno počet všech možností
+Ve školách se pravděpodobnost učí na příkladech házení kostky a řeší se například, jaká je pravděpodobnost, že padne sudé číslo. Pokud házíme kostkou, pak může padnout šest hodnot: $\Omega= \{1,2,3,4,5,6\}$, a sudá čísla z toho jsou tři: $A=\{2,4,6\}$. Pravděpodobnost se pak spočítá jako počet příznivých možností dělený počtem všech možností:
 
 ::: {.column-margin}
 <!-- ![Pierre-Simon Laplace](https://m.media-amazon.com/images/I/512+nstKt9L.jpg) -->
@@ -16,7 +25,7 @@ Ve školách se pravděpodobnost učí na příkladech házení kostky a řeší
 
 $$P(\text{sudé}) = \frac{|A|}{|\Omega|}=\frac{3}{6} = 0.5$$
 
-Takto definované pravděpodobnost je založena na principu [stejně pravděpodobných možných výsledků]{.highlight-term}. Ale co když výsledky nejsou stejně pravděpodobné, naříklad kdybychom stěny kostky přelepili tak, že strany 1 a 2 by byly modré a stěny 3,4, 5 a 6 červené? Pak pravděpodobnost červené > pravděpodobnost modré! Na základním proincipu to však nic nemění protože máme možnosti $\Omega= \{m,m,c,c,c,c\}$, a pravděpodobnost jedné modré je stále stejná jako jakékoli jiné strany. 
+Takto definovaná pravděpodobnost je založena na principu [stejně pravděpodobných možných výsledků]{.highlight-term}. Ale co když výsledky nejsou stejně pravděpodobné, například kdybychom stěny kostky přelepili tak, že strany 1 a 2 by byly modré a stěny 3, 4, 5 a 6 červené? Pak pravděpodobnost červené > pravděpodobnost modré! Na základním principu to však nic nemění, protože máme možnosti $\Omega= \{m,m,c,c,c,c\}$, a pravděpodobnost každé jednotlivé stěny je stále stejná. 
 
 Takto pojatá definice pravděpodobnosti byla prokazatelně používána již od 16. století, ale její kodifikovaná verze je připisována [Pierru Laplaceovi (1749-1827)]{.smallcaps}. 
 
@@ -29,7 +38,7 @@ Uvedený příklad vychází z tradičního pojetí. O tom, jak bylo toto pojet�
 
 ## "Zákon velkých čísel"
 
-Pravděpodobnost často chápeme intuitivně jako míru nejistoty v náhodných jevech – například pravděpodobnost, že při hodu férovou mincí padne panna. Ale co přesně znamená pravděpodobnost 50%? [Jacob Bernoulli (1655-1705)]{.smallcaps}, jeden z prvních matematiků, kteří se tímto problémem systematicky zabývali, navrhl, že pravděpodobnost je něco, co se projevuje v dlouhodobém opakování pokusu. Představte si, že házíte mincí tisíckrát: i když v prvních deseti hodech může padnout lev osmkrát, s rostoucím počtem hodů se poměr lvů výrazně blíží k 1/2. 
+Pravděpodobnost často chápeme intuitivně jako míru nejistoty v náhodných jevech – například pravděpodobnost, že při hodu férovou mincí padne panna. Ale co přesně znamená pravděpodobnost 50 %? [Jacob Bernoulli (1655-1705)]{.smallcaps}, jeden z prvních matematiků, kteří se tímto problémem systematicky zabývali, navrhl, že pravděpodobnost je něco, co se projevuje v dlouhodobém opakování pokusu. Představte si, že házíte mincí tisíckrát: i když v prvních deseti hodech může osmkrát padnout panna, s rostoucím počtem hodů se podíl hodů, při nichž padla panna, výrazně blíží k 1/2. 
 
 
 Vyberte situaci (mince, kostka, kostka s nestejnými stranami nebo písmena v textu) a řekněte, co je „úspěch“. Každý výsledek se zapíše do posloupnosti nahoře, úspěch je oranžový, a dole se z posloupnosti počítá relativní četnost úspěchu (úspěchy děleno pokusy). Přidávejte pokusy a sledujte, jak se „roztřesená“ pozorovaná data postupně uklidňují.
@@ -39,32 +48,14 @@ U mince a kostky se výsledky losují a cílová hodnota $\pi$ je dána situací
 U písmen se nic nelosuje. Písmena se čtou popořadě z textu Karla Čapka *R.U.R.* (1920, volné dílo, [Wikisource](https://cs.wikisource.org/wiki/R.U.R.)) a cílovou hodnotu předem neznáme, takže se nekreslí. Text je rozdělen na tři stejné části, které se čtou současně: první modře, druhá a třetí šedě. Všechny tři četnosti se mají ustálit na téže hodnotě. Světlý pás kolem modré čáry je $\pm 2\sqrt{f(1-f)/n}$, počítané jen z dat, a s rostoucím $n$ se zužuje.
 
 ```{ojs}
-//| echo: false
-import {C, plotStyle} from "../assets/jhrules.js"
-```
-
-```{ojs}
-//| echo: false
-import {columnWidth, animation, drawText, clamp, ease, makeButton} from "../assets/anim.js"
-```
-
-```{ojs}
-//| echo: false
-// šířka textového sloupce místo vestavěné šířky celé plochy (grafy jinak přetékají doprava)
-width = columnWidth(Generators)
-```
-
-```{ojs}
-//| echo: false
 import {textCz} from "../assets/text-cz.js"
 ```
 
 ```{ojs}
-//| echo: false
 situations1 = [
   {name: "Mince", faces: ["P", "O"]},
   {name: "Kostka 1–6", faces: [1, 2, 3, 4, 5, 6]},
-  {name: "Kostka 5-5-5-4-4-3", faces: [5, 5, 5, 4, 4, 3]},
+  {name: "Kostka 3-4-4-5-5-5", faces: [3, 4, 4, 5, 5, 5]},
   {name: "Písmena v českém textu", text: true}
 ]
 
@@ -108,7 +99,6 @@ pi1 = sit1.text
 ```
 
 ```{ojs}
-//| echo: false
 {
   const H = 340, eps = 0.05;
   const third = Math.floor(letters1.length / 3);          // text se dělí na tři stejné části
@@ -265,31 +255,31 @@ pi1 = sit1.text
 }
 ```
 
-V simulaci vidíte postupné relativní četnosti které se s přibývajícím počtem pokusů přibližují k jedné hodnotě, pravděpodobnosti že nastane nějaký jev $A$. Matematicky to popisujeme jako $P(A) \approx \frac{n_A}{n}$ nebo přesněji pomocí limity
+V simulaci vidíte postupné relativní četnosti, které se s přibývajícím počtem pokusů přibližují k jedné hodnotě, pravděpodobnosti, že nastane nějaký jev $A$. Matematicky to popisujeme jako $P(A) \approx \frac{n_A}{n}$ nebo přesněji pomocí limity
 
 $$\lim_{n\to \infty}\frac{n_A}{n}=P(A)$$
 
 :::{.callout-note}
 **Jednotlivý hod** mincí je symbolem **náhodnosti.**
 
-**Tisíc hodů** je ukazuje na **stabilitu**, nenáhodnost.
+**Tisíc hodů** ukazuje **stabilitu**, nenáhodnost.
 :::
 
 Bernoulli tento princip ilustroval na modelu urny: představte si nádobu s fixním počtem černých a bílých kuliček (v neznámém poměru). Každé losování s vrácením je nezávislý pokus. Pokud losujete velmi mnohokrát a spočítáte podíl vytažených černých kuliček, tento podíl se s rostoucím počtem losování přibližuje skutečnému (neznámému) poměru černých kuliček v urně. Tímto způsobem **odhalujeme skrytou pravděpodobnost empiricky, z dat**.
 
 
-## Bernouli vs Laplace - dva přístupy k pravděpodobnosti 
-Rozlišujeme dva hlavní způsoby, jak nahlížet na pravděpodobnost výsledku. Zatímco klasický přístup spoléhá na logiku, experimentální přístup vychází z pozorovaných dat. Experimentální přístup získává pravděpodobnost až po experimentech (házíme kostkou abychom zjistili, s jakou pravděpodobností padá šestka), pro což se využívá latinského příslovce  [a posteriori]{.highlight-term}, poté. Klasický přístup vypočítává pravděpodobnost nezávisle na experimentu, někdy také před experimentem (ověřujem, že kostka není falešná: nejprve vypočteme očekávanou pravděpodobnost a poté házíme kostkou dostatečně dlouho a relativní četnost porovnáváme s očekávanou hodnotou). pro což se používá latinského spojení [a priori]{.highlight-term}, předem. 
+## Bernoulli vs Laplace - dva přístupy k pravděpodobnosti 
+Rozlišujeme dva hlavní způsoby, jak nahlížet na pravděpodobnost výsledku. Zatímco klasický přístup spoléhá na logiku, experimentální přístup vychází z pozorovaných dat. Experimentální přístup získává pravděpodobnost až po experimentech (házíme kostkou, abychom zjistili, s jakou pravděpodobností padá šestka), pro což se využívá latinské příslovce [a posteriori]{.highlight-term}, poté. Klasický přístup vypočítává pravděpodobnost nezávisle na experimentu, někdy také před experimentem (ověřujeme, že kostka není falešná: nejprve vypočteme očekávanou pravděpodobnost a poté házíme kostkou dostatečně dlouho a relativní četnost porovnáváme s očekávanou hodnotou), pro což se používá latinské spojení [a priori]{.highlight-term}, předem. 
 
 | Název| Logika | Vzorec | Klíčová postava |
 |:---|:---:|:---|:---|
-| **a priori**, teoretická|  prst $\to$ experiment | $P(A) = \frac{|A|}{|\Omega|}$ | J.S. Laplace |
-| **a posteriori**, empirická| experiment  $\to$ prst| $P(A)=\lim_{n\to \infty}\frac{n_A}{n}$ | J.  Bernouli|
+| **a priori**, teoretická|  prst $\to$ experiment | $P(A) = \frac{|A|}{|\Omega|}$ | P.-S. Laplace |
+| **a posteriori**, empirická| experiment  $\to$ prst| $P(A)=\lim_{n\to \infty}\frac{n_A}{n}$ | J. Bernoulli|
 : Srovnání teoretického (a priori) a empirického (a posteriori) přístupu k pravděpodobnosti {#tbl-01-pravdepodobnost}
 
 ---
 
-každý přístup má ejen své historické ukotvení a také praktické využití. **Laplaceův přístup** je ideální např pro sázení na výhru při losování, zatímco **Bernouliův přístup** je vhodný např na určwení výše pojistného pro zahraniční cestu (prast úrazu při cestách pro velké množství pojištěnců konverguje k hodnotě, kterou neznáme).
+Každý přístup má nejen své historické ukotvení, ale také praktické využití. **Laplaceův přístup** je ideální např. pro sázení na výhru při losování, zatímco **Bernoulliův přístup** je vhodný např. na určení výše pojistného pro zahraniční cestu (pravděpodobnost úrazu při cestách pro velké množství pojištěnců konverguje k hodnotě, kterou neznáme).
 
 ## Shrnutí
 
@@ -297,7 +287,7 @@ každý přístup má ejen své historické ukotvení a také praktické využit
 ## Klíčové poznatky
 - Teoretická pravděpodobnost vyžaduje **stejně pravděpodobné výsledky**
 - Pro výpočet používáme vzorec $P(A) = \frac{|A|}{|\Omega|}$
-- Zákon velkých čísel, $P(A) \approx \frac{n_A}{x}$
+- Zákon velkých čísel, $P(A) \approx \frac{n_A}{n}$
 - **Relativní četnost konverguje k pravděpodobnosti**  
 :::
 

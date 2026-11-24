@@ -18,19 +18,26 @@ import {C} from "./jhrules.js";
 // (asi dvojnásobek), takže grafy přetékaly doprava. V kapitole se používá jako
 //   width = columnWidth(Generators)
 // a všechny buňky pak dostávají šířku textového sloupce (sleduje se i změna velikosti okna).
+// Pozor: hodnota se oznámí jen tehdy, když se šířka skutečně změnila. ResizeObserver totiž hlásí i změny výšky
+// (například když pod animací naskočí text s popisem). Každé oznámení znovu vytvoří všechny buňky, které na šířce
+// závisí, a ty zase změní výšku stránky, takže animace donekonečna blikala.
 export function columnWidth(Generators) {
   return Generators.observe((notify) => {
     const root = document.querySelector("#quarto-document-content") || document.body;
+    let last = null, timer = null;
     const measure = () => {
       const p = Array.from(root.querySelectorAll("p"))
         .find((el) => !el.closest(".column-margin, .callout, aside, table, figure"));
-      const w = (p && p.clientWidth) || root.clientWidth || window.innerWidth;
-      notify(Math.max(280, Math.floor(w)));
+      const w = Math.max(280, Math.floor((p && p.clientWidth) || root.clientWidth || window.innerWidth));
+      if (w === last) return;
+      last = w;
+      notify(w);
     };
     measure();
-    const ro = new ResizeObserver(measure);
+    // změna šířky okna se zpracuje až po krátké pauze, ať se buňky nepřekreslují při každém pixelu
+    const ro = new ResizeObserver(() => { clearTimeout(timer); timer = setTimeout(measure, 120); });
     ro.observe(root);
-    return () => ro.disconnect();
+    return () => { clearTimeout(timer); ro.disconnect(); };
   });
 }
 
@@ -174,5 +181,7 @@ export function animation({
   }, 1000 / fps);
 
   root.append(canvas, bar, info);
+  // první snímek hned, ať popis pod obrázkem nenaskočí až o chvíli později a nezměnil tím výšku stránky
+  try { render(); } catch (e) { /* kapitola si případnou chybu ohlásí při dalším snímku */ }
   return root;
 }

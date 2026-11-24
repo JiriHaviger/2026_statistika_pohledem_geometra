@@ -1,0 +1,3 @@
+# Společná nastavení všech kapitol v této složce (Quarto je přidá ke každému souboru).
+execute:
+  echo: false   # kód OJS buněk se čtenáři neukazuje

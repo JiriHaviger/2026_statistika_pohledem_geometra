@@ -20,7 +20,7 @@ book:
   site-url: https://jirihaviger.github.io/2026_statistika_pohledem_geometra/
   chapters:
     - index.qmd
-    - part: "**Pravděpodobnost**"
+    - part: 01-pravdepodobnost/intro.qmd    # úvod části, nevyjmenovává kapitoly, aby se nemusel při přidání kapitoly upravovat
       chapters:
         - 01-pravdepodobnost/01-klasicka-prst.qmd
         - 01-pravdepodobnost/02-prst-pravidla.qmd

@@ -1,4 +1,15 @@
-# Typy proměnných
+---
+title: "Typy proměnných"
+---
+
+```{ojs}
+// Společný základ OJS buněk kapitoly (cesty jsou relativní k souboru kapitoly)
+import {C, gradient, plotStyle} from "../assets/jhrules.js"
+import {columnWidth, animation, drawText, clamp, ease, makeButton} from "../assets/anim.js"
+
+// šířka textového sloupce místo vestavěné šířky celé plochy (grafy jinak přetékají doprava)
+width = columnWidth(Generators)
+```
 
 V tabulce jsou čtyři sloupce: poštovní směrovací číslo, pořadí v závodě, teplota a počet dětí. U každého se nabízí spočítat průměr. U počtu dětí i teploty to dává smysl, u pořadí jen s opatrností a u PSČ je to nesmysl, přestože jde o čísla. Rozhoduje totiž to, co čísla znamenají, ne jak vypadají.
 
@@ -27,22 +38,10 @@ Nominální a ordinální proměnné jsou **kvalitativní** (kategoriální). Ob
 - [intervalová]{.highlight-term} proměnná nemá pevnou nulu, mají smysl rozdíly, ale ne podíly. Příkladem je teplota ve stupních Celsia: $20\,^\circ\mathrm{C}$ není „dvakrát tepleji“ než $10\,^\circ\mathrm{C}$.
 - [poměrová]{.highlight-term} proměnná má nulu danou věcně (věk, příjem, hmotnost, rychlost), takže smysl mají i podíly: $20$ kg je dvakrát víc než $10$ kg.
 
-```{ojs}
-//| echo: false
-import {columnWidth, animation, drawText, ease, makeButton} from "../assets/anim.js"
-```
-
-```{ojs}
-//| echo: false
-// šířka textového sloupce místo vestavěné šířky celé plochy (grafy jinak přetékají doprava)
-width = columnWidth(Generators)
-```
-
 Osm lidí je zvážených na poměrové stupnici (nahoře, číslo je hmotnost v kg, barva značí skupinu A, B nebo C). Tlačítky vyberte úroveň měření: kopie bodů se přesunou na dolní osu a v popiscích zůstane jen to, co daná úroveň měření zachovává.
 Původní body nahoře se nemění.
 
 ```{ojs}
-//| echo: false
 {
   const H = 330, m = 40;
   const kg = [52, 58, 66, 73, 81, 90, 104, 124];
@@ -198,11 +197,12 @@ Každý další typ „umí“ všechno, co předchozí, a něco navíc.
 
 Průměr pořadí v závodě nebo průměr krevních skupin nemá smysl, i když počítač ochotně vypočítá číslo.
 
+Jednotlivé statistiky (modus, medián, průměr, rozptyl) jsou stručně popsané v [kapitole o deskriptivních statistikách](../02-statistika/01-typy-promennych.qmd). Zde stačí vědět, že vyšší typ proměnné jich dovoluje víc než nižší.
+
 U každé položky vyberte typ proměnné. Vpravo se hned ukáže, zda sedí, a jaké operace a statistiky daný typ dovoluje
 (tučně je to, co přibývá oproti nižšímu typu).
 
 ```{ojs}
-//| echo: false
 items31 = [
   {text: "Barva očí", type: "nominální"},
   {text: "Teplota vzduchu ve °C", type: "intervalová"},
@@ -226,7 +226,6 @@ levels31 = [
 ```
 
 ```{ojs}
-//| echo: false
 {
   const tbl = html`<table style="font-size:14px;border-collapse:collapse"></table>`;
   // jednotlivé symboly: nové tučně, zděděné šedě
@@ -265,9 +264,6 @@ levels31 = [
 Pro diskrétní proměnné (nominální, ordinální i kardinální diskrétní) je základním nástrojem **tabulka četností**. Tady je počet dětí ve 20 náhodně vybraných domácnostech.
 
 ```{ojs}
-//| echo: false
-import {C, gradient, plotStyle} from "../assets/jhrules.js"
-
 deti31 = [0, 1, 1, 2, 0, 1, 2, 1, 3, 1, 0, 2, 1, 2, 1, 0, 1, 4, 2, 1]
 
 freq31 = {
@@ -297,7 +293,6 @@ Typ proměnné určuje i graf.
 **Nominální proměnná**: sloupce, jejichž pořadí je libovolné (hodí se seřadit podle velikosti).
 
 ```{ojs}
-//| echo: false
 krev31 = [
   {kat: "A", p: 0.42}, {kat: "0", p: 0.33},
   {kat: "B", p: 0.18}, {kat: "AB", p: 0.07}
@@ -319,7 +314,6 @@ Plot.plot({
 **Ordinální proměnná**: sloupce v pevném pořadí kategorií. Mezery mezi sloupci připomínají, že vzdálenosti mezi kategoriemi neznáme.
 
 ```{ojs}
-//| echo: false
 spok31 = [
   {kat: "nízká", p: 0.15}, {kat: "střední", p: 0.50}, {kat: "vysoká", p: 0.35}
 ]
@@ -340,7 +334,6 @@ Plot.plot({
 **Kardinální diskrétní proměnná**: tady jsou na ose skutečná čísla, takže jsou možné dva grafy.
 
 ```{ojs}
-//| echo: false
 deti31p = [
   {x: 0, p: 0.20}, {x: 1, p: 0.45}, {x: 2, p: 0.25},
   {x: 3, p: 0.08}, {x: 4, p: 0.02}
@@ -360,7 +353,6 @@ Plot.plot({
 ```
 
 ```{ojs}
-//| echo: false
 Plot.plot({
   width,
   height: 220,
@@ -379,25 +371,6 @@ Plot.plot({
 - **Bodový graf** je matematicky přesnější. Zdůrazňuje, že hodnoty mezi body mají nulovou pravděpodobnost, například $P(X=1{,}3)=0$.
 
 U spojitých proměnných se oba grafy nahradí histogramem a křivkou hustoty (viz kapitola o spojitém rozdělení).
-
-## Zařaďte: procvičení
-
-Určete typ proměnné.
-
-1. Pořadí běžce v cíli závodu.
-2. Teplota vzduchu ve stupních Celsia.
-3. Poštovní směrovací číslo.
-4. Počet dětí v rodině.
-
-<details>
-<summary>Řešení</summary>
-
-1. **Ordinální.** Pořadí známe, ale rozdíly časů mezi místy mohou být zcela různé.
-2. **Kardinální spojitá, intervalová.** Rozdíly mají smysl, nula je dohodnutá, ne věcná.
-3. **Nominální.** Je to sice číslo, ale jen jako štítek. Sčítat PSČ ani počítat jejich průměr nedává smysl.
-4. **Kardinální diskrétní, poměrová.** Nula dětí je skutečná nula a čtyři děti jsou dvakrát víc než dvě.
-
-</details>
 
 ## Typ proměnné a pravděpodobnostní rozdělení
 

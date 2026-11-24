@@ -4,17 +4,7 @@ Představte si, že máte seznam studentů a u každého z nich výsledek testu 
 
 
 ## Proměnná 
-Proměnná je jakákoli **měřená** (zaznamenávaná) **veličina**, která **může nabývat různých hodnot**. Například čas průjezdu kola v motocyklové soutěži, počet nehod v kraji za měsíc, výdaje domácností na stravu, spokojenost s výukou, barva očí, pohlaví pacienta, ... Hodnoty kterých tyto veličiny mohou nabývat jsou různé a podle toho s nimi pak můžeme pracovat. Proto se proměnné rozdělují na následující typu, kterým se také říká **úroveň měření**. Stejné typy proměnných z pohledu pravděpodobnosti, tedy jako hodnoty náhodné veličiny, najdete v kapitole [Typy proměnných](../01-pravdepodobnost/031-typy-promennych.qmd).
-
-[Nominální proměnná]{.highlight-term}: objekty jen pojmenováváme. Např. $\Omega = \{\text{muž, žena}\}$ nebo $\Omega = \{Královéhradecký, Pardubický, ...\}$ jako kraj rodiště studentů.Matematicky můžeme kategorie popsat pouze četností (např kolik je žen) a relativní četností (jaké je procentuální zastoupení žen).  Patří mezi **kvalitativní** proměnné, speciálním příadem je **dichotomická**, která má jen dva možné výsledky. 
-
-[Ordinální proměnná]{.highlight-term}: Kategorie už mají jasné pořadí. Např. známky ve škole, pocity spokojenosti (nízká, střední, vysoká) nebo pořadí v závodu. Zde už má smysl mluvit o tom, že hodnoty rostou a na ose x je uspořádat od nejmenší po největší. Patří také mezi **kvalitativní** proměnné. 
-
-[Kardinální diskrétní proměnná]{.highlight-term}: Na ose $x$ jsou skutečná čísla (počet dětí, počet padlých šestek). Rozestupy mezi nimi jsou matematicky definované. Stále jsou to ale izolované body – mezi 1 a 2 dětmi neexistuje žádná hodnota. 
-
-[Kardinální spojitá proměnná]{.highlight-term}: Body na ose $x$ se k sobě přiblíží natolik, že mezi jakýmikoliv dvěma hodnotami vždy najdeme nekonečně mnoho dalších (viz kapitola o spojitém rozdělení).
-
-Obě kardinální porměnné patří mezi **kvantitativní**, alternativně se pro ně používají i označení **metrická** nebo **škála**. Někdy se dělí na **intervalové**, které nemají pevnou nulu (teplota ve stuních celsia, datum) a **poměrové**  které mají nulu definovanou (věk, plat, hmotnost, rychlost, ...). 
+Proměnná je jakákoli **měřená** (zaznamenávaná) **veličina**, která **může nabývat různých hodnot**. Například čas průjezdu kola v motocyklové soutěži, počet nehod v kraji za měsíc, výdaje domácností na stravu, spokojenost s výukou, barva očí, pohlaví pacienta, ... Podle toho, jakých hodnot proměnná nabývá, s ní můžeme různě pracovat. Rozlišujeme proměnné **nominální** (jen pojmenování), **ordinální** (kategorie s pořadím) a **kardinální** (čísla s rozestupy), které se dále dělí na **diskrétní** a **spojité** a také na **intervalové** (bez pevné nuly) a **poměrové** (s věcnou nulou). Tomu se říká **úroveň měření**. Podrobný výklad včetně toho, co které úrovni dovoluje, je v kapitole [Typy proměnných](../01-pravdepodobnost/031-typy-promennych.qmd), kde jsou stejné typy popsané z pohledu pravděpodobnosti, tedy jako hodnoty náhodné veličiny.
 
 ## Deskriptivní statistiky obecně
 

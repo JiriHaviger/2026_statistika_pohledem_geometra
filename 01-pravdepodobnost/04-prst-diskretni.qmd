@@ -1,7 +1,18 @@
-# Typická rozdělení diskrétních proměnných
+---
+title: "Typická rozdělení diskrétních proměnných"
+---
+
+```{ojs}
+// Společný základ OJS buněk kapitoly (cesty jsou relativní k souboru kapitoly)
+import {C, gradient, plotStyle} from "../assets/jhrules.js"
+import {columnWidth, animation, drawText, clamp, ease, makeButton} from "../assets/anim.js"
+
+// šířka textového sloupce místo vestavěné šířky celé plochy (grafy jinak přetékají doprava)
+width = columnWidth(Generators)
+```
 
 ::: {.callout-note}
-Pro vizuálně přívětivější zobrazení pravděpodobnostních funkci zde budeme využívat využít sloupcové grafy.
+Pro vizuálně přívětivější zobrazení pravděpodobnostních funkcí zde budeme využívat sloupcové grafy.
 :::
 
 ---
@@ -13,10 +24,10 @@ U 80 % pacientů po podání Acylpyrinu nastane snížení teploty (úspěch, $+
 
 | $k$ | Výsledek | $P(x_k)$ |
 |:---:|:---:|:---:|
-| 1 | $+$ | $0,80$ |
-| 2 | $-$ | $0,20$ |
+| 1 | $+$ | $0{,}80$ |
+| 2 | $-$ | $0{,}20$ |
 
-Tohle je distribuce pro výsledek jednoho pokusu,  co když jich ale máme více? Jaká je například pravděpodobnost, že ze tří pacientů budou dva úspěšně vyléčení (+)? Podívejme se na situaci u dvou, tří nebo obecně $n$ pacientů (v našem případě nezáleží na pořadí, takže $(+, -) = (-, +)$).
+Tohle je rozdělení pro výsledek jednoho pokusu. Co když jich ale máme více? Jaká je například pravděpodobnost, že ze tří pacientů budou dva úspěšně vyléčení (+)? Podívejme se na situaci u dvou, tří nebo obecně $n$ pacientů (v našem případě nezáleží na pořadí, takže $(+, -) = (-, +)$).
 
 | Počet pacientů | Množina výsledků $\Omega$ |
 |:---|:---|
@@ -32,14 +43,14 @@ $P(+++) = P(+) \cdot P(+) \cdot P(+)$,
 ale pro dva úspěchy:
 $P(\text{2 úspěchy}) = P(++-) + P(+-+) + P(-++) = 3 \cdot P(+)^2 \cdot P(-)^1$.
 
-Konstantu $3$ z předchozího výpočtu můžeme zobecnit pomocí binomického čísla jako počet možností, jak z $n$ prvků vybrat $k$ úspěchů, tedy $\binom{n}{k}$, v našem případě $\binom{3}{2} = 3$. Tato situace je typickým příkladem diskrétní distribucew, konkrétněji [binomické distribuce]{.highlight-term}. 
+Konstantu $3$ z předchozího výpočtu můžeme zobecnit pomocí binomického čísla jako počet možností, jak z $n$ prvků vybrat $k$ úspěchů, tedy $\binom{n}{k}$, v našem případě $\binom{3}{2} = 3$. Tato situace je typickým příkladem diskrétního rozdělení, konkrétněji [binomického rozdělení]{.highlight-term}. 
 
-## Binomické rozdělní 
+## Binomické rozdělení 
 
-Popisuje pravděodobnost několika úspěchů. Typickou otázkou je například: *„Jaká je pravděpodobnost, že když hodíme šesti kostkami, tak padnou dvě šestky?“*
+Popisuje pravděpodobnost několika úspěchů. Typickou otázkou je například: *„Jaká je pravděpodobnost, že když hodíme šesti kostkami, tak padnou dvě šestky?“*
 
 ::: {.callout-note}
-## Binomická distribuce (předpoklady)
+## Binomické rozdělení (předpoklady)
 Abychom mohli mluvit o binomickém rozdělení, musí být splněno:
 
 - Pokus končí buď **úspěchem**, nebo **neúspěchem**.
@@ -54,12 +65,6 @@ $$p(x) = \binom{n}{x} \cdot \pi^x \cdot (1-\pi)^{n-x}$$
 
 
 ```{ojs}
-//| echo: false
-import {C} from "../assets/jhrules.js"
-```
-
-```{ojs}
-import { Inputs } from "@observablehq/inputs"
 viewof n = Inputs.range([1, 50], {step: 1, value: 10, label: "počet pokusů (n)"})
 viewof p = Inputs.range([0, 1], {step: 0.01, value: 0.5, label: "prst úspěchu (π)"})
 
@@ -96,18 +101,7 @@ Plot.plot({
 
 
 
-Fuknce, kterou jsem takto zavedli se korektně označuje [pravdpodobnostní funkce]{.highlight-term} (**probability mass function**, **pmf**). Matematické podrobnosti o binomickém rozdělední viz  @wikipedia-binomial.  
-
-```{ojs}
-//| echo: false
-import {columnWidth, animation, drawText, clamp, ease, makeButton} from "../assets/anim.js"
-```
-
-```{ojs}
-//| echo: false
-// šířka textového sloupce místo vestavěné šířky celé plochy (grafy jinak přetékají doprava)
-width = columnWidth(Generators)
-```
+Funkce, kterou jsme takto zavedli, se nazývá pravděpodobnostní funkce (*probability mass function*, PMF); její obecný popis najdete v [kapitole o rozdělení diskrétní veličiny](032-rozdeleni-diskretni-veliciny.qmd). Matematické podrobnosti o binomickém rozdělení viz @wikipedia-binomial.  
 
 ### Galtonova deska (binomické rozdělení)
 
@@ -116,13 +110,11 @@ Počet odrazů vpravo z $n$ řad je binomická veličina. Osa y ukazuje podíl k
 Oranžová úsečka je teoretický podíl (pravděpodobnost přihrádky) a modrý sloupec je skutečný podíl ze spadlých kuliček.
 
 ```{ojs}
-//| echo: false
 viewof n4 = Inputs.range([3, 14], {step: 1, value: 8, label: "Počet řad (n)"})
 viewof pi4 = Inputs.range([0.1, 0.9], {step: 0.05, value: 0.5, label: "Prst vpravo (π)"})
 ```
 
 ```{ojs}
-//| echo: false
 {
   const H = 420, top = 24;
   const rowsH = H * 0.5, ly = rowsH / n4;
@@ -136,9 +128,30 @@ viewof pi4 = Inputs.range([0.1, 0.9], {step: 0.05, value: 0.5, label: "Prst vpra
   const logC = (n, k) => d3.sum(d3.range(1, k + 1), (i) => Math.log((n - i + 1) / i));
   const pmf = d3.range(0, n4 + 1).map((k) => Math.exp(logC(n4, k) + k * Math.log(pi4) + (n4 - k) * Math.log(1 - pi4)));
 
+  // kuličky přidané tlačítkem padnou rovnou do přihrádek (bez animace pádu)
+  const dropNow = (s, k) => {
+    for (let i = 0; i < k && s.launched < maxBalls; i++) {
+      s.counts[d3.sum(d3.range(n4).map(() => Math.random() < pi4 ? 1 : 0))]++;
+      s.launched++;
+    }
+  };
+  let toggleBtn;
+
   return animation({
-    width, height: H,
+    width, height: H, buttons: false,
     setup: () => ({balls: [], counts: new Array(n4 + 1).fill(0), launched: 0, tick: 0}),
+    controls: (ctl) => {
+      const box = document.createElement("div");
+      box.style.cssText = "display:flex;gap:8px;flex-wrap:wrap";
+      toggleBtn = makeButton("Plynule", () => { ctl.running = !ctl.running; });
+      box.append(
+        toggleBtn,
+        makeButton("+10", () => { ctl.running = false; dropNow(ctl.state, 10); ctl.redraw(); }),
+        makeButton("+100", () => { ctl.running = false; dropNow(ctl.state, 100); ctl.redraw(); }),
+        makeButton("Restart", () => { ctl.reset(); })
+      );
+      return box;
+    },
     step: (s) => {
       s.tick++;
       if (s.tick % 3 === 0 && s.launched < maxBalls) {
@@ -203,7 +216,8 @@ viewof pi4 = Inputs.range([0.1, 0.9], {step: 0.05, value: 0.5, label: "Prst vpra
         ctx.beginPath(); ctx.arc(x, y, 3.5, 0, 2 * Math.PI); ctx.fill();
       }
     },
-    readout: (s) => {
+    readout: (s, ctl) => {
+      toggleBtn.textContent = ctl.running ? "Pauza" : "Plynule";
       const N = s.counts.reduce((a, b) => a + b, 0);
       return `Kuliček v přihrádkách: ${N}. Teorie: Bi(${n4}; ${String(pi4).replace(".", ",")}), střední hodnota ${(n4 * pi4).toFixed(2).replace(".", ",")}.`;
     }
@@ -218,18 +232,17 @@ Binomické rozdělení patří do skupiny **diskrétních pravděpodobnostních 
  Popisuje „čekání na první úspěch“. Typickou otázkou je například: *„Jaká je pravděpodobnost, že budeme muset hodit kostkou právě pětkrát, než poprvé padne šestka?“* Viz podrobněji @shafer2012intro.
 
 ::: {.callout-note appearance="simple"}
-## Geometrická distribuce (předpoklady)
+## Geometrické rozdělení (předpoklady)
 - Pokusy jsou **nezávislé**.
 - Každý pokus má pouze dva výsledky (úspěch/neúspěch).
 - Pravděpodobnost úspěchu $\pi$ je v každém pokusu **stejná**.
-- Ptáme se, po kolika pokusech $x$ získáme první úspěšný 
+- Ptáme se, po kolika pokusech $x$ získáme první úspěch.
 
 **Obecný vzorec:**
-$$p(x) = \pi \cdot (1-\pi)^{x}$$
+$$p(x) = \pi \cdot (1-\pi)^{x-1}, \qquad x=1,2,3,\dots$$
 :::
 
 ```{ojs}
-//| echo: false
 viewof p_geom = Inputs.range([0.01, 1], {step: 0.01, value: 0.2, label: "Prst úspěchu (π)"})
 
 Plot.plot({
@@ -263,7 +276,6 @@ $$P(x) = \frac{\binom{M}{x}\cdot \binom{N-M}{n-x}}{\binom{N}{n}}$$
 
 
 ```{ojs}
-//| echo: false
 viewof N_hg = Inputs.range([10, 100], {step: 1, value: 50, label: "Velikost populace (N)"})
 viewof M_hg = Inputs.range([1, N_hg], {step: 1, value: 10, label: "Počet úspěchů v populaci (M)"})
 viewof n_hg = Inputs.range([1, N_hg], {step: 1, value: 10, label: "Velikost výběru (n)"})
@@ -294,24 +306,21 @@ Plot.plot({
 
 ### Hypergeometrické rozdělení: výběr bez vracení
 
-V urně je $N$ kuliček, z toho $K$ modrých. Vytáhneme $n$ kuliček a zajímá nás počet modrých mezi nimi. Pokud tažené kuličky **nevracíme**,
+V urně je $N$ kuliček, z toho $M$ modrých. Vytáhneme $n$ kuliček a zajímá nás počet modrých mezi nimi. Pokud tažené kuličky **nevracíme**,
 každý tah změní složení urny a počet modrých má hypergeometrické rozdělení. Pokud je **vracíme**, tahy jsou nezávislé a vychází binomické
-rozdělení $\mathrm{Bi}(n;\,K/N)$. Přepínač nahoře ukazuje obě varianty: oranžová úsečka je teorie vybrané varianty, šedá úsečka
+rozdělení $\mathrm{Bi}(n;\,M/N)$. Přepínač nahoře ukazuje obě varianty: oranžová úsečka je teorie vybrané varianty, šedá úsečka
 teorie té druhé. Rozdíl je největší u malé urny a mizí, když je urna proti výběru velká.
 
 ```{ojs}
-//| echo: false
 viewof N6 = Inputs.range([10, 60], {step: 5, value: 30, label: "Kuliček v urně (N)"})
 ```
 
 ```{ojs}
-//| echo: false
-viewof K6 = Inputs.range([1, N6 - 1], {step: 1, value: Math.round(N6 / 3), label: "Z toho modrých (K)"})
+viewof K6 = Inputs.range([1, N6 - 1], {step: 1, value: Math.round(N6 / 3), label: "Z toho modrých (M)"})
 viewof n6 = Inputs.range([1, Math.min(10, N6)], {step: 1, value: Math.min(5, N6), label: "Velikost výběru (n)"})
 ```
 
 ```{ojs}
-//| echo: false
 {
   const H = 400;
   const N = N6, K = K6, n = n6, piS = K / N;
@@ -451,7 +460,7 @@ viewof n6 = Inputs.range([1, Math.min(10, N6)], {step: 1, value: Math.min(5, N6)
     readout: (s) => {
       const m = n * piS;
       const varHyp = n * piS * (1 - piS) * (N - n) / (N - 1), varBin = n * piS * (1 - piS);
-      return `Výběrů: ${s.nTrials}. Střední hodnota n·K/N = ${m.toFixed(2).replace(".", ",")} v obou schématech, rozptyl bez vracení ${cz(varHyp)}, ` +
+      return `Výběrů: ${s.nTrials}. Střední hodnota n·M/N = ${m.toFixed(2).replace(".", ",")} v obou schématech, rozptyl bez vracení ${cz(varHyp)}, ` +
         `s vracením ${cz(varBin)} (poměr (N − n)/(N − 1) = ${cz((N - n) / (N - 1))}).`;
     }
   });
@@ -488,7 +497,6 @@ $$P(x) = \frac{\lambda^x \cdot e^{-\lambda}}{x!}$$
 :::
 
 ```{ojs}
-//| echo: false
 // 1. Slider
 viewof lambda = Inputs.range([0.1, 20], {step: 0.1, value: 3, label: "Průměrná četnost (λ)"})
 
@@ -541,12 +549,10 @@ o jeden interval, **Dokončit sadu** spočítá všechny zobrazené intervaly na
 na ose méně intervalů, aby body zůstaly čitelné.
 
 ```{ojs}
-//| echo: false
 viewof lam4 = Inputs.range([0.5, 10], {step: 0.5, value: 3, label: "Průměr na interval (λ)"})
 ```
 
 ```{ojs}
-//| echo: false
 {
   // počet intervalů na ose: čím větší λ, tím méně, aby na ose zůstalo zhruba 60 bodů
   const H = 340, T = Math.max(6, Math.min(20, Math.round(60 / lam4))), maxK = 20;
@@ -683,20 +689,18 @@ viewof lam4 = Inputs.range([0.5, 10], {step: 0.5, value: 3, label: "Průměr na 
 
 ### Geometrické rozdělení a jeho vztah k Poissonovu
 
-Čas rozdělíme na malé **sloty**. V každém slotu nastane událost s pravděpodobností $p=\lambda/m$, kde $m$ je počet slotů
+Čas rozdělíme na malé **sloty**. V každém slotu nastane událost s pravděpodobností $\pi=\lambda/m$, kde $m$ je počet slotů
 v jednom **bloku** a $\lambda$ průměrný počet událostí na blok. Na tentýž proud událostí se dá dívat dvěma způsoby.
 Vlevo se počítá, **kolik událostí je v bloku** (blíží se Poissonovu rozdělení). Vpravo se měří, **kolik slotů uplyne mezi dvěma
-událostmi**, tedy jak dlouho se čeká na další. To je geometrické rozdělení $P(X=k)=(1-p)^{k-1}\,p$. Čím větší $m$
+událostmi**, tedy jak dlouho se čeká na další. To je geometrické rozdělení $P(X=k)=(1-\pi)^{k-1}\,\pi$. Čím větší $m$
 (kratší sloty), tím přesněji platí Poissonovo rozdělení pro počty.
 
 ```{ojs}
-//| echo: false
 viewof lam5 = Inputs.range([1, 6], {step: 0.5, value: 3, label: "Průměr událostí na blok (λ)"})
 viewof m5 = Inputs.radio([10, 20, 40], {value: 20, label: "Slotů v bloku (m)"})
 ```
 
 ```{ojs}
-//| echo: false
 {
   const H = 480;
   const p = lam5 / m5;
@@ -764,7 +768,7 @@ viewof m5 = Inputs.radio([10, 20, 40], {value: 20, label: "Slotů v bloku (m)"})
       return box;
     },
     draw: (ctx, s) => {
-      drawText(ctx, `Proud slotů: v každém nastane událost s pravděpodobností p = λ/m = ${cz(p)}`, L0, 16, {bold: true});
+      drawText(ctx, `Proud slotů: v každém nastane událost s pravděpodobností π = λ/m = ${cz(p)}`, L0, 16, {bold: true});
       drawText(ctx, "počet událostí v bloku", L0, axisY - 62, {size: 11, color: C.context, bold: true});
       drawText(ctx, "čekání mezi událostmi (ve slotech)", L0, axisY + 62, {size: 11, color: C.primaryText, bold: true});
 
@@ -833,7 +837,7 @@ viewof m5 = Inputs.radio([10, 20, 40], {value: 20, label: "Slotů v bloku (m)"})
     readout: (s, ctl) => {
       toggleBtn.textContent = ctl.running ? "Pauza" : "Plynule";
       return `Bloků: ${s.nBlocks}, čekání: ${s.nGaps}. Počty v bloku: Bi(${m5}; ${cz(p)}), pro velké m se blíží Po(${String(lam5).replace(".", ",")}). ` +
-        `Čekání: geometrické s p = ${cz(p)}, střední hodnota 1/p = ${(1 / p).toFixed(1).replace(".", ",")} slotu.`;
+        `Čekání: geometrické s π = ${cz(p)}, střední hodnota 1/π = ${(1 / p).toFixed(1).replace(".", ",")} slotu.`;
     }
   });
 }
@@ -849,17 +853,17 @@ Pokud potřebujete tyto pravděpodobnosti spočítat v tabulkovém procesoru, po
 
 * **Binomické:** `=BINOM.DIST(x; n; p; NE)`
 * **Hypergeometrické:** `=HYPGEOM.DIST(x; n; M; N; NE)`
-* **Geometrické:** `=NEGBINOM.DIST(1; x; p)` *(Excel nemá přímou funkci GEOM.DIST, používá se tato varianta negativně binomického rozdělení). Hodneota $x$ vyjadřuje počet neúspěchů před prvním úspěchem*
+* **Geometrické:** `=NEGBINOM.DIST(x-1; 1; p; NE)` *(Excel nemá přímou funkci GEOM.DIST, používá se negativně binomické rozdělení s jedním úspěchem: $x-1$ neúspěchů před prvním úspěchem v $x$-tém pokusu)*
 * **Poissonovo:** `=POISSON.DIST(x; lambda; NE)`
 :::
 
 ::: {.callout-note}
 ## Klíčové poznatky
-- Pravděpodobnostní distribuce je souhrn včech možných výsledků s jejich pravděpodobnostmi
-- u malého počtu možností nejčastěji tabulkou
-- u většího počtu možností grafem
-- u teoretických distribucí vzorcem a grafem
-- pro teoretické i empirické pravděpodobnosti stejné 
+- Pravděpodobnostní rozdělení je souhrn všech možných výsledků s jejich pravděpodobnostmi
+- U malého počtu možností se zadává nejčastěji tabulkou
+- U většího počtu možností grafem
+- U teoretických rozdělení vzorcem a grafem
+- Pro teoretické i empirické pravděpodobnosti se používá stejný zápis
 :::
 
 

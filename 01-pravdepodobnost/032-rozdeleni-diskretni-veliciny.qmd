@@ -1,4 +1,15 @@
-# Rozdělení pravděpodobnosti diskrétní veličiny
+---
+title: "Rozdělení pravděpodobnosti diskrétní veličiny"
+---
+
+```{ojs}
+// Společný základ OJS buněk kapitoly (cesty jsou relativní k souboru kapitoly)
+import {C, gradient, plotStyle} from "../assets/jhrules.js"
+import {columnWidth, animation, drawText, clamp, ease, makeButton} from "../assets/anim.js"
+
+// šířka textového sloupce místo vestavěné šířky celé plochy (grafy jinak přetékají doprava)
+width = columnWidth(Generators)
+```
 
 Sázková kancelář nabízí hru s upravenou kostkou. Aby mohla určit férovou cenu sázky, nestačí jí vědět, co všechno může padnout. Musí vědět, s jakou pravděpodobností které hodnoty padají. Přesně to popisuje pravděpodobnostní rozdělení.
 
@@ -25,9 +36,6 @@ Kostka má jednu stěnu se čtyřkou, dvě stěny s pětkou a tři stěny se še
 **Grafem:**
 
 ```{ojs}
-//| echo: false
-import {C, gradient, plotStyle} from "../assets/jhrules.js"
-
 kostka32 = [
   {x: 4, p: 1 / 6},
   {x: 5, p: 2 / 6},
@@ -72,7 +80,6 @@ $$F(x)=\sum_{k:\,x_k\leq x} p_k.$$
 Posuvníkem vybíráme bod $t$ a sledujeme, jak se v CDF mění hodnota $F(t)$.
 
 ```{ojs}
-//| echo: false
 // pravděpodobnostní funkce jako „tyčinky“: nulová čára s prázdnými kolečky, tyčinky s plnými
 Plot.plot({
   width,
@@ -90,7 +97,6 @@ Plot.plot({
 ```
 
 ```{ojs}
-//| echo: false
 viewof t32 = Inputs.range([3, 7], {step: 0.05, value: 5.5, label: "Bod t"})
 
 // schody CDF: na každém intervalu [x1, x2) je F konstantní
@@ -136,23 +142,10 @@ relativní četnosti některé délky mezi první a druhou polovinou díla je as
 z krátkého úseku textu tedy kolísá, ale s přibývajícími slovy se k celku přibližuje.
 
 ```{ojs}
-//| echo: false
-import {columnWidth, animation, drawText, makeButton} from "../assets/anim.js"
-```
-
-```{ojs}
-//| echo: false
-// šířka textového sloupce místo vestavěné šířky celé plochy (grafy jinak přetékají doprava)
-width = columnWidth(Generators)
-```
-
-```{ojs}
-//| echo: false
 import {textCz} from "../assets/text-cz.js"
 ```
 
 ```{ojs}
-//| echo: false
 {
   const cw = 24, stripY = 36;
   const H = 375, gt = 160, gb = 320, nMax = 3000;
@@ -162,7 +155,7 @@ import {textCz} from "../assets/text-cz.js"
   // každé rozdělení je seznam stejně pravděpodobných výsledků pokusu
   const pairs = d3.cross(d3.range(1, 7), d3.range(1, 7));
   const models = [
-    {name: "Kostka", two: false,
+    {name: "Kostka 1–6", two: false,
      out: d3.range(1, 7).map((x) => ({x, txt: `${x}`}))},
     {name: "Kostka 3-4-4-5-5-5", two: false,
      out: [3, 4, 4, 5, 5, 5].map((x) => ({x, txt: `${x}`}))},
@@ -408,7 +401,6 @@ $$\operatorname{Var}(X)=\sum_k \bigl(x_k-\mu\bigr)^2\, p_k,
 [Medián]{.highlight-term} je hodnota, která rozděluje rozdělení na dvě poloviny: $P(X\leq m)\geq 0{,}5$ a $P(X\geq m)\geq 0{,}5$.
 
 ```{ojs}
-//| echo: false
 mean32 = d3.sum(kostka32, d => d.x * d.p)
 var32 = d3.sum(kostka32, d => (d.x - mean32) ** 2 * d.p)
 ```

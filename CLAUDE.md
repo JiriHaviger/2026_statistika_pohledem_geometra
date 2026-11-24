@@ -1,6 +1,7 @@
 # CLAUDE.md
 
 @docs_for_agents/AGENTS.md
+@docs_for_agents/animace-konvence.md
 
 ## Tento projekt
 
@@ -11,6 +12,11 @@ Starý název „Havi Notes“ se už nepoužívá.
 
 - `_quarto.yml` – seznam kapitol (`book.chapters`) a téma (`hag_custom.scss`).
 - `01-pravdepodobnost/`, `02-statistika/` – kapitoly knihy (`*.qmd`).
+  Kapitoly mají jednotnou YAML hlavičku (jen `title:`, bez nadpisu `#`). Společná nastavení složky jsou v `_metadata.yml`
+  (u pravděpodobnosti `execute: echo: false`), takže se v buňkách nepíše `//| echo: false`.
+  Úvod části (`01-pravdepodobnost/intro.qmd`, zapojený přes `part:` v `_quarto.yml`) je záměrně obecný, **nevyjmenovává kapitoly**
+  (jen průběh části, barevnou konvenci a ovládání ukázek), takže přidání kapitoly nevyžaduje jeho úpravu.
+  Texty knihy vykají (ne tykání).
 - `_drafts/` – pracovní místo pro rozpracované a vygenerované texty (Quarto složky začínající `_` nerenderuje).
 - `main.py`, `crew/`, `chapters.py` – generátor kapitol (CrewAI + Claude, model v `crew/config.py`).
   Běží v `.venv`, interpreter se volá přímo (bez aktivace): `.venv\Scripts\python.exe main.py <příkaz>`.

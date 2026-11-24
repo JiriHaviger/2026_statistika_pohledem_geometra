@@ -1,21 +1,32 @@
-# Příklady, základní pojmy a vzorce
+---
+title: "Příklady, základní pojmy a vzorce"
+---
 
-Jaké jsou základní otázky které lze řešit pomocí teorie pravděpodobnosti? Pojďme si to ukázat na několika příkladech:
+```{ojs}
+// Společný základ OJS buněk kapitoly (cesty jsou relativní k souboru kapitoly)
+import {C, gradient, plotStyle} from "../assets/jhrules.js"
+import {columnWidth, animation, drawText, clamp, ease, makeButton} from "../assets/anim.js"
 
-**Člověče nezlob se:** házíme 1 x kostkou. Jaké jsou možnosti, co nám padne? Co nám reálně padlo? jaká je pravděpodobnost, že to bude číslo větší než 4?
+// šířka textového sloupce místo vestavěné šířky celé plochy (grafy jinak přetékají doprava)
+width = columnWidth(Generators)
+```
 
-**Karty:**  Z balíčku 52 karet (žolíkové, 4 typy, 8 stypňů každéhy typu) vybereme kartu.  Kolik možností máme, když nás zajímá jenom barva? Jakou barvu jsme vylosovali? Jaká je pravděpodobnost, že vybereme zelené?
+Jaké jsou základní otázky, které lze řešit pomocí teorie pravděpodobnosti? Pojďme si to ukázat na několika příkladech:
+
+**Člověče, nezlob se:** házíme jednou kostkou. Jaké jsou možnosti, co nám padne? Co nám reálně padlo? Jaká je pravděpodobnost, že to bude číslo větší než 4?
+
+**Karty:** Z balíčku 52 karet (4 barvy po 13 kartách) vybereme kartu. Kolik možností máme, když nás zajímá jenom barva? Jakou barvu jsme vylosovali? Jaká je pravděpodobnost, že vybereme piky?
 
 ::: {.callout-note collapse="true"}
 ## Další příklady 
 
-**Pojišťovna:** Rodina jede autem na dovolenou, má nehodu. Kolik osob může mít zranění (kolik je v autě osob)?. Kolik jich reálně zranění má? Jaká je pravděpodobnost, že nebude zraněn nikdo?
+**Pojišťovna:** Rodina jede autem na dovolenou, má nehodu. Kolik osob může mít zranění (kolik je v autě osob)? Kolik jich reálně zranění má? Jaká je pravděpodobnost, že nebude zraněn nikdo?
 
-**Acylpirin:** pacient má horečku, dáme mu acylpirin. Jaká může nastat situace (snížení, stagnace, zvýšení). Jak dopadl konkrétní pacient? Jaká je pravděpodobnost, že se horečka sníží?
+**Acylpyrin:** pacient má horečku, dáme mu Acylpyrin. Jaká může nastat situace (snížení, stagnace, zvýšení)? Jak dopadl konkrétní pacient? Jaká je pravděpodobnost, že se horečka sníží?
 
 **Bonbóny:** v sáčku je 10 červených a 5 modrých bonbonů, vytáhneme tři. Jaké barevné kombinace mohou nastat? Co jsme konkrétně vytáhli? Jaká je pravděpodobnost, že všechny budou červené?
 
-**Reklama:** prohlížíme web, na něm je reklamní banner. Můžeme ho ignorovat  nebo na něj kliknout. Kliknul jsi na něj? jaká je pravděpodobnost, že na něj návštěvník stránky klikne?
+**Reklama:** prohlížíme web, na něm je reklamní banner. Můžeme ho ignorovat, nebo na něj kliknout. Kliknuli jste na něj? Jaká je pravděpodobnost, že na něj návštěvník stránky klikne?
 
 **Stromy:** máme les vysazený před dvaceti lety. Jaká je výška stromů v tomto lese? Kolik měří nejbližší strom? Jaká je pravděpodobnost, že strom bude vyšší než 50 metrů?
 :::
@@ -24,22 +35,22 @@ Zkusme tyto situace zobecnit a formalizovat.
 
 | Pojem | Definice |
 |:---|:---|
-|[Náhodný pokus ]{.highlight-term} | jakákoli situace, kde výsledek není jistý, ale můžeš ho opakovat za stejných podmínek.|
-|[Základní Prostor ($\Omega$)]{.highlight-term} | množina všech možných elementárních jevů, které mohou nastat při daném náhodném pokusu.|
+|[Náhodný pokus]{.highlight-term} | jakákoli situace, kde výsledek není jistý, ale lze ho opakovat za stejných podmínek.|
+|[Základní prostor ($\Omega$)]{.highlight-term} | množina všech možných elementárních jevů, které mohou nastat při daném náhodném pokusu.|
 |[Elementární jev]{.highlight-term} | nejzákladnější nerozložitelný výsledek jednoho pokusu, značí se $\omega \in \Omega$.|
-|[Jev $A$]{.highlight-term} | libovolná ale přesně definovaná podmnožina $X\subseteq \Omega$.|
+|[Jev $A$]{.highlight-term} | libovolná ale přesně definovaná podmnožina $A\subseteq \Omega$.|
 : Základní pojmy a jejich definice {#tbl-definice}
 
 ::: {.example-box}
-| Příklad | Základní množina $\Omega$ | Elementární Jev $\omega$ | nastal jev $A$? |
+| Příklad | Základní množina $\Omega$ | Elementární jev $\omega$ | nastal jev $A$? |
 |:---|:---|:---|:---|
-| **Člověčec nezlob se**    | $\{  1, 2, 3, 4, 5, 6 \}$         | Padla 4           | Padlo sudé číslo ? |
-| **Karty **                | {srdce, káry, piky, kříže}         | Vybralo se srdce           | Vybraly se kříže? |
+| **Člověče, nezlob se**    | $\{  1, 2, 3, 4, 5, 6 \}$         | Padla 4           | Padlo sudé číslo? |
+| **Karty**                | {srdce, káry, piky, kříže}         | Vybralo se srdce           | Vybraly se kříže? |
 | **Pojišťovna**            | $\{  A,B,C,D \}$ osoby v autě         | Byl zraněn A           | Nebyl nikdo zraněn? |
-| **Acylpirin**             | $\{$  nižší, stejná, vyšší $\}$ teplota     | Mě se teplota snížila          | Jaká je pravděpodobnost na snížení? |
-| **Bonbóny**               | $\{$ červený (Red), zelený (Green) $\}$   | vybraný je zelený | Je vybraný zelený? |
+| **Acylpyrin**             | $\{$  nižší, stejná, vyšší $\}$ teplota     | Teplota se snížila          | Snížila se teplota? |
+| **Bonbóny**               | $\{$ červený, modrý $\}$   | vybraný je modrý | Je vybraný modrý? |
 | **Reklama**               | $\{$ ano, ne $\}$                 | ano, kliknul      | kliknul?|
-| **Stromy**                | $(40, 80)$ metrů                  | strom měří 55,4m  | je strom větší než 60 m? |
+| **Stromy**                | $(40, 80)$ metrů                  | strom měří 55,4 m  | je strom větší než 60 m? |
 : Základní pojmy a jejich příklady {#02-tbl-pojmypriklady}
 :::
 
@@ -47,23 +58,23 @@ Zkusme tyto situace zobecnit a formalizovat.
 
 ## Pravděpodobnost doplňku
 
-Příklad **karty** - pravděpodobnost že vytáhnu piky je $\frac{13}{52}$, pravděpodobnost že vytáhnu něco jiného je $\frac{39}{52}$, ale lze to také vyjádřitj jinak: $\frac{39}{52}=\frac{52-13}{52}=1-\frac{13}{52}$. Pravděpodobnost doplňku jevu $a$ je tedy 
-$$P(\bar{a})=1-P(a).$$   
+Příklad **karty**: pravděpodobnost, že vytáhnu piky (jev $A$), je $\frac{13}{52}$, pravděpodobnost, že vytáhnu něco jiného, je $\frac{39}{52}$, ale lze to také vyjádřit jinak: $\frac{39}{52}=\frac{52-13}{52}=1-\frac{13}{52}$. Pravděpodobnost doplňku jevu $A$ je tedy
+$$P(\bar{A})=1-P(A).$$
 
-## pravděpodobnost sjednocení jevů
-Abychom mohli postoupit s pravděpodobností od jednotlivých jevů potřebujeme nadefinovat aritlemtiku pro pravděpodobnosti. Nejprve ale rozdělíme jevy na takové, které mohou nastat současně a ty které ne. 
+## Pravděpodobnost sjednocení jevů
+Abychom mohli postoupit s pravděpodobností od jednotlivých jevů, potřebujeme nadefinovat aritmetiku pro pravděpodobnosti. Nejprve ale rozdělíme jevy na takové, které mohou nastat současně, a ty, které ne.
 
-Příklad **karty**  - když vybereme kartu, může to být buď srdce (jev $A$), nebo piky (jev $B$), ostatní nás v tuto chvíli nezajímá. Karta nemůže být srcde a piky současně.  Jevům které nemohou nastat současně říkáme  [neslučitelné]{.highlight-term}. Pravděpodobnost, že vytáhnu srdce (s) nebo piky (p) je $P(s\lor p) = P(s) + P(p)$, resp. v množinové notaci
-$$P(s\cup p) = P(s) + P(p)$$
+Příklad **karty**: když vybereme kartu, může to být buď srdce (jev $A$), nebo piky (jev $B$), ostatní nás v tuto chvíli nezajímá. Karta nemůže být srdce a piky současně. Jevům, které nemohou nastat současně, říkáme [neslučitelné]{.highlight-term}. Pravděpodobnost, že vytáhnu srdce nebo piky, je $P(A\lor B) = P(A) + P(B)$, resp. v množinové notaci
+$$P(A\cup B) = P(A) + P(B)$$
 
-Tento vztah se označuje jak **pravidlo součtu** pro slovní vyjádření **buď ... anebo ...**
+Tento vztah se označuje jako **pravidlo součtu** pro slovní vyjádření **buď ... anebo ...**
 
-Pokračujeme v příkaldu **karty**  - když vybereme kartu, může to být srdce (jev $s$) nebo král (jev $k$) ale také srdcový král ($s\lor k$), ostatní nás v tuto chvíli nezajímá. Karta ale může být srdcový král, obě vlastnosti mohou nastat současně.  Jevům které mohou nastat současně říkáme  [slučitelné]{.highlight-term}. Pravděpodbnost že vytáhnu srdce nebo krále musíme rozdělit na tři neslučitelné případy, srdcové ale ne král ($s\land \bar{k}$), král, ale ne srdcový $\bar{s} \land k$ a srdcový král ($s \land k)$. Pak je $P(s\lor k) = P(s\land \bar{k}) + P(\bar{s} \land k) + P(s \land k)$, resp v množinové notaci 
-$P(s\cup k) = P(s\cap \bar{k}) + P(\bar{s} \cap k) + P(s \cap k)$. Pokud bychom  se chtěli přiblížit tvaru pro neslučitelné jevy, můžeme také psát  
+Pokračujeme v příkladu **karty**: když vybereme kartu, může to být srdce (jev $A$) nebo král (jev $B$), ale také srdcový král ($A\land B$), ostatní nás v tuto chvíli nezajímá. Karta může být srdcový král, obě vlastnosti mohou nastat současně. Jevům, které mohou nastat současně, říkáme [slučitelné]{.highlight-term}. Pravděpodobnost, že vytáhnu srdce nebo krále, musíme rozdělit na tři neslučitelné případy: srdce, ale ne král ($A\land \bar{B}$), král, ale ne srdce ($\bar{A} \land B$), a srdcový král ($A \land B$). Pak je $P(A\lor B) = P(A\land \bar{B}) + P(\bar{A} \land B) + P(A \land B)$, resp. v množinové notaci
+$P(A\cup B) = P(A\cap \bar{B}) + P(\bar{A} \cap B) + P(A \cap B)$. Pokud bychom se chtěli přiblížit tvaru pro neslučitelné jevy, můžeme také psát
 
-$$P(a\cup b) = P(a) + P(b) - P(a \cap b)$$
+$$P(A\cup B) = P(A) + P(B) - P(A \cap B)$$
 
-Průnik odečítáme, protože v součtu je zahrnut dvakrát - jednou součástí $a$ a podruhé součástí $b$. Neslučitelné jevy mají průnik prázdký, takže i ty spadají od tento vzorec.
+Průnik odečítáme, protože v součtu je zahrnut dvakrát: jednou jako součást $A$ a podruhé jako součást $B$. Neslučitelné jevy mají průnik prázdný, takže i ty spadají pod tento vzorec.
 
 V ukázce jsou $A$ a $B$ dva svislé pruhy v obdélníku s 2000 náhodnými body (modré jsou body v $A$ nebo v $B$, oranžové v obou). Posuvník **Posun B** přesouvá $B$ k $A$.
 Dokud se pruhy nedotýkají, jsou jevy neslučitelné a součet $P(A)+P(B)$ je přesně $P(A\cup B)$.
@@ -71,7 +82,6 @@ Jakmile se překrývají (slučitelné jevy), součet počítá průnik dvakrát
 V histogramu mají sloupce $A$ a $B$ oranžový díl, tedy průnik (stejná barva jako body v obou jevech), a jsou posunuté tak, aby na sebe tyto díly navazovaly. Sloupec sjednocení je slepený přes průnik, takže ho obsahuje jen jednou, $P(A\cup B)=P(A)+P(B)-P(A\cap B)$. Osa a tmavá čárka (teoretická hodnota) platí pro sjednocení a pro základnu sloupce $B$.
 
 ```{ojs}
-//| echo: false
 {
   const pad = 10;
   const Wp = Math.min(width * 0.55, 480) - pad;   // šířka plochy s body
@@ -199,10 +209,10 @@ V histogramu mají sloupce $A$ a $B$ oranžový díl, tedy průnik (stejná barv
 }
 ```
 
-## podmíněná pravděpodobnost
-Pokud budeme pokračovat v příkladu **karty**: Pokdu zjišťujeme pravděpodobnost vytažení srdcového krle z 52 karet je to jistě pravděpodobnost jiná než když budeme určovat pravděpodobnost srdcového krále když již víme, že jsem vytáhli červenou. To co víme píšeme za svisou čáru $P(sk | s)$ a čteme "pravděpodobnost že vytváhnu červeného krále *pokud víme, že* jsme vytáhli červenou", resp. *za podmínky*. Při podmíněné pravděpodobnosti se tedy pravděpodobnost že vytáhnu srdcového krále dělíme pravděpodobností, že vytáhnu srdcové: $P(S|k)=\frac{P(s\land k)}{P(s)} =\frac{1/52}{13/52}=\frac{1}{13}$, nebo v množinové notaci 
+## Podmíněná pravděpodobnost
+Pokud budeme pokračovat v příkladu **karty** (jev $A$ je „srdce“, jev $B$ je „král“): zjišťujeme-li pravděpodobnost vytažení srdcového krále z 52 karet, je to jistě jiná pravděpodobnost, než když už víme, že jsme vytáhli srdce. To, co víme, píšeme za svislou čáru, $P(B \mid A)$, a čteme „pravděpodobnost, že vytáhnu krále, *pokud víme, že* jsme vytáhli srdce“, resp. *za podmínky*. Při podmíněné pravděpodobnosti tedy pravděpodobnost srdcového krále dělíme pravděpodobností srdcové karty: $P(B \mid A)=\frac{P(A\land B)}{P(A)} =\frac{1/52}{13/52}=\frac{1}{13}$, nebo v množinové notaci
 
-$$P(b|a)=\frac{P(a\cap b)}{P(a)}$$
+$$P(B\mid A)=\frac{P(A\cap B)}{P(A)}$$
 
 Podmíněnou pravděpodobnost si můžete vyzkoušet v simulaci.
 Do obdélníku, který je celým výsledkovým prostorem, se postupně přidávají náhodné body (plynule, nebo po 10 a po 100).
@@ -213,23 +223,6 @@ Sloupce vpravo ukazují živý odhad $P(\cdot \mid \text{podmínka})$, oranžov�
 Všimněte si, že $P(C \mid A) = 0$ (obdélníky se nepřekrývají) a $P(A \mid A) = 1$.
 
 ```{ojs}
-//| echo: false
-import {C} from "../assets/jhrules.js"
-```
-
-```{ojs}
-//| echo: false
-import {columnWidth, animation, drawText, ease, makeButton} from "../assets/anim.js"
-```
-
-```{ojs}
-//| echo: false
-// šířka textového sloupce místo vestavěné šířky celé plochy (grafy jinak přetékají doprava)
-width = columnWidth(Generators)
-```
-
-```{ojs}
-//| echo: false
 {
   const pad = 10;
   const Wp = Math.min(width * 0.6, 560) - pad;   // šířka plochy s body
@@ -440,16 +433,16 @@ width = columnWidth(Generators)
 
 
 
-## nezávislost jevů a pravděúpodobnost průniku jevů 
+## Nezávislost jevů a pravděpodobnost průniku jevů 
 
-Zajímá nás pravděpodobnost vytažeí srdcové karty. Vytáhneme z balíčku jednu kartu $a$ a zjistíme výsledek. Pak ji vložíme zpět, zamícháme a vytáhneme druhou $b$. Výsledek druhého pokusu jistě nezávisí nezávisí na tom, jaký yl výsledek prvního pokusu. Jinými slovy pravděpodobost $b$ bez znalosti $a$ je stejná, jako pravděpodobnost $b$ když víme, jak dopadlo $a$. Matematikcy zapsáno  
-$P(b)=P(b|a)$, dosadíme podmíněnou pravděpodobnost $P(b)=\frac{P(b\land a)}{P(a)}$ a upravíme do množinové notace
+Zajímá nás pravděpodobnost vytažení srdcové karty. Vytáhneme z balíčku jednu kartu a zjistíme výsledek (jev $A$: je to srdce). Pak ji vložíme zpět, zamícháme a vytáhneme druhou (jev $B$: je to srdce). Výsledek druhého pokusu jistě nezávisí na tom, jaký byl výsledek prvního pokusu. Jinými slovy pravděpodobnost $B$ bez znalosti $A$ je stejná jako pravděpodobnost $B$, když víme, jak dopadlo $A$. Matematicky zapsáno
+$P(B)=P(B\mid A)$, dosadíme podmíněnou pravděpodobnost $P(B)=\frac{P(B\land A)}{P(A)}$ a upravíme do množinové notace
 
-$$P(a\cap b) = P(a)\cdot P(b)$$
+$$P(A\cap B) = P(A)\cdot P(B)$$
 
-Tento vztah se označuje jak **pravidlo součinu** pro slovní vyjádření **... a současně ...**
+Tento vztah se označuje jako **pravidlo součinu** pro slovní vyjádření **... a současně ...**
 
-Tato rovnice je používána jako definice [nezávislosti jevů]{.highlight-term}. Pokud známe obě strany rovnice, pak lze tento vztah využít k testování nezávislosti dvou jevů.
+Tato rovnice se používá jako definice [nezávislosti jevů]{.highlight-term}. Pokud známe obě strany rovnice, lze tento vztah využít k testování nezávislosti dvou jevů.
 
 Nezávislost si můžete prohlédnout v simulaci. Jev $A$ je svislý pruh a jev $B$ vodorovný pruh, jejich průnik je obdélník o stranách $P(A)$ a $P(B)$,
 takže jeho plocha je přesně $P(A)\cdot P(B)$. Posuvník **míra závislosti** přesouvá $B$ postupně dovnitř $A$ (pravděpodobnost $P(B)$ se přitom nemění).
@@ -461,7 +454,6 @@ Proto je v pravé dvojici světlý pás tolerance (zhruba $\pm 2$ směrodatné c
 Je to jen hrubý náznak, jak o nezávislosti rozhodovat ze vzorku. Správné testování přijde v kapitole o výběru a populaci.
 
 ```{ojs}
-//| echo: false
 {
   const pad = 10;
   const Wp = Math.min(width * 0.55, 480) - pad;   // šířka plochy s body
@@ -672,28 +664,28 @@ Je to jen hrubý náznak, jak o nezávislosti rozhodovat ze vzorku. Správné te
 }
 ```
 
-Pokud máme nezávislé jevy, pak 
-$$P(a\cap b) = P(a)\cdot P(b)$$
+Pokud máme nezávislé jevy, pak
+$$P(A\cap B) = P(A)\cdot P(B)$$
 
-Pokdu máme jevy závislé, pak vycházíme z definice prodmíněné pravděpodobnosti $P(b|a)=\frac{P(a\cap b)}{P(a)}$ kterou jen upravíme 
+Pokud máme jevy závislé, vycházíme z definice podmíněné pravděpodobnosti $P(B\mid A)=\frac{P(A\cap B)}{P(A)}$, kterou jen upravíme
 
-$$P(a\cap b)=P(a)\cdot P(b|a)$$
+$$P(A\cap B)=P(A)\cdot P(B\mid A)$$
 
 ::: {.callout-note}
 ## Klíčové poznatky
 
-Následujcí vzorce platí jak pro pravděpodobnosti empirické, tak pro teoretické
+Následující vzorce platí jak pro pravděpodobnosti empirické, tak pro teoretické
 
 | Zkoumaný jev |Pravděpodobnost|
 |:---|:---| 
-|Hodnoty|$0\leq P(a) \leq 1$ |
-|Doplněk (vše ostatní než $a$)                 |$P(\bar{a})=1-P(a)$|
-|Testování nezávislosti               |$P(a\cap b)\stackrel{?}{=}P(a)\cdot P(b)$|
-|Sjednocení jevů ($a$ **nebo** $b$)   |$P(a\cup b)=P(a)+P(b)-P(a\cap b)$|
-|Sjednocení jevů, když $a,b$ jsou **neslučitelné**  |$P(a\cup b)=P(a)+P(b)$|
-|Podmíněná pravděpodobnost ($b$, jestliže víme  $a$)  |$P(b|a)=\frac{P(a\cap b)}{P(a)}$|
-|Průnik ($a$ **a současně** $b$) | $P(a\cap b)=P(a)\cdot P(b|a)$|
-|Průnik, když $a,b$ jsou **nezávislé** | $P(a\cap b)=P(a)\cdot P(b)$|
+|Hodnoty|$0\leq P(A) \leq 1$ |
+|Doplněk (vše ostatní než $A$)                 |$P(\bar{A})=1-P(A)$|
+|Testování nezávislosti               |$P(A\cap B)\stackrel{?}{=}P(A)\cdot P(B)$|
+|Sjednocení jevů ($A$ **nebo** $B$)   |$P(A\cup B)=P(A)+P(B)-P(A\cap B)$|
+|Sjednocení jevů, když $A,B$ jsou **neslučitelné**  |$P(A\cup B)=P(A)+P(B)$|
+|Podmíněná pravděpodobnost ($B$, jestliže víme $A$)  |$P(B\mid A)=\frac{P(A\cap B)}{P(A)}$|
+|Průnik ($A$ **a současně** $B$) | $P(A\cap B)=P(A)\cdot P(B\mid A)$|
+|Průnik, když $A,B$ jsou **nezávislé** | $P(A\cap B)=P(A)\cdot P(B)$|
 :::
 
 
