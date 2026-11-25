@@ -71,6 +71,10 @@ figcaption, .figure-caption, .quarto-figure figcaption {
 }
 
 
+// Grafy Observable Plot mají ve výchozím stavu bílé pozadí, v tmavém režimu by byly bílou plochou s nečitelným textem.
+// Pozadí je vždy průhledné (text grafu přebírá barvu stránky).
+svg[class^="plot-"], figure svg[class^="plot-"] { background: transparent !important; }
+
 // Posuvníky a zaškrtávátka v barvě palety (místo výchozí jasně modré)
 input[type="range"], input[type="checkbox"], input[type="radio"] { accent-color: $jh-primary; }
 

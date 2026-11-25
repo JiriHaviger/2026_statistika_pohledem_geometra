@@ -37,6 +37,9 @@ $light:            #23262A;
 $dark:             #E4E4E4;
 $border-color:     #3A3F45;
 $code-color:       #E8A5C9;
+$code-bg:          #2B2F34;   // inline kód
+$code-block-bg:    #23262A;   // bloky kódu
+$code-block-color: #E4E4E4;
 $input-bg:         #26292D;
 $input-color:      $jh-text;
 $input-border-color: #4B5056;
@@ -46,3 +49,7 @@ $input-border-color: #4B5056;
 
 // Logo v postranním panelu je černá kresba na průhledném pozadí: v tmavém režimu se převrátí na světlou
 .sidebar-logo, img.sidebar-logo { filter: invert(1); }
+
+// Kód v tmavém režimu: tmavé pozadí bloků i inline kódu (jinak zůstává světlé a text na něm není čitelný)
+div.sourceCode, pre.sourceCode, div.sourceCode pre { background-color: #23262A !important; color: #E4E4E4; }
+code:not(.sourceCode) { background-color: #2B2F34 !important; }

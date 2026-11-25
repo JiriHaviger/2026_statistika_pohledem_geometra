@@ -1,10 +1,10 @@
 <!--
   GENEROVÁNO automaticky (python main.py style --force). Needitovat ručně.
   Sekce 5 a 6 vkládá Python (crew/style_guide.py), ostatní píše LLM.
-  Datum: 2026-11-25
+  Datum: 2026-11-26
   Zdroje (sha256):
     _quarto.yml: 4a42ebf171dc411be150b3674919b83bd6aab73a3e127b2e9492a654130ec337
-    hag_custom.scss: 05c8d8ef25b18706e33199697c25e4bdfae9036c47f7d82af4bf762e9b1a7b81
+    hag_custom.scss: 142b70be433e054edc83e7fb709a6b365c18486606a3a440ad237745a402f014
     jhrules.py: bb0a270daf062fa9da0de1a9f493920847db178d9bf128c164c27061e1e4b8a2
     assets/jhrules.js: f834f3313dacc4dca485b230f3ee188a415f7f5f53f09f9e97ea471a34e0073d
 -->
