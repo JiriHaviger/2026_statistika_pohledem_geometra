@@ -9,8 +9,9 @@
 
 const FALLBACK = {
   bg: "#FFFFFF", text: "#3D3D3D", primary: "#4682B4", primaryLight: "#A9C6DE",
-  primaryText: "#3D729E", accent: "#D35400", context: "#7F7F7F",
-  contextLight: "#D3D3D3", grid: "#EBEBEB", warning: "#8C2D35"
+  primaryText: "#3D729E", accent: "#C46F26", context: "#7F7F7F",
+  contextLight: "#D3D3D3", grid: "#EBEBEB", warning: "#A8402F",
+  primaryDark: "#2F5D84", green: "#6B8E23", greenDark: "#475F1A"
 };
 
 // primaryLight → --jh-primary-light
@@ -26,6 +27,18 @@ function readPalette() {
 }
 
 export const C = readPalette();
+
+// Přepnutí světlého/tmavého režimu (tlačítko Quarto v postranním panelu): barvy se čtou jednou při načtení
+// a plátna se kreslí jejich hodnotami, proto se stránka po přepnutí načte znovu (volba režimu se pamatuje).
+// Poslouchá se jen kliknutí na přepínač, nic se nehlídá v pozadí, takže nemůže vzniknout smyčka.
+if (typeof document !== "undefined" && !window.__jhSchemeReload) {
+  window.__jhSchemeReload = true;
+  document.addEventListener("click", (e) => {
+    if (e.target.closest && e.target.closest(".quarto-color-scheme-toggle")) {
+      setTimeout(() => window.location.reload(), 200);
+    }
+  });
+}
 
 // Společný styl Observable Plot podle JHRules: průhledné pozadí, text v barvě text,
 // Arial, popisky 12 px. Použití: Plot.plot({ style: plotStyle, ... })

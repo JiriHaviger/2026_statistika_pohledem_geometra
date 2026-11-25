@@ -3,10 +3,10 @@
   Sekce 5 a 6 vkládá Python (crew/style_guide.py), ostatní píše LLM.
   Datum: 2026-11-25
   Zdroje (sha256):
-    _quarto.yml: d88d8a0d3ba0ab1a955bc8832f0b13c1253561cbc651d8162f2a04a18a61a793
-    hag_custom.scss: db62784b2f8866682f3012be3fc99e232de15ad9e5dac9098572427fccf11d64
-    jhrules.py: 3eb42555026ceadf007f2f14f88df4534a515527a62ccb8e9c4f37d0fa58eebf
-    assets/jhrules.js: 0a55ee3e90b7fb8791c3e16a54baed17e7bad0c0f68b35489f3010565d30b6c5
+    _quarto.yml: 4a42ebf171dc411be150b3674919b83bd6aab73a3e127b2e9492a654130ec337
+    hag_custom.scss: 05c8d8ef25b18706e33199697c25e4bdfae9036c47f7d82af4bf762e9b1a7b81
+    jhrules.py: bb0a270daf062fa9da0de1a9f493920847db178d9bf128c164c27061e1e4b8a2
+    assets/jhrules.js: f834f3313dacc4dca485b230f3ee188a415f7f5f53f09f9e97ea471a34e0073d
 -->
 
 # Style Guide: Statistika pohledem geometra
@@ -287,20 +287,24 @@ import {C, gradient, plotStyle} from "../assets/jhrules.js"
 | `C.primary` | `#4682B4` | hlavní datová barva (sloupce, křivky, prvky grafu) |
 | `C.primaryLight` | `#A9C6DE` | výplně, podklady, vedlejší řady téže věci |
 | `C.primaryText` | `#3D729E` | tmavší primary jen pro odkazy a text (kontrast ≥ 4,5 : 1) |
-| `C.accent` | `#D35400` | NA CO SE DÍVAT: jedna věc na obrázek (zvýrazněný bod, hodnota, výsledek) |
+| `C.accent` | `#C46F26` | NA CO SE DÍVAT: jedna věc na obrázek (zvýrazněný bod, hodnota, výsledek), okrová |
 | `C.context` | `#7F7F7F` | kontext: osy, popisky, vedlejší data |
 | `C.contextLight` | `#D3D3D3` | okrajové a pomocné prvky |
 | `C.grid` | `#EBEBEB` | mřížka (jen vodorovná, jemná) |
-| `C.warning` | `#8C2D35` | pouze varování a chyby (tlumená bordó) |
+| `C.warning` | `#A8402F` | pouze varování a chyby (cihlová červená) |
+| `C.primaryDark` | `#2F5D84` | tmavá modrá pro bloky a štítky pojmů (ne pro grafy) |
+| `C.green` | `#6B8E23` | olivová pro bloky „Jak na to“ (ne pro grafy) |
+| `C.greenDark` | `#475F1A` | tmavá olivová pro bloky „Příklad“ (ne pro grafy) |
 
 Úplná pravidla stylu JHRules: `docs_for_agents/jhrules/README.md`.
 
 Principy:
 
-- Čistý design: bílé pozadí, tlumeně tmavě šedý text (ne čistá černá), žádné rámečky, stíny ani přechody.
+- Čistý design: světlé nebo tmavé pozadí (výchozí je tmavý režim, barvy se čtou z CSS proměnných), tlumený text (ne čistá černá), žádné rámečky, stíny ani přechody.
 - Jedna akcentová barva: `primary` nese veškerý důraz a nemusí se šetřit.
 - Výjimka je výjimka: `accent` zvýrazňuje jen jeden prvek (bod, sloupec, výsledek).
 - Kontext ustupuje: osy, popisky a potlačená data jsou šedé (`context`, `contextLight`).
+- V grafech jen modrá, šedá (a jejich stupně) a oranžový akcent. Zelená a červená jsou pro bloky a text, ne pro grafy.
 - Zvýraznění místo duhy: víc kategorií = jedna `primary` a zbytek `contextLight`, případně plynulé stupňování `gradient(n)`.
 
 Grafy:

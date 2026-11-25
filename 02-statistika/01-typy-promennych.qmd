@@ -424,7 +424,7 @@ Plot.plot({
 
 Míra polohy však nemusí kazovat na střed jako **medián (mdn)**, ale také na krajní hodnoty:  **minimum (min)**, **maximum (max)**. Pokud chceme podrobnější dělení našich dat, pak můžeme využít i další kvantily. [Kvantil]{.highlight-term} je hodnota, "pod kterou" leží určité procento dat (přesněji jsou menší nebo stejné). Důležité kvantily mají svá spěcifická označení: **medián** pro polovinu, **kvartily** pro čtvrtiny, **decily** pro desetiny a **percentily** pro setiny. Proto platí že např medián = druhý kvartil = pátý decil = padesátý percentil. Postup výpočtu se může lišit, my uvedeme ten nejvíce používaný, který odpovídá funkci PERCENTIL.INC v MS EXCEL. Kvantil $p$ hledáme **v setříděném souboru** na pozici **$k=1+(n-1)\cdot p$** a to buď přímo, pokud $k$ je celé, nebo interpolací, pokud $k$ celé není. V druhém příapdě  číslo $k$ rozdělíme na celou část $c$ (index souseda vlevo) a desetinnou část $d$ (poměrná vzdálenost k sousedovi vpravo). Percentil je pak hodnota na spojnici těchto dvou sousedů: **$x_{c} + (x_{c+1}-x_c) \cdot d$**. Ukažme to na příkladu našich dat.
 
-::: {.callout-note collapse="true"}
+::: {.callout-note .priklad collapse="true"}
 # Určete první kvartil a osmý decil {.unnumbered .unlisted}
 
 Pro první kvartil je $p=0.25$. Vypočeteme pořadí $k=1+(10-1)\cdot 0.25=3.25$, protože to není číslo celé, rozdělíme ho $3.25 = 3 + 0.25$. Požadovaný kvartil tedy hledáme mezi třetí a čtvrtou, $\{1,  2, \mathbf{ 2, 2}, 3, 3, 4, 5, 8, 11\}$. Můžeme použít vzorec $x_3+(x_4-x_3)\cdot 0.25$, ale protože $x_3=x_4=2$, tak hodnota prvního kvartilu je $Q_1=2$.

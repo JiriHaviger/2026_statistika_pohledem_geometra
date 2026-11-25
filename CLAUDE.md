@@ -2,6 +2,7 @@
 
 @docs_for_agents/AGENTS.md
 @docs_for_agents/animace-konvence.md
+@docs_for_agents/bloky-a-tmavy-rezim.md
 
 ## Tento projekt
 
@@ -72,8 +73,9 @@ Starý název „Havi Notes“ se už nepoužívá.
 - **Jediný zdroj palety:** proměnné `$jh-*` v `hag_custom.scss`. Kopie je jen v `jhrules.py` (matplotlib/plotly)
   a ve záložních hodnotách `assets/jhrules.js`; shodu kontroluje `.venv\Scripts\python.exe -m crew.style_guide`.
 - Při změně palety upravit všechna tři místa a přegenerovat sekci 5 style guide.
-- Akcent (`accent`, oranžová) jen na jednu věc na obrázek, jinak `primary` a šedé `context`. Varování `warning` (bordó).
-- Zatím se ladí jen světlý režim; tmavý přijde později.
+- Akcent (`accent`, okrová) jen na jednu věc na obrázek, jinak `primary` a šedé `context`. Varování `warning` (cihlová červená).
+  V grafech jen modrá, šedá a akcent. Zelené, tmavě modré a červené odstíny jsou pro bloky v textu (viz `bloky-a-tmavy-rezim.md`).
+- Kniha má světlý i tmavý režim, výchozí je **tmavý** (`hag_dark.scss`, přepínač pod logem). Změnu barev ověřit v obou.
 
 ### Prostředí
 

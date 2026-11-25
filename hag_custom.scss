@@ -11,11 +11,18 @@ $jh-text:          #3D3D3D;   // běžný text a nadpisy
 $jh-primary:       #4682B4;   // hlavní barva grafů a prvků
 $jh-primary-light: #A9C6DE;   // podklady, výplně
 $jh-primary-text:  #3D729E;   // tmavší primary pro odkazy (kontrast 5,1 : 1 na bílé)
-$jh-accent:        #D35400;   // „na co se dívat“ – jen jedna věc na obrázek
+$jh-accent:        #C46F26;   // okrová: „na co se dívat“ – jen jedna věc na obrázek
 $jh-context:       #7F7F7F;   // osy, popisky, vedlejší data
 $jh-context-light: #D3D3D3;
 $jh-grid:          #EBEBEB;
-$jh-warning:       #8C2D35;   // tlumená bordó pro varování (kontrast 8,3 : 1)
+$jh-warning:       #A8402F;   // cihlová červená pro varování a chyby
+$jh-primary-dark:  #2F5D84;   // tmavá modrá: hlavičky klíčových poznatků, štítky pojmů
+$jh-green:         #6B8E23;   // olivová: bloky „Jak na to“
+$jh-green-dark:    #475F1A;   // tmavá olivová: bloky „Příklad“
+
+// Bloky (callouty): podbarvení těla. Tmavý režim (hag_dark.scss) hodnoty zvyšuje.
+$callout-tint:       0.05;
+$callout-solid-tint: 0.075;
 
 // Bootstrap / Quarto
 $body-bg:          $jh-bg;
@@ -48,6 +55,9 @@ $headings-font-weight: 600;
   --jh-context-light: #{$jh-context-light};
   --jh-grid: #{$jh-grid};
   --jh-warning: #{$jh-warning};
+  --jh-primary-dark: #{$jh-primary-dark};
+  --jh-green: #{$jh-green};
+  --jh-green-dark: #{$jh-green-dark};
 }
 
 // Pomocné třídy JHRules
@@ -104,6 +114,11 @@ mjx-container[display="true"] { overflow-x: auto; overflow-y: hidden; max-width:
 .observablehq form {
   input[type="range"] { min-height: 44px; width: 100%; max-width: 100%; }
   input[type="number"], input[type="text"], select { min-height: 44px; }
+  input[type="number"], input[type="text"], select, textarea {
+    background-color: $jh-bg;
+    color: $jh-text;
+    border: 1px solid $jh-context-light;
+  }
   label { white-space: normal; }
 }
 
@@ -195,89 +210,53 @@ mjx-container[display="true"] { overflow-x: auto; overflow-y: hidden; max-width:
   border-radius: 3px;
 }
 
-// Zvýraznění pro Definice/Pojmy
+// Zvýraznění pojmu (definice): tmavě modrý štítek s bílým písmem, v obou režimech stejně
 .highlight-term {
-  padding: 0.25rem 0.5rem;
-  display: inline-block; // Umožní boxu obtékat text
+  background-color: $jh-primary-dark;
+  color: #fff;
+  padding: 1px 7px;
   border-radius: 4px;
-  background-color: rgba($jh-primary-light, 0.5); // světlý podklad z palety
-  border-left: 5px solid $primary;
+  display: inline;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
 }
 
 /* ===============================================================*/
-/*-- SCSS: Custom callout --*/
+/*-- SCSS: Bloky (callouty) --*/
+// Běžné bloky: horní pruh, jemný rámeček a lehké podbarvení (varianta 5 z návrhu paleta.qmd).
+// Klíčové poznatky (callout-important): plná hlavička v barvě (varianta 2).
+// Ostatní role se řeší další třídou na stejném bloku (viz docs_for_agents/bloky-a-tmavy-rezim.md).
 
-.callout {
-  // 1. Odstranění ikon a sjednocení odsazení
-  &::before, .callout-icon-container {
-    display: none !important;
-  }
-  .callout-header {
-    padding-left: 0.5rem !important;
-  }
-  // 2. Základní nastavení čáry pro všechna appearance
-  border-left-width: 5px !important;
+@mixin jh-callout($c) {
+  background-color: rgba($c, $callout-tint) !important;
+  border: 1px solid rgba($c, 0.35) !important;
+  border-top: 5px solid $c !important;
+  border-radius: 0 !important;
+  .callout-header { background-color: transparent !important; padding-left: 0.9rem !important; }
+  .callout-title-container, .callout-title-container * { color: $c !important; font-weight: 700; }
+}
+
+@mixin jh-callout-solid($c, $tint-color) {
+  background-color: rgba($tint-color, $callout-solid-tint) !important;
+  border: none !important;
+  border-left: 6px solid $c !important;
+  border-radius: 0 !important;
+  .callout-header { background-color: $c !important; padding-left: 0.9rem !important; }
+  .callout-title-container, .callout-title-container *, .callout-header i { color: #fff !important; font-weight: 700; }
+}
+
+div.callout {
   margin: 1rem 0;
-  &.callout-style-simple {
-    background-color: transparent !important;
-    border-top: none !important;    // Zruší horní okraj
-    border-right: none !important;  // Zruší pravý okraj
-    border-bottom: none !important; // Zruší dolní okraj
+  &::before, .callout-icon-container { display: none !important; }
+  .callout-body-container { color: $body-color; }
 
-    .callout-header {
-      display: flex !important; // Vynutí nadpis
-      background-color: transparent !important;
-    }
-  }
-  &.callout-style-minimal {
-    background-color: transparent !important;
-    border-top: none !important;
-    border-right: none !important;
-    border-bottom: none !important;
+  &.callout-note { @include jh-callout($jh-primary); }
+  &.callout-tip { @include jh-callout($jh-green); }
+  &.callout-caution { @include jh-callout($jh-context); }
+  &.callout-warning { @include jh-callout($jh-warning); }
+  &.callout-important { @include jh-callout-solid($jh-primary-dark, $jh-primary); }
+  &.callout-note.priklad { @include jh-callout($jh-green-dark); }
+  &.callout-note.zapamatuj { @include jh-callout($jh-accent); }
 
-    .callout-header {
-      display: none !important; // Skryje nadpis
-    }
-  }
-  // WARNING ==================================================
-  &.callout-warning {
-    border-left-color: $jh-warning !important;
-    background-color: rgba($jh-warning, 0.08) !important;
-
-    &.callout-style-minimal {
-      background-color: transparent !important;
-    }
-  }
-
-  // NOTE ==================================================
-  &.callout-note {
-    border-left-color: $primary !important;
-    background-color: $light !important;
-
-    &.callout-style-minimal {
-      background-color: transparent !important;
-    }
-  }
-}
-
-// Barva levého pruhu pro tip (note a warning jsou výše)
-.callout-tip {
-  border-left-color: $primary !important;
-}
-
-// Hlavičky bloků v barvách palety (jinak Quarto použije výchozí zelenou, oranžovou a jasně modrou, které
-// se neshodují s grafy): note i tip světle modře jako highlight-term, caution šedě jako kontext,
-// important tlumenou bordó jako varování.
-.callout {
-  &.callout-note, &.callout-tip {
-    .callout-header { background-color: rgba($jh-primary-light, 0.35) !important; }
-  }
-  &.callout-caution {
-    border-left-color: $jh-context !important;
-    .callout-header { background-color: rgba($jh-context-light, 0.5) !important; }
-  }
-  &.callout-important {
-    border-left-color: $jh-warning !important;
-    .callout-header { background-color: rgba($jh-warning, 0.1) !important; }
-  }
+  &.callout-style-minimal .callout-header { display: none !important; }
 }

@@ -283,7 +283,7 @@ Každý přístup má nejen své historické ukotvení, ale také praktické vyu
 
 ## Shrnutí
 
-::: {.callout-note}
+::: {.callout-important}
 ## Klíčové poznatky
 - Teoretická pravděpodobnost vyžaduje **stejně pravděpodobné výsledky**
 - Pro výpočet používáme vzorec $P(A) = \frac{|A|}{|\Omega|}$

@@ -38,12 +38,10 @@ book:
 
 format:
   html:
-    theme: 
-      # https://bootswatch.com/
-      light: [cosmo,hag_custom.scss] #cosmo, flatly, sandstone 
-      #cosmo, flatly, journal, lumen, paper, readable, sandstone, simplex, slate, spacelab, superhero, united, yeti
-      dark: [cosmo, hag_custom.scss] 
-      # light: [yeti, hag_custom.scss]
+    theme:
+      # Výchozí je první uvedený (tmavý režim). hag_dark.scss musí být PŘED hag_custom.scss (dřívější vrstva má přednost).
+      dark: [cosmo, hag_dark.scss, hag_custom.scss]
+      light: [cosmo, hag_custom.scss]
     code-fold: true
     code-tools: true
     code-copy: true

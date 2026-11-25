@@ -1,0 +1,48 @@
+/*-- scss:defaults --*/
+
+// ===============================================================
+// Tmavý režim (výchozí režim knihy). Doplněk k hag_custom.scss, který zůstává zdrojem světlé palety.
+//
+// Zapojení v _quarto.yml: dark: [cosmo, hag_dark.scss, hag_custom.scss]. Quarto bere u vrstev motivu
+// dřívější soubor jako silnější, proto je tento soubor PŘED hag_custom.scss a přepisuje jeho proměnné.
+// Co se v hag_custom.scss odvozuje (například $body-bg: $jh-bg), se tady musí přepsat znovu.
+// Barvy jsou už v tmavém režimu zesvětlené, aby měly na tmavém pozadí kontrast.
+// ===============================================================
+$jh-bg:            #1B1D20;
+$jh-text:          #E4E4E4;
+$jh-primary:       #5B9BD0;
+$jh-primary-light: #35567A;   // výplně: tmavší, ať nesvítí na tmavém pozadí
+$jh-primary-text:  #8FB8DC;
+$jh-accent:        #E0903F;
+$jh-context:       #9A9A9A;
+$jh-context-light: #4B5056;
+$jh-grid:          #33373C;
+$jh-warning:       #D9705F;
+$jh-primary-dark:  #2F5D84;   // hlavičky klíčových poznatků a štítky pojmů (bílé písmo)
+$jh-green:         #8DB43A;
+$jh-green-dark:    #6F9430;
+
+$callout-tint:       0.08;
+$callout-solid-tint: 0.12;
+
+// Bootstrap / Quarto
+$body-bg:          $jh-bg;
+$body-color:       $jh-text;
+$headings-color:   $jh-text;
+$primary:          $jh-primary;
+$secondary:        $jh-context;
+$warning:          $jh-warning;
+$link-color:       $jh-primary-text;
+$light:            #23262A;
+$dark:             #E4E4E4;
+$border-color:     #3A3F45;
+$code-color:       #E8A5C9;
+$input-bg:         #26292D;
+$input-color:      $jh-text;
+$input-border-color: #4B5056;
+
+
+/*-- scss:rules --*/
+
+// Logo v postranním panelu je černá kresba na průhledném pozadí: v tmavém režimu se převrátí na světlou
+.sidebar-logo, img.sidebar-logo { filter: invert(1); }

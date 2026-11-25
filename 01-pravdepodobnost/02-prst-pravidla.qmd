@@ -17,7 +17,7 @@ Jaké jsou základní otázky, které lze řešit pomocí teorie pravděpodobnos
 
 **Karty:** Z balíčku 52 karet (4 barvy po 13 kartách) vybereme kartu. Kolik možností máme, když nás zajímá jenom barva? Jakou barvu jsme vylosovali? Jaká je pravděpodobnost, že vybereme piky?
 
-::: {.callout-note collapse="true"}
+::: {.callout-note .priklad collapse="true"}
 ## Další příklady 
 
 **Pojišťovna:** Rodina jede autem na dovolenou, má nehodu. Kolik osob může mít zranění (kolik je v autě osob)? Kolik jich reálně zranění má? Jaká je pravděpodobnost, že nebude zraněn nikdo?
@@ -671,7 +671,7 @@ Pokud máme jevy závislé, vycházíme z definice podmíněné pravděpodobnost
 
 $$P(A\cap B)=P(A)\cdot P(B\mid A)$$
 
-::: {.callout-note}
+::: {.callout-important}
 ## Klíčové poznatky
 
 Následující vzorce platí jak pro pravděpodobnosti empirické, tak pro teoretické

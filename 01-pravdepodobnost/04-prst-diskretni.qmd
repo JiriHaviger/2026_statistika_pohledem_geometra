@@ -857,7 +857,7 @@ Pokud potřebujete tyto pravděpodobnosti spočítat v tabulkovém procesoru, po
 * **Poissonovo:** `=POISSON.DIST(x; lambda; NE)`
 :::
 
-::: {.callout-note}
+::: {.callout-important}
 ## Klíčové poznatky
 - Pravděpodobnostní rozdělení je souhrn všech možných výsledků s jejich pravděpodobnostmi
 - U malého počtu možností se zadává nejčastěji tabulkou

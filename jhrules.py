@@ -4,8 +4,9 @@ Kopie palety z hag_custom.scss (proměnné $jh-*). Při změně palety uprav ob�
 shodu kontroluje `.venv\\Scripts\\python.exe -m crew.style_guide`.
 """
 C = dict(bg="#FFFFFF", text="#3D3D3D", primary="#4682B4", primary_light="#A9C6DE",
-         primary_text="#3D729E", accent="#D35400", context="#7F7F7F",
-         context_light="#D3D3D3", grid="#EBEBEB", warning="#8C2D35")
+         primary_text="#3D729E", accent="#C46F26", context="#7F7F7F",
+         context_light="#D3D3D3", grid="#EBEBEB", warning="#A8402F",
+         primary_dark="#2F5D84", green="#6B8E23", green_dark="#475F1A")
 
 
 def use_matplotlib():
