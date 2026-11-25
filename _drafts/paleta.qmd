@@ -1,0 +1,327 @@
+---
+title: "Návrh rozšířené palety a vzhledu bloků"
+# náhled draftu se stejným motivem jako kniha (paleta JHRules)
+format:
+  html:
+    theme:
+      light: [cosmo, ../hag_custom.scss]
+      dark: [cosmo, ../hag_custom.scss, paleta-dark.scss]
+execute:
+  echo: false
+---
+
+*Návrhová stránka, v knize se nepoužívá. Slouží k výběru. Bloky jsou zde kresleny ručně (ne přes Quarto callouty), aby šly rychle měnit.*
+
+Dnes mají všechny bloky stejnou ocelově modrou a splývají. Paleta vychází z návrhu B (olivová a cihlová): dvě modré, dvě zelené, tmavě červená, šedá a oranžový akcent. Níže jsou k výběru tři varianty zelené dvojice a čtyři odstíny oranžové, a pak **šest způsobů podbarvení** bloků. Ovladači nahoře se vybírá paleta a síla podbarvení, galerie se podle toho překreslí. **Tmavý režim** se přepíná tlačítkem (měsíc / slunce) v pravém horním rohu stránky: přepne se text, pozadí, bloky i skutečné callouty Quarto na konci stránky. Grafy a animace se zde ukazují jen orientačně, viz poznámka u grafu.
+
+```{ojs}
+//| echo: false
+import {C, plotStyle} from "../assets/jhrules.js"
+```
+
+```{ojs}
+//| echo: false
+import {columnWidth} from "../assets/anim.js"
+```
+
+```{ojs}
+//| echo: false
+width = columnWidth(Generators)
+```
+
+```{ojs}
+//| echo: false
+// tmavý režim: Quarto u dvojího motivu nepozná, že druhý je tmavý (hag_custom.scss nastavuje bílé $body-bg),
+// proto se pozná podle skutečné barvy pozadí stránky; změna se sleduje na <head> (přepnutí stylopisu) i <body>
+isDark = Generators.observe((notify) => {
+  const get = () => {
+    const c = d3.color(getComputedStyle(document.body).backgroundColor);
+    return !!c && d3.hsl(c).l < 0.4;
+  };
+  let last = get();
+  notify(last);
+  const check = () => setTimeout(() => { const v = get(); if (v !== last) { last = v; notify(v); } }, 60);
+  const mo = new MutationObserver(check);
+  mo.observe(document.head, {subtree: true, attributes: true, attributeFilter: ["rel"]});
+  mo.observe(document.body, {attributes: true, attributeFilter: ["class"]});
+  check();
+  return () => mo.disconnect();
+})
+
+pageBg = isDark ? "#1b1d20" : "#ffffff"
+ink = isDark ? "#e4e4e4" : "#3D3D3D"
+// v tmavém režimu se barvy pro text a pruhy zesvětlí, ať mají kontrast vůči tmavému pozadí
+lift = (hex) => isDark ? d3.color(hex).brighter(0.9).formatHex() : hex
+```
+
+## Palety
+
+Dnes (z `hag_custom.scss`) má kniha modrou `#4682B4`, šedou `#7F7F7F`, oranžový akcent `#D35400` (`$jh-accent`, tatáž oranžová je v grafech) a tlumenou bordó `#8C2D35`. Návrh doplňuje tmavší modrou `#2F5D84`, **dvě zelené** (stejně jako dvě modré), tmavě červenou (teplejší bordó k výběru). Hnědá odpadla. Číslo u barvy je kontrast vůči pozadí stránky (WCAG; v tmavém režimu se zesvětlenými barvami): od 4,5 výš lze barvu použít na text, od 3 na pruhy a ikony.
+
+```{ojs}
+//| echo: false
+// zelená dvojice (světlejší + tmavší) a odstíny oranžového akcentu k výběru
+greens = ({
+  "1: olivová + tmavá olivová": ["#6B8E23", "#475F1A"],
+  "2: olivová + lesní zelená": ["#6B8E23", "#2F5D3A"],
+  "3: mechová + tmavší mechová": ["#7A9A3A", "#50682A"]
+})
+
+oranges = ({
+  "stávající #D35400": "#D35400",
+  "tlumená #C2571A": "#C2571A",
+  "měděná #B3592A": "#B3592A",
+  "okrová #C46F26": "#C46F26"
+})
+
+// teplejší tmavě červené (bordó)
+reds = ({
+  "teplá bordó #8A2E2B": "#8A2E2B",
+  "dnešní bordó #8C2D35": "#8C2D35",
+  "cihlová #A8402F": "#A8402F",
+  "vínově hnědá #7E2F2A": "#7E2F2A",
+  "dřívější #A23B3B": "#A23B3B"
+})
+
+// role bloků: popisek, klíč barvy, ukázkový text
+roles = [
+  {key: "blue", title: "Poznámka", text: "Doplňující informace, která text nepřerušuje. Nejběžnější blok v knize."},
+  {key: "darkBlue", title: "Klíčové poznatky", text: "Shrnutí na konci kapitoly: co si odnést a co si zapamatovat."},
+  {key: "green", title: "Jak na to v Excelu?", text: "Praktický tip: vzorec, funkce nebo postup, který si lze rovnou vyzkoušet."},
+  {key: "darkGreen", title: "Příklad", text: "Konkrétní výpočet s čísly, který pojem názorně ukazuje."},
+  {key: "grey", title: "Upozornění", text: "Okrajová poznámka nebo odkaz jinam, která nemá stát v popředí."},
+  {key: "red", title: "Pozor", text: "Častá chyba nebo omezení, na které je třeba si dát pozor."},
+  {key: "orange", title: "Zapamatujte si", text: "Jediná věta, která je v kapitole nejdůležitější."}
+]
+
+// kontrast vůči bílé (WCAG 2.1)
+contrast = (hex, bgHex = "#ffffff") => {
+  const lin = (v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; };
+  const lum = (h) => { const c = d3.rgb(h); return 0.2126 * lin(c.r) + 0.7152 * lin(c.g) + 0.0722 * lin(c.b); };
+  const l1 = lum(hex), l2 = lum(bgHex);
+  return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
+}
+
+rgba = (hex, a) => { const c = d3.rgb(hex); return `rgba(${c.r},${c.g},${c.b},${a})`; }
+
+viewof greenPair = Inputs.radio(Object.keys(greens), {label: "Zelená dvojice", value: Object.keys(greens)[0]})
+viewof orangeSel = Inputs.radio(Object.keys(oranges), {label: "Oranžová", value: Object.keys(oranges)[3]})
+viewof redSel = Inputs.radio(Object.keys(reds), {label: "Tmavě červená", value: Object.keys(reds)[2]})
+
+// vybraná paleta: dvě modré, dvě zelené, červená, šedá, oranžový akcent
+palSel = ({
+  blue: "#4682B4", darkBlue: "#2F5D84", green: greens[greenPair][0], darkGreen: greens[greenPair][1],
+  grey: "#7F7F7F", red: reds[redSel], orange: oranges[orangeSel]
+})
+viewof tint = Inputs.range([0.04, 0.45], {step: 0.01, value: 0.25, label: "Síla podbarvení"})
+```
+
+```{ojs}
+//| echo: false
+{
+  const pal = palSel;
+  const names = {blue: "modrá", darkBlue: "tmavě modrá", green: "zelená", darkGreen: "tmavě zelená", grey: "šedá", red: "tmavě červená", orange: "oranžová"};
+  const chip = (k) => {
+    const hex = lift(pal[k]), r = contrast(hex, pageBg);
+    return `<div style="width:116px;margin:0 10px 12px 0">
+      <div style="height:46px;background:${hex};border-radius:4px"></div>
+      <div style="display:flex;height:14px;margin-top:3px">
+        ${[0.1, 0.2, 0.3, 0.45].map((a) => `<div style="flex:1;background:${rgba(hex, a)}"></div>`).join("")}
+      </div>
+      <div style="font-size:12px;margin-top:3px"><b>${names[k]}</b><br>${hex} · ${r.toFixed(1).replace(".", ",")} : 1</div>
+    </div>`;
+  };
+  return html`<div style="display:flex;flex-wrap:wrap">${Object.keys(names).map(chip).join("")}</div>
+    <div style="font-size:12px;color:${C.context}">Proužek pod barvou ukazuje průhlednost 10, 20, 30 a 45 %.</div>`;
+}
+```
+
+**Grafy zůstávají jen u dnešních barev**: modrá, šedá (a jejich stupně) a oranžový akcent. Zelená a červená slouží jen textu a blokům. Oranžová je „teorie / na co se dívat“, modrá „pozorování“. V tmavém režimu je ukázka jen orientační, skutečné grafy a animace by si vyžádaly vlastní tmavou paletu (viz poznámka na konci).
+
+```{ojs}
+//| echo: false
+{
+  const pal = palSel;
+  // jen modrá, šedá a jejich stupně
+  const fills = ["#4682B4", "#2F5D84", "#A9C6DE", "#7F7F7F", "#D3D3D3"];
+  const data = fills.map((f, i) => ({f, label: ["A", "B", "C", "D", "E"][i], v: [8, 5, 6, 3, 4][i]}));
+  return Plot.plot({
+    width, height: 200, style: {...plotStyle, color: ink}, marginLeft: 40,
+    x: {label: null, domain: data.map((d) => d.label)},
+    y: {grid: true, label: "četnost"},
+    marks: [
+      Plot.barY(data, {x: "label", y: "v", fill: (d) => d.f}),
+      Plot.ruleY([0], {stroke: C.context}),
+      Plot.line([{x: "A", y: 7}, {x: "B", y: 5.5}, {x: "C", y: 6.5}, {x: "D", y: 4}, {x: "E", y: 4.5}], {x: "x", y: "y", stroke: lift(pal.orange), strokeWidth: 2.5, curve: "monotone-x"})
+    ]
+  });
+}
+```
+
+## Vzhled bloků
+
+Šest způsobů podbarvení se stejnými sedmi barvami. Nahoře jde měnit **síla podbarvení** (u variant, které podbarvení nemají, nemá posuvník vliv).
+
+```{ojs}
+//| echo: false
+modes = [
+  {id: 1, name: "1. Tónovaná hlavička + jemné tělo",
+   note: "Dnešní styl, ale s výraznější hlavičkou. Barvu určuje posuvník.",
+   css: (c, t, k) => ({box: `border-left:6px solid ${c};background:${rgba(c, t * 0.3 * k.m)}`, head: `background:${rgba(c, t * k.m)};color:${c}`})},
+  {id: 2, name: "2. Plná hlavička v barvě",
+   note: "Výrazné, ale pozor na kontrast bílého textu (viz čísla u palet).",
+   css: (c, t, k) => ({box: `border-left:6px solid ${k.c0};background:${rgba(c, t * 0.3 * k.m)}`, head: `background:${k.c0};color:#fff`})},
+  {id: 3, name: "3. Celý blok podbarvený, bez hlavičky",
+   note: "Klidné, plochá výplň. Název jen barevným písmem.",
+   css: (c, t, k) => ({box: `border-left:6px solid ${c};background:${rgba(c, t * k.m)}`, head: `color:${c}`})},
+  {id: 4, name: "4. Bez podbarvení, jen pruh a nadpis",
+   note: "Nejklidnější varianta, barva nese jen pruh a titulek.",
+   css: (c, t, k) => ({box: `border-left:6px solid ${c}`, head: `color:${c}`})},
+  {id: 5, name: "5. Horní pruh a jemný rámeček",
+   note: "Blok se odliší od textu rámečkem, pruh je nahoře.",
+   css: (c, t, k) => ({box: `border-top:5px solid ${c};border-right:1px solid ${rgba(c, 0.35)};border-bottom:1px solid ${rgba(c, 0.35)};border-left:1px solid ${rgba(c, 0.35)};background:${rgba(c, t * 0.2 * k.m)}`, head: `color:${c}`})},
+  {id: 6, name: "6. Zaoblený obrys, tělo v barvě pozadí",
+   note: "Lehké, bez výplně, na světlém i tmavém pozadí čitelné.",
+   css: (c, t, k) => ({box: `border:2px solid ${c};border-radius:8px;background:${k.bg}`, head: `color:${c}`})}
+]
+
+box = (mode, role, pal, t) => {
+  const c0 = pal[role.key], c = lift(c0), s = mode.css(c, t, {c0, bg: pageBg, m: isDark ? 1.6 : 1});
+  return `<div style="flex:1 1 220px;min-width:220px;max-width:340px;${s.box};padding:0;overflow:hidden;font-size:13px;line-height:1.4">
+    <div style="padding:5px 10px;font-weight:700;${s.head}">${role.title}</div>
+    <div style="padding:7px 10px 9px 10px">${role.text}</div>
+  </div>`;
+}
+```
+
+```{ojs}
+//| echo: false
+html`${modes.map((m) => `
+  <div style="margin:26px 0 6px 0">
+    <div style="font-weight:700;font-size:16px">${m.name}</div>
+    <div style="font-size:13px;color:${C.context};margin-bottom:8px">${m.note}</div>
+    <div style="display:flex;flex-wrap:wrap;gap:12px">${roles.map((r) => box(m, r, palSel, tint)).join("")}</div>
+  </div>`).join("")}`
+```
+
+## Reálný tvar: všech šest variant přes celou šířku sloupce
+
+V knize mají bloky šířku textového sloupce, ne třetinovou jako v galerii výše. Níže je pro každou z šesti variant ukázka stejné krátké stránky (odstavce, pojem ve variantě 4 a pět bloků) ve vybrané paletě a s nastavenou silou podbarvení. Slouží k odhadu, kolik barvy by na stránce bylo.
+
+```{ojs}
+//| echo: false
+{
+  const pal = palSel, m = isDark ? 1.6 : 1;
+  const term = (s) => `<span style="background:${pal.darkBlue};color:#fff;padding:1px 7px;border-radius:4px">${s}</span>`;
+  const code = (s) => `<code style="font-size:13px;padding:1px 5px;border-radius:3px;background:${rgba("#808080", 0.18)}">${s}</code>`;
+  const page = (mode) => {
+    const bx = (key, title, body) => {
+      const c0 = pal[key], c = lift(c0), s = mode.css(c, tint, {c0, bg: pageBg, m});
+      return `<div style="${s.box};margin:16px 0;overflow:hidden;font-size:15px;line-height:1.55">
+        <div style="padding:6px 14px;font-weight:700;${s.head}">${title}</div>
+        <div style="padding:10px 14px 12px 14px">${body}</div></div>`;
+    };
+    return `<div style="margin:34px 0 10px 0;font-weight:700;font-size:17px">${mode.name}</div>
+      <div style="font-size:16px;line-height:1.65;border-top:1px solid ${rgba("#808080", 0.35)};padding-top:6px">
+      <p>${term("Medián")} je hodnota, která rozděluje uspořádaný soubor na dvě poloviny. U sudého počtu hodnot je to průměr dvou prostředních hodnot.</p>
+      ${bx("blue", "Poznámka", "Medián i další kvantily můžeme určit pro proměnné, které mají alespoň uspořádání, tedy pro ordinální a kardinální.")}
+      <p>Ukažme si to na deseti domácnostech a jejich počtu motorových vozidel.</p>
+      ${bx("darkGreen", "Příklad", "Uspořádaná data: 1, 2, 2, 2, <b>3, 3</b>, 4, 5, 8, 11. Prostřední jsou dvě trojky, takže medián je (3 + 3) / 2 = <b>3</b>.")}
+      ${bx("green", "Jak na to v Excelu?", `Medián spočítáte funkcí ${code("=MEDIAN(A1:A10)")}.`)}
+      <p>Průměr se od mediánu liší, pokud jsou data zešikmená nebo obsahují odlehlé hodnoty.</p>
+      ${bx("red", "Pozor", "Průměr 4,1 je tažený směrem k hodnotě 11. U zešikmených dat proto sám o sobě nestačí.")}
+      ${bx("darkBlue", "Klíčové poznatky", "<ul style='margin:0;padding-left:20px'><li>Medián je prostřední hodnota uspořádaného souboru.</li><li>Je odolný vůči odlehlým hodnotám.</li></ul>")}
+      </div>`;
+  };
+  return html`${modes.map(page).join("")}`;
+}
+```
+
+## Jednotlivé pojmy ve větě
+
+Zvýraznění pojmu v textu (`highlight-term`) je dnes pastelový podklad s modrým pruhem a ve světlém režimu nevypadá dobře. Níže je 15 variant, které jdou prohlížet ve světlém i tmavém režimu (přepínač vpravo nahoře). Čísla jsou pro snadný výběr. Barvy bere z vybrané palety, síla podkladu z posuvníku nahoře. **Vybrána je varianta 4** (tmavě modrý štítek, bílé písmo), platí pro světlý i tmavý režim.
+
+```{ojs}
+//| echo: false
+{
+  const pal = palSel, m = isDark ? 1.6 : 1, L = (k) => lift(pal[k]);
+  const base = "padding:1px 7px;border-radius:4px;-webkit-box-decoration-break:clone;box-decoration-break:clone;";
+  const variants = [
+    ["Dnešní: světlý podklad a modrý pruh", `background:${rgba("#A9C6DE", 0.5)};border-left:5px solid #4682B4`],
+    ["Plošný podklad bez pruhu (síla × 1,4)", `background:${rgba(L("blue"), tint * 1.4 * m)}`],
+    ["Podklad s pruhem (síla z posuvníku)", `background:${rgba(L("blue"), tint * m)};border-left:5px solid ${L("blue")}`],
+    ["Tmavě modrý štítek, bílé písmo", `background:${pal.darkBlue};color:#fff`],
+    ["Modrý štítek, bílé písmo", `background:${pal.blue};color:#fff`],
+    ["Olivový štítek, bílé písmo", `background:${pal.green};color:#fff`],
+    ["Okrový štítek, bílé písmo", `background:${pal.orange};color:#fff`],
+    ["Marker modrý (spodní polovina)", `box-shadow:inset 0 -0.55em 0 ${rgba(L("blue"), 0.38)};border-radius:0`],
+    ["Marker okrový (teplý)", `box-shadow:inset 0 -0.55em 0 ${rgba(L("orange"), 0.38)};border-radius:0`],
+    ["Marker olivový", `box-shadow:inset 0 -0.55em 0 ${rgba(L("green"), 0.42)};border-radius:0`],
+    ["Tučné tmavě modré písmo bez podkladu", `color:${L("darkBlue")};font-weight:700;padding:0`],
+    ["Obrys (pilulka), bez výplně", `border:1.5px solid ${L("blue")};border-radius:12px;padding:0 9px`],
+    ["Tečkované podtržení", `border-bottom:2px dotted ${L("blue")};border-radius:0;padding:0 2px`],
+    ["Tučně s okrovým spodním pruhem", `font-weight:700;border-bottom:3px solid ${L("orange")};border-radius:0;padding:0 2px`],
+    ["Kapitálky, modré tučné", `font-variant:small-caps;font-weight:700;letter-spacing:0.03em;color:${L("blue")};padding:0 2px`]
+  ];
+  return html`<div style="font-size:15px;line-height:2.3">${variants.map(([name, css], i) => `
+    <div><b style="display:inline-block;width:1.8em;color:#8a8a8a">${i + 1}</b><span style="${base}${css}">Pravděpodobnost</span> je číslo od 0 do 1. <span style="color:#8a8a8a;font-size:12px">${name}</span></div>`).join("")}</div>`;
+}
+```
+
+## Skutečné bloky Quarto (dnešní styl knihy)
+
+Bloky níže jsou skutečné callouty ze stylu knihy, ne ruční ukázky. V tmavém režimu je vidět, jak je zpracuje náhled (`paleta-dark.scss`). V knize je tmavý režim zatím stejný jako světlý.
+
+::: {.callout-note}
+## Poznámka
+Běžný text v bloku s odkazem na [jinou kapitolu](../01-pravdepodobnost/intro.qmd), vzorcem $P(A)=\frac{|A|}{|\Omega|}$ a kódem `=NORM.DIST(x; 0; 1; ANO)`.
+:::
+
+::: {.callout-tip}
+## Jak na to v Excelu?
+Pojem [pravděpodobnost]{.highlight-term} je v textu zvýrazněn podkladem. Tabulka níže ukazuje, jak vypadají řádky a ohraničení.
+:::
+
+::: {.callout-caution}
+## Upozornění
+Okrajová poznámka, která nemá stát v popředí.
+:::
+
+::: {.callout-important}
+## Důležité
+Něco, co si čtenář nesmí nechat ujít.
+:::
+
+| Hodnota | Četnost | Podíl |
+|:---|:---:|:---:|
+| 1 | 12 | 0,30 |
+| 2 | 18 | 0,45 |
+| 3 | 10 | 0,25 |
+
+: Ukázková tabulka {#tbl-paleta-ukazka}
+
+## Poznámka k tmavému režimu grafů a animací
+
+V ukázkách výše (graf s kategoriemi, bloky) jsou barvy přepočtené, ale skutečné grafy a animace v knize se tak zatím nechovají. Měly by:
+
+- **vlastní tmavou paletu** (`--jh-text`, `--jh-bg`, `--jh-grid`, `--jh-context*`, `--jh-primary-light`), protože dnes mají tmavé písmo a světlé výplně,
+- **živé čtení barev**: `C` z `jhrules.js` se čte jednou při načtení, po přepnutí režimu by se musel přečíst znovu a plátna překreslit,
+- zesvětlenou modrou, oranžovou a bordó, aby měly na tmavém pozadí dost kontrastu.
+
+## Zvoleno a jak se bloky budou psát
+
+Zvoleno: zelená dvojice 1 (olivová a tmavá olivová), okrová oranžová, cihlová červená, síla podbarvení 0,25, bloky s plnou hlavičkou (varianta 2), pojmy jako tmavě modrý štítek (varianta 4).
+
+Bloky se v kapitolách budou **psát dál jako Quarto callouty** (`::: {.callout-...}`), vzhled se mění jen ve stylu knihy, takže ruční psaní a úpravy zůstávají stejné. Quarto má pět pevných typů, ostatní role se řeší další třídou na stejném bloku:
+
+| Role | Zápis |
+|:---|:---|
+| Poznámka (modrá) | `::: {.callout-note}` |
+| Klíčové poznatky (tmavě modrá) | `::: {.callout-important}` |
+| Jak na to v Excelu (olivová) | `::: {.callout-tip}` |
+| Příklad (tmavě zelená) | `::: {.callout-note .priklad}` |
+| Upozornění (šedá) | `::: {.callout-caution}` |
+| Pozor (cihlová) | `::: {.callout-warning}` |
+| Zapamatujte si (okrová) | `::: {.callout-note .zapamatuj}` |
+
+Nadpis bloku se píše jako dosud (`## Nadpis`), rozbalování (`collapse="true"`) i ostatní volby Quarto fungují. Stávající bloky „Klíčové poznatky“ jsou dnes `callout-note` a pro novou barvu by se musely přepsat na `callout-important`, to jde jednorázovým skriptem. Pro ruční úpravu jednoho bloku stačí přidat vlastní třídu nebo atribut `style`. Pokud je bude ještě třeba, jde jednoduše vložit i ruční HTML jako v této ukázce.

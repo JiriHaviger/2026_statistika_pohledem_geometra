@@ -1,0 +1,389 @@
+---
+title: "Rozdělení pravděpodobnosti spojité veličiny"
+# náhled draftu se stejným motivem jako kniha (paleta JHRules, vzhled bloků)
+format:
+  html:
+    theme: [cosmo, ../hag_custom.scss]
+execute:
+  echo: false
+---
+
+
+*Draft k posouzení (návrh kapitoly 5 části Pravděpodobnost). Navazuje na [kapitolu o rozdělení diskrétní veličiny](../01-pravdepodobnost/032-rozdeleni-diskretni-veliciny.qmd) a [typická diskrétní rozdělení](../01-pravdepodobnost/04-prst-diskretni.qmd).*
+
+Autobus jezdí každých deset minut a vy přijdete na zastávku v náhodnou chvíli. Jaká je pravděpodobnost, že budete čekat právě 4 minuty? Přesně $4{,}000000\ldots$ minuty? Ne, **nulová**. Že budete čekat mezi 4 a 6 minutami? Pětinová. U veličin, které mění hodnotu plynule (čas, výška, hmotnost, teplota), se pravděpodobnost přestává přiřazovat jednotlivým hodnotám a začíná se přiřazovat **intervalům**.
+
+[Spojitá náhodná veličina]{.highlight-term} může nabýt libovolné hodnoty z nějakého intervalu, mezi dvěma hodnotami vždy leží další. Pro takovou veličinu se místo sloupců pravděpodobností $p_k$ používá křivka, hustota.
+
+```{ojs}
+//| echo: false
+import {C, plotStyle} from "../assets/jhrules.js"
+```
+
+```{ojs}
+//| echo: false
+import {columnWidth, animation, drawText, clamp, ease, makeButton} from "../assets/anim.js"
+```
+
+```{ojs}
+//| echo: false
+// šířka textového sloupce místo vestavěné šířky celé plochy (grafy jinak přetékají doprava)
+width = columnWidth(Generators)
+```
+
+```{ojs}
+//| echo: false
+// tři rozdělení použitá v ukázkách: hustota, distribuční funkce, výběr z rozdělení
+SQRT2PI5 = Math.sqrt(2 * Math.PI)
+
+// chyba erf (Abramowitz–Stegun 7.1.26, přesnost asi 1e-7) kvůli distribuční funkci normálního rozdělení
+erf5 = (x) => {
+  const s = Math.sign(x), ax = Math.abs(x), t = 1 / (1 + 0.3275911 * ax);
+  const poly = ((((1.061405429 * t - 1.453152027) * t) + 1.421413741) * t - 0.284496736) * t + 0.254829592;
+  return s * (1 - poly * t * Math.exp(-ax * ax));
+}
+
+distDefs5 = ({
+  "Normální (výška v cm, μ = 170, σ = 10)": {
+    dom: [130, 210], qdom: [70, 270], range: [130, 210], step: 1, a0: 160, b0: 185, label: "výška x (cm)",
+    pdf: (x) => Math.exp(-0.5 * ((x - 170) / 10) ** 2) / (10 * SQRT2PI5),
+    cdf: (x) => 0.5 * (1 + erf5((x - 170) / (10 * Math.SQRT2))),
+    sample: () => 170 + 10 * d3.randomNormal()()
+  },
+  "Exponenciální (doba čekání, průměr 5 min)": {
+    dom: [0, 25], qdom: [0, 400], range: [0, 25], step: 0.25, a0: 2, b0: 8, label: "doba čekání x (min)",
+    pdf: (x) => x < 0 ? 0 : 0.2 * Math.exp(-0.2 * x),
+    cdf: (x) => x < 0 ? 0 : 1 - Math.exp(-0.2 * x),
+    sample: () => -5 * Math.log(1 - Math.random())
+  },
+  "Rovnoměrná (čekání na autobus 0 až 10 min)": {
+    dom: [-1, 11], qdom: [0, 10], range: [0, 10], step: 0.25, a0: 3, b0: 7, label: "doba čekání x (min)",
+    pdf: (x) => x >= 0 && x <= 10 ? 0.1 : 0,
+    cdf: (x) => x < 0 ? 0 : x > 10 ? 1 : x / 10,
+    sample: () => 10 * Math.random()
+  },
+  "Normální (průměr drátu v mm, μ = 2,00, σ = 0,10)": {
+    dom: [1.6, 2.4], qdom: [1, 3], range: [1.6, 2.4], step: 0.01, a0: 1.95, b0: 2.05, label: "průměr drátu x (mm)",
+    pdf: (x) => Math.exp(-0.5 * ((x - 2) / 0.1) ** 2) / (0.1 * SQRT2PI5),
+    cdf: (x) => 0.5 * (1 + erf5((x - 2) / (0.1 * Math.SQRT2))),
+    sample: () => 2 + 0.1 * d3.randomNormal()()
+  }
+})
+
+distNames5 = Object.keys(distDefs5)
+
+// kvantilová funkce půlením intervalu (distribuční funkce je neklesající)
+quant5 = (d, p) => {
+  let lo = d.qdom[0], hi = d.qdom[1];
+  for (let i = 0; i < 80; i++) {
+    const mid = (lo + hi) / 2;
+    if (d.cdf(mid) < p) lo = mid; else hi = mid;
+  }
+  return (lo + hi) / 2;
+}
+
+cz5 = (x, d = 3) => x.toFixed(d).replace(".", ",")
+```
+
+## Od histogramu k hustotě
+
+U diskrétní veličiny je výška sloupce přímo pravděpodobnost. U spojité to nejde, protože každá přesná hodnota má pravděpodobnost nulovou. Proto se nad hodnotami skládají sloupce **intervalů** a jako pravděpodobnost se bere jejich **plocha**. Aby byl součet ploch všech sloupců roven $1$, musí být výška sloupce
+
+$$\text{výška} = \frac{\text{počet pozorování v intervalu}}{n \cdot \text{šířka intervalu}}$$
+
+Takovému histogramu se říká histogram v hustotním měřítku. V ukázce padají pozorování do intervalů. Posuvníkem zužujte intervaly a sledujte, že sloupce kopírují hladkou oranžovou křivku, kterou nazýváme [hustota pravděpodobnosti]{.highlight-term} (probability density function, PDF), značíme $f(x)$. Tvar křivky můžete změnit výběrem rozdělení.
+
+```{ojs}
+//| echo: false
+viewof distA5 = Inputs.select(distNames5, {label: "Rozdělení"})
+```
+
+```{ojs}
+//| echo: false
+{
+  const d = distDefs5[distA5];
+  const H = 320, L0 = 52, top = 26, bot = H - 40, maxN = 5000;
+  const R1 = width - 20;
+  const xOf = (x) => L0 + (R1 - L0) * (x - d.dom[0]) / (d.dom[1] - d.dom[0]);
+  const grid = d3.range(d.dom[0], d.dom[1] + 1e-9, (d.dom[1] - d.dom[0]) / 300);
+  const fmax = d3.max(grid, d.pdf) * 1.3;
+  const yOf = (v) => bot - (bot - top) * v / fmax;
+
+  let toggleBtn;
+  return animation({
+    width, height: H, buttons: false,
+    setup: (prev) => ({xs: [], bins: prev ? prev.bins : 25}),
+    step: (s) => {
+      const k = s.xs.length < 50 ? 1 : s.xs.length < 300 ? 5 : 25;
+      for (let i = 0; i < k && s.xs.length < maxN; i++) s.xs.push(d.sample());
+    },
+    controls: (ctl) => {
+      const box = document.createElement("div");
+      box.style.cssText = "display:flex;gap:8px;flex-wrap:wrap;align-items:center";
+      const add = (k) => { ctl.running = false; for (let i = 0; i < k && ctl.state.xs.length < maxN; i++) ctl.state.xs.push(d.sample()); ctl.redraw(); };
+      toggleBtn = makeButton("Plynule", () => { ctl.running = !ctl.running; });
+      const bins = Inputs.range([3, 80], {step: 1, value: ctl.state.bins, label: "Počet intervalů"});
+      bins.addEventListener("input", () => { ctl.state.bins = +bins.value; ctl.redraw(); });
+      box.append(toggleBtn, makeButton("+10", () => add(10)), makeButton("+100", () => add(100)),
+                 makeButton("Restart", () => ctl.reset()), bins);
+      return box;
+    },
+    draw: (ctx, s) => {
+      const n = s.xs.length, bw = (d.dom[1] - d.dom[0]) / s.bins;
+      const counts = new Array(s.bins).fill(0);
+      for (const x of s.xs) {
+        const b = Math.floor((x - d.dom[0]) / bw);
+        if (b >= 0 && b < s.bins) counts[b]++;
+      }
+      // osa y: hustota
+      for (const v of [0, fmax / 1.3 / 2, fmax / 1.3]) {
+        ctx.strokeStyle = C.grid; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(L0, yOf(v)); ctx.lineTo(R1, yOf(v)); ctx.stroke();
+        drawText(ctx, v.toFixed(3).replace(".", ","), L0 - 8, yOf(v) + 4, {align: "right", size: 11});
+      }
+      drawText(ctx, "hustota (počet / (n · šířka))", L0, 16, {bold: true});
+      // pás hustoty nad 1 (pod sloupci, ať je nevybledí)
+      if (fmax / 1.3 > 1) {
+        ctx.fillStyle = C.contextLight; ctx.globalAlpha = 0.35;
+        ctx.fillRect(L0, top, R1 - L0, yOf(1) - top);
+        ctx.globalAlpha = 1;
+      }
+      // sloupce
+      counts.forEach((c, b) => {
+        const h = n ? c / (n * bw) : 0;
+        ctx.fillStyle = C.primary;
+        ctx.fillRect(xOf(d.dom[0] + b * bw), yOf(h), xOf(d.dom[0] + bw) - xOf(d.dom[0]), bot - yOf(h));
+        ctx.strokeStyle = C.bg; ctx.lineWidth = 1.5;
+        ctx.strokeRect(xOf(d.dom[0] + b * bw), yOf(h), xOf(d.dom[0] + bw) - xOf(d.dom[0]), bot - yOf(h));
+      });
+      // osa x
+      ctx.strokeStyle = C.context; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(L0, bot); ctx.lineTo(R1, bot); ctx.stroke();
+      for (const x of d3.ticks(d.dom[0], d.dom[1], 6)) drawText(ctx, String(x), xOf(x), bot + 16, {align: "center"});
+      drawText(ctx, d.label, (L0 + R1) / 2, bot + 32, {align: "center"});
+      // teoretická hustota
+      ctx.strokeStyle = C.accent; ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      grid.forEach((x, i) => i ? ctx.lineTo(xOf(x), yOf(d.pdf(x))) : ctx.moveTo(xOf(x), yOf(d.pdf(x))));
+      ctx.stroke();
+      // hustota nad 1: vyznačený pás, aby bylo vidět, že hustota není pravděpodobnost
+      if (fmax / 1.3 > 1) {
+        ctx.strokeStyle = C.text; ctx.lineWidth = 1.2; ctx.setLineDash([6, 4]);
+        ctx.beginPath(); ctx.moveTo(L0, yOf(1)); ctx.lineTo(R1, yOf(1)); ctx.stroke();
+        ctx.setLineDash([]);
+        drawText(ctx, "hustota = 1", R1 - 6, yOf(1) + 14, {align: "right", bold: true, size: 11});
+        drawText(ctx, "y>1  je v pořádku, protože hodnoty funkce hustoty neurčují pravděpodobnost", L0 + 8, top + 14, {bold: true, size: 12});
+      }
+    },
+    readout: (s, ctl) => {
+      toggleBtn.textContent = ctl.running ? "Pauza" : "Plynule";
+      const bw = (d.dom[1] - d.dom[0]) / s.bins;
+      const peak = d3.max(grid, d.pdf);
+      return `n = ${s.xs.length} pozorování, šířka intervalu ${cz5(bw, 3)}. Plocha všech sloupců je 1, plocha pod oranžovou křivkou také.` +
+        (peak > 1 ? ` Hustota dosahuje ${cz5(peak, 2)}, tedy je větší než 1: není to pravděpodobnost, pravděpodobnost je plocha.` : "");
+    }
+  });
+}
+```
+
+## Hustota a distribuční funkce
+
+Hustota $f(x)$ je nezáporná křivka s plochou pod ní rovnou $1$. Pravděpodobnost intervalu je plocha pod křivkou nad ním
+
+$$P(a\leq X\leq b)=\int_a^b f(x)\,dx = F(b)-F(a).$$
+
+Plocha nad jediným bodem je nulová, takže $P(X=a)=0$ a nezáleží na tom, jestli je v nerovnostech $<$ nebo $\leq$. Stejně jako u diskrétní veličiny existuje distribuční funkce $F(x)=P(X\leq x)$, tedy plocha pod hustotou **až do** $x$. Je neklesající, začíná v $0$ a končí v $1$, a tentokrát je spojitá (nemá schody).
+
+:::{.callout-note}
+Hustota $f(x)$ **není pravděpodobnost**: může být větší než $1$ (u veličiny s malým rozptylem je křivka úzká a vysoká). Pravděpodobností jsou až plochy pod ní. Vyzkoušejte to na rozdělení *průměr drátu* v ukázkách níže, nebo posuvníkem $\sigma$ u normálního rozdělení: hustota tam dosahuje hodnot kolem 4, a přesto je plocha pod křivkou pořád jen 1.
+:::
+
+Posuvníky $a$ a $b$ vyberte interval. Nahoře je plocha pod hustotou, dole distribuční funkce: pravděpodobnost je **rozdíl** $F(b)-F(a)$.
+
+```{ojs}
+//| echo: false
+viewof distB5 = Inputs.select(distNames5, {label: "Rozdělení"})
+dB5 = distDefs5[distB5]
+viewof a5 = Inputs.range(dB5.range, {step: dB5.step, value: dB5.a0, label: "mez a"})
+viewof b5 = Inputs.range(dB5.range, {step: dB5.step, value: dB5.b0, label: "mez b"})
+```
+
+```{ojs}
+//| echo: false
+{
+  const d = dB5;
+  const lo = Math.min(a5, b5), hi = Math.max(a5, b5);
+  const xs = d3.range(d.dom[0], d.dom[1] + 1e-9, (d.dom[1] - d.dom[0]) / 300);
+  const shade = d3.range(lo, hi + 1e-9, Math.max((hi - lo) / 100, 1e-6));
+  const fLo = d.cdf(lo), fHi = d.cdf(hi);
+  const fm = d3.max(xs, d.pdf);
+  const top = Plot.plot({
+    width, height: 220, style: plotStyle, marginLeft: 50,
+    x: {domain: d.dom, label: d.label},
+    y: {grid: true, label: "hustota f(x)"},
+    marks: [
+      // hustota nad 1: pás a čára, aby bylo vidět, že hustota není pravděpodobnost
+      ...(fm > 1 ? [
+        Plot.rect([{y1: 1, y2: fm * 1.05}], {x1: d.dom[0], x2: d.dom[1], y1: "y1", y2: "y2", fill: C.contextLight, fillOpacity: 0.35}),
+        Plot.ruleY([1], {stroke: C.text, strokeDasharray: "5,4"}),
+        Plot.text([{x: d.dom[1], y: 1}], {x: "x", y: "y", text: ["hustota = 1"], textAnchor: "end", dy: 12, fontWeight: "bold", fontSize: 11})
+      ] : []),
+      Plot.areaY(shade, {x: (x) => x, y: d.pdf, fill: C.primaryLight, fillOpacity: 0.9}),
+      Plot.line(xs, {x: (x) => x, y: d.pdf, stroke: C.accent, strokeWidth: 2}),
+      Plot.ruleX([lo, hi], {stroke: C.text, strokeDasharray: "4,3"}),
+      Plot.ruleY([0], {stroke: C.context})
+    ]
+  });
+  const bottom = Plot.plot({
+    width, height: 220, style: plotStyle, marginLeft: 50,
+    x: {domain: d.dom, label: d.label},
+    y: {grid: true, label: "distribuční funkce F(x)", domain: [0, 1]},
+    marks: [
+      Plot.line(xs, {x: (x) => x, y: d.cdf, stroke: C.accent, strokeWidth: 2}),
+      Plot.link([{x: lo, y: fLo}, {x: hi, y: fHi}], {x1: d.dom[0], x2: "x", y1: "y", y2: "y", stroke: C.context, strokeDasharray: "4,3"}),
+      Plot.dot([{x: lo, y: fLo}, {x: hi, y: fHi}], {x: "x", y: "y", r: 5, fill: C.text}),
+      Plot.link([{y1: fLo, y2: fHi}], {x1: d.dom[0], x2: d.dom[0], y1: "y1", y2: "y2", stroke: C.primary, strokeWidth: 5}),
+      Plot.ruleY([0], {stroke: C.context})
+    ]
+  });
+  return html`${top}${bottom}
+    <div style="font-size:14px">P(${cz5(lo, 2)} ≤ X ≤ ${cz5(hi, 2)}) = F(${cz5(hi, 2)}) − F(${cz5(lo, 2)}) = ${cz5(fHi)} − ${cz5(fLo)} =
+    <b>${cz5(fHi - fLo)}</b>. Pravděpodobnost přesné hodnoty je nulová: P(X = ${cz5(lo, 2)}) = 0.</div>
+    ${fm > 1 ? html`<div style="font-size:14px;margin-top:8px;padding:6px 10px;border-left:5px solid ${C.primary};background:${C.contextLight}59">
+      <b>Pozor:</b> hustota zde dosahuje ${cz5(fm, 2)}, je tedy <b>větší než 1</b>. Hustota není pravděpodobnost, ta nemůže přesáhnout 1.
+      Pravděpodobností je až <b>plocha</b> pod křivkou, a ta je vždy nejvýše 1.</div>` : ""}`;
+}
+```
+
+## Tři důležitá rozdělení
+
+[Rovnoměrné rozdělení]{.highlight-term} $U(a,b)$: všechny hodnoty na intervalu $(a,b)$ jsou „stejně možné“, hustota je vodorovná čára $f(x)=\frac{1}{b-a}$. Je to spojitá obdoba klasické pravděpodobnosti (kostky): plocha je úměrná délce intervalu. Příklad je čekání na autobus, který jezdí v pravidelném intervalu.
+
+[Exponenciální rozdělení]{.highlight-term} $Exp(\lambda)$ popisuje **dobu čekání na událost**, která přichází náhodně a nezávisle (v průměru $\lambda$ za jednotku času). Je to „spojitá sestra“ Poissonova rozdělení z [kapitoly o typických rozděleních](../01-pravdepodobnost/04-prst-diskretni.qmd): Poisson počítá **počet** událostí v intervalu, exponenciální měří **čas mezi nimi**. Platí
+
+$$f(x)=\lambda e^{-\lambda x},\quad F(x)=1-e^{-\lambda x},\quad x\geq 0.$$
+
+Střední doba čekání je $1/\lambda$. Zvláštností je **ztráta paměti**: kdo už čekal pět minut, čeká dál stejně dlouho jako na začátku.
+
+[Normální rozdělení]{.highlight-term} $N(\mu,\sigma^2)$ je zvonovitá křivka symetrická kolem $\mu$ s hustotou
+
+$$f(x)=\frac{1}{\sigma\sqrt{2\pi}}\,e^{-\frac{(x-\mu)^2}{2\sigma^2}}.$$
+
+Parametr $\mu$ **posouvá** křivku a $\sigma$ ji **roztahuje** (přesně jako $+b$ a $\cdot a$ v kapitole o aritmetice dat). Nejčastěji se používá kvůli tomu, že ho mají veličiny, na kterých se podílí mnoho malých nezávislých vlivů (viz kapitola o lineárních kombinacích).
+
+Pravděpodobnost uvnitř intervalu $\mu\pm k\sigma$ **nezávisí na $\mu$ ani $\sigma$**, jen na $k$. Změňte $\mu$ a $\sigma$ a sledujte, že plocha pro stejné $k$ zůstává stejná.
+
+```{ojs}
+//| echo: false
+viewof mu5 = Inputs.range([-4, 4], {step: 0.25, value: 0, label: "μ (střed)"})
+viewof sd5 = Inputs.range([0.2, 3], {step: 0.1, value: 1, label: "σ (směrodatná odchylka)"})
+viewof k5 = Inputs.range([0.25, 4], {step: 0.05, value: 1, label: "k (počet σ od středu)"})
+```
+
+```{ojs}
+//| echo: false
+{
+  const pdf = (x) => Math.exp(-0.5 * ((x - mu5) / sd5) ** 2) / (sd5 * SQRT2PI5);
+  const xs = d3.range(-10, 10.001, 0.02);
+  const lo = mu5 - k5 * sd5, hi = mu5 + k5 * sd5;
+  const shade = d3.range(lo, hi + 1e-9, 0.02);
+  const peak = 1 / (sd5 * SQRT2PI5);                 // vrchol hustoty
+  const prob = erf5(k5 / Math.SQRT2);       // P(μ − kσ ≤ X ≤ μ + kσ) = 2Φ(k) − 1
+  const plot = Plot.plot({
+    width, height: 260, style: plotStyle,
+    x: {domain: [-10, 10], label: "x"},
+    y: {axis: null, domain: [0, Math.max(0.85, peak * 1.05)]},
+    marks: [
+      ...(peak > 1 ? [
+        Plot.rect([{y1: 1, y2: peak * 1.05}], {x1: -10, x2: 10, y1: "y1", y2: "y2", fill: C.contextLight, fillOpacity: 0.35}),
+        Plot.ruleY([1], {stroke: C.text, strokeDasharray: "5,4"}),
+        Plot.text([{x: 10, y: 1}], {x: "x", y: "y", text: ["hustota = 1"], textAnchor: "end", dy: 12, fontWeight: "bold", fontSize: 11})
+      ] : []),
+      Plot.areaY(shade, {x: (x) => x, y: pdf, fill: C.primaryLight, fillOpacity: 0.9}),
+      Plot.line(xs, {x: (x) => x, y: pdf, stroke: C.accent, strokeWidth: 2}),
+      Plot.ruleX([mu5], {stroke: C.context}),
+      Plot.ruleX([lo, hi], {stroke: C.text, strokeDasharray: "4,3"}),
+      Plot.ruleY([0], {stroke: C.context})
+    ]
+  });
+  return html`${plot}
+    <div style="font-size:14px">P(μ − ${cz5(k5, 2)}σ ≤ X ≤ μ + ${cz5(k5, 2)}σ) = 2Φ(${cz5(k5, 2)}) − 1 = <b>${cz5(prob)}</b></div>
+    <div style="font-size:13px;color:${C.context};margin-top:4px">Pravidlo 68–95–99,7: ±1σ ${cz5(erf5(1 / Math.SQRT2), 4)} · ±2σ ${cz5(erf5(2 / Math.SQRT2), 4)} · ±3σ ${cz5(erf5(3 / Math.SQRT2), 4)}</div>
+    ${peak > 1 ? html`<div style="font-size:14px;margin-top:8px;padding:6px 10px;border-left:5px solid ${C.primary};background:${C.contextLight}59">
+      <b>Pozor:</b> pro σ = ${cz5(sd5, 1)} je vrchol hustoty ${cz5(peak, 2)}, tedy <b>větší než 1</b>. Hustota není pravděpodobnost,
+      plocha pod celou křivkou je pořád 1 (křivka je jen užší a vyšší).</div>` : ""}`;
+}
+```
+
+## Kvantilová funkce
+
+Distribuční funkce odpovídá na otázku „jaká je pravděpodobnost, že $X\le x$?“. **Kvantilová funkce** je obrácená otázka: „pod jakou hodnotu spadne přesně podíl $p$ všech pozorování?“. Je to inverzní funkce k distribuční funkci
+
+$$Q(p)=q \Longleftrightarrow F(q)=P(X\leq q)=p.$$
+
+Je to totéž, co jste v [deskriptivní statistice](../02-statistika/01-typy-promennych.qmd) počítali z dat (medián je $Q(0{,}5)$, kvartily $Q(0{,}25)$ a $Q(0{,}75)$), jen teď pro teoretické rozdělení. Cesta vede opačným směrem než u distribuční funkce: z hladiny $p$ na svislé ose **vodorovně** k distribuční funkci a odtud **svisle dolů** na hodnotu $q$.
+
+```{ojs}
+//| echo: false
+viewof distD5 = Inputs.select(distNames5, {label: "Rozdělení"})
+viewof pD5 = Inputs.range([1, 99], {step: 1, value: 50, label: "p (%)"})
+```
+
+```{ojs}
+//| echo: false
+{
+  const d = distDefs5[distD5];
+  const p = pD5 / 100, q = quant5(d, p);
+  const xs = d3.range(d.dom[0], d.dom[1] + 1e-9, (d.dom[1] - d.dom[0]) / 300);
+  const plot = Plot.plot({
+    width, height: 300, style: plotStyle, marginLeft: 50,
+    x: {domain: d.dom, label: d.label},
+    y: {grid: true, label: "distribuční funkce F(x) = p", domain: [0, 1]},
+    marks: [
+      Plot.line(xs, {x: (x) => x, y: d.cdf, stroke: C.accent, strokeWidth: 2}),
+      Plot.link([{x1: d.dom[0], x2: q, y1: p, y2: p}], {x1: "x1", x2: "x2", y1: "y1", y2: "y2", stroke: C.text, strokeDasharray: "5,4", strokeWidth: 2}),
+      Plot.link([{x1: q, x2: q, y1: p, y2: 0}], {x1: "x1", x2: "x2", y1: "y1", y2: "y2", stroke: C.text, strokeDasharray: "5,4", strokeWidth: 2}),
+      Plot.dot([{x: q, y: p}], {x: "x", y: "y", r: 6, fill: C.text}),
+      Plot.text([{x: q, y: 0}], {x: "x", y: "y", text: [`q = ${cz5(q, 2)}`], dy: -14, dx: 6, textAnchor: "start", fontWeight: "bold", fill: C.text}),
+      Plot.ruleY([0], {stroke: C.context})
+    ]
+  });
+  return html`${plot}<div style="font-size:14px">Q(${cz5(p, 2)}) = <b>${cz5(q, 2)}</b>, tedy ${pD5} % hodnot je menších nebo rovných ${cz5(q, 2)}.</div>`;
+}
+```
+
+## Střední hodnota a rozptyl spojité veličiny
+
+Význam je stejný jako u diskrétní veličiny, pravděpodobnostmi vážený průměr a střední kvadratická odchylka od něj, jen se **součet změní na integrál**:
+
+$$E(X)=\int_{-\infty}^{\infty} x\,f(x)\,dx,\qquad \operatorname{Var}(X)=\int_{-\infty}^{\infty}(x-\mu)^2 f(x)\,dx=E(X^2)-\mu^2,\qquad \sigma=\sqrt{\operatorname{Var}(X)}.$$
+
+U tří rozdělení z této kapitoly vycházejí jednoduché vzorce:
+
+| Rozdělení | $E(X)$ | $\operatorname{Var}(X)$ |
+|:---|:---:|:---:|
+| rovnoměrné $U(a,b)$ | $\dfrac{a+b}{2}$ | $\dfrac{(b-a)^2}{12}$ |
+| exponenciální $Exp(\lambda)$ | $\dfrac{1}{\lambda}$ | $\dfrac{1}{\lambda^2}$ |
+| normální $N(\mu,\sigma^2)$ | $\mu$ | $\sigma^2$ |
+
+: Střední hodnota a rozptyl tří spojitých rozdělení {#tbl-spojita-charakteristiky}
+
+Autobus s intervalem $10$ minut má střední dobu čekání $5$ minut a rozptyl $\frac{100}{12}\doteq 8{,}33$, tedy $\sigma\doteq 2{,}89$ minuty. Medián je $Q(0{,}5)$, kvantil z předchozí části. U symetrického rozdělení (rovnoměrné, normální) splývá se střední hodnotou, u zešikmeného ne: čekání s průměrem $5$ minut má exponenciální medián $\frac{\ln 2}{\lambda}\doteq 3{,}47$ minuty, takže **polovina čekání je kratší než 3,5 minuty**, přestože průměr je $5$.
+
+::: {.callout-tip}
+## 💡 Jak na to v Excelu?
+* **Normální, hustota / distribuční funkce:** `=NORM.DIST(x; μ; σ; NE)` / `=NORM.DIST(x; μ; σ; ANO)`
+* **Normální, kvantilová funkce:** `=NORM.INV(p; μ; σ)`
+* **Exponenciální:** `=EXPON.DIST(x; λ; ANO)` pro $F(x)$, kde `λ` je $1/\text{průměr}$
+* **Rovnoměrné:** Excel nemá přímou funkci, $F(x)=\frac{x-a}{b-a}$ se zapíše vzorcem.
+:::
+
+::: {.callout-note}
+## Klíčové poznatky
+- Spojitá veličina: pravděpodobnost má **interval**, jednotlivá hodnota má pravděpodobnost $0$
+- Hustota $f(x)$: plocha pod ní je pravděpodobnost, celková plocha je $1$, sama hodnota $f$ pravděpodobností není
+- Distribuční funkce $F(x)=P(X\leq x)$, $P(a\leq X\leq b)=F(b)-F(a)$
+- Rovnoměrné (stejná šance všude), exponenciální (čekání, ztráta paměti), normální (zvon, $\mu\pm k\sigma$)
+- Kvantilová funkce $Q(p)=F^{-1}(p)$: z pravděpodobnosti zpět na hodnotu
+- Střední hodnota $E(X)=\int x f(x)\,dx$ a rozptyl $\operatorname{Var}(X)=\int (x-\mu)^2 f(x)\,dx$, u zešikmeného rozdělení se medián liší od střední hodnoty
+:::

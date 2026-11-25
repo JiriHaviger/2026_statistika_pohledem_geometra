@@ -1,0 +1,57 @@
+/*-- scss:rules --*/
+
+// Náhled tmavého režimu pro návrhovou stránku paleta.qmd (v knize se zatím nepoužívá).
+// Jde jen o přebití CSS pravidly: hag_custom.scss nastavuje barvy napevno ve světlých hodnotách,
+// takže proměnné v defaults by se přes něj nepřepsaly.
+
+:root {
+  --jh-bg: #1b1d20;
+  --jh-text: #e4e4e4;
+  --jh-primary-light: #35567a;
+  --jh-primary-text: #8fb8dc;
+  --jh-accent: #e8742a;
+  --jh-context: #9a9a9a;
+  --jh-context-light: #4b5056;
+  --jh-grid: #33373c;
+  --jh-warning: #d9667a;
+}
+
+html, body, #quarto-content, .content {
+  background-color: #1b1d20 !important;
+  color: #e4e4e4 !important;
+}
+h1, h2, h3, h4, h5, h6, .title, .quarto-title h1 { color: #f2f2f2 !important; }
+a { color: #8fb8dc; }
+hr { border-color: #3a3f45; }
+
+// kód a tabulky
+code, pre { background-color: #26292d !important; color: #e4e4e4 !important; }
+code { color: #e8a5c9 !important; }
+table, th, td { border-color: #3a3f45 !important; color: #e4e4e4 !important; }
+.table > :not(caption) > * > * { background-color: transparent !important; color: #e4e4e4 !important; }
+caption, figcaption { color: #9a9a9a !important; }
+
+// formuláře v ukázkách (Inputs)
+input, select, button, textarea {
+  background-color: #26292d !important;
+  color: #e4e4e4 !important;
+  border-color: #4b5056 !important;
+}
+
+// pojmy v textu: tmavší modrý podklad místo světlého
+.highlight-term {
+  background-color: rgba(70, 130, 180, 0.35) !important;
+  color: #f2f2f2 !important;
+}
+
+// callouty: tmavé tělo a tónovaná hlavička
+.callout, .callout.callout-note, .callout.callout-tip, .callout.callout-caution,
+.callout.callout-important, .callout.callout-warning {
+  background-color: #23262a !important;
+  border-color: #3a3f45 !important;
+  color: #e4e4e4 !important;
+  .callout-header { color: #f2f2f2 !important; background-color: rgba(70, 130, 180, 0.28) !important; }
+  .callout-title-container, .callout-body-container { color: #e4e4e4 !important; }
+  &.callout-caution .callout-header { background-color: rgba(154, 154, 154, 0.25) !important; }
+  &.callout-important .callout-header, &.callout-warning .callout-header { background-color: rgba(217, 102, 122, 0.25) !important; }
+}

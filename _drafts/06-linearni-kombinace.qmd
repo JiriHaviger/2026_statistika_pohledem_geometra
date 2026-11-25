@@ -1,0 +1,329 @@
+---
+title: "Lineární kombinace náhodných veličin"
+# náhled draftu se stejným motivem jako kniha (paleta JHRules, vzhled bloků)
+format:
+  html:
+    theme: [cosmo, ../hag_custom.scss]
+execute:
+  echo: false
+---
+
+
+*Draft k posouzení (návrh kapitoly 6 části Pravděpodobnost). Navazuje na [spojitá rozdělení](05-prst-spojita-rozdeleni.qmd) a vrací se k [zákonu velkých čísel](../01-pravdepodobnost/01-klasicka-prst.qmd) i k [rozkladu rozptylu](../02-statistika/05-analyza-rozptylu-geometricky.qmd).*
+
+Doba cesty do práce je doba jízdy tramvají **plus** doba jízdy metrem. Cena objednávky je $40\cdot X$ korun za $X$ kusů **plus** poštovné. Výsledek měření je **průměr** z několika opakování. Pořád stejná otázka: když známe rozdělení jednotlivých veličin, co víme o jejich součtu, o násobku a o průměru? Obecně se ptáme na [lineární kombinaci]{.highlight-term}
+
+$$Y = c_1X_1 + c_2X_2 + \dots + c_kX_k,$$
+
+kde $c_i$ jsou pevná čísla (váhy) a $X_i$ náhodné veličiny. Součet je $c_i = 1$, průměr $c_i = \frac{1}{n}$, rozdíl $c_1=1, c_2=-1$.
+
+```{ojs}
+//| echo: false
+import {C, plotStyle} from "../assets/jhrules.js"
+```
+
+```{ojs}
+//| echo: false
+import {columnWidth, animation, drawText, clamp, ease, makeButton} from "../assets/anim.js"
+```
+
+```{ojs}
+//| echo: false
+// šířka textového sloupce místo vestavěné šířky celé plochy (grafy jinak přetékají doprava)
+width = columnWidth(Generators)
+```
+
+```{ojs}
+//| echo: false
+// chyba erf (Abramowitz–Stegun 7.1.26) pro distribuční funkci normálního rozdělení
+erf6 = (x) => {
+  const s = Math.sign(x), ax = Math.abs(x), t = 1 / (1 + 0.3275911 * ax);
+  const poly = ((((1.061405429 * t - 1.453152027) * t) + 1.421413741) * t - 0.284496736) * t + 0.254829592;
+  return s * (1 - poly * t * Math.exp(-ax * ax));
+}
+
+// hustota normálního rozdělení N(0, s²)
+npdf6 = (x, s) => Math.exp(-0.5 * (x / s) ** 2) / (s * Math.sqrt(2 * Math.PI))
+
+cz6 = (x, d = 2) => x.toFixed(d).replace(".", ",")
+```
+
+## Připomenutí: střední hodnota a rozptyl
+
+Budeme pracovat s teoretickou střední hodnotou $E(X)=\mu$ a rozptylem $\operatorname{Var}(X)=\sigma^2$ náhodné veličiny, které jsme zavedli pro [diskrétní](032-rozdeleni-diskretni-veliciny.qmd) i [spojitou](05-prst-spojita-rozdeleni.qmd) veličinu. Na rozdíl od průměru a rozptylu z [deskriptivní statistiky](../02-statistika/02-deskriptivni-statistiky-momenty.qmd) se nepočítají z dat, ale z rozdělení, a tedy nejsou náhodné. Z dat je jen **odhadujeme**.
+
+## Posun a změna měřítka: $Y=aX+b$
+
+Nejjednodušší kombinace je jedna veličina. Přičtením $b$ se celé rozdělení **posune**, násobením $a$ se **roztáhne** od nuly (pro záporné $a$ i převrátí):
+
+$$E(aX+b)=a\,E(X)+b,\qquad \operatorname{Var}(aX+b)=a^2\operatorname{Var}(X),\qquad \sigma_Y=|a|\,\sigma_X.$$
+
+Posun nemění rozptyl, násobení ho násobí **čtvercem** $a$. Je to totéž, co jste viděli u dat v [kapitole o aritmetice dat](../02-statistika/03-aritmetika-dat.qmd), teď pro teoretické rozdělení. V ukázce je třicet výšek (horní řada, $\mu=170$ cm, $\sigma=10$ cm) a jejich transformace. Tlačítka nastaví převod na palce a z-skór.
+
+```{ojs}
+//| echo: false
+// 30 „přesně normálních“ výšek: kvantily N(170, 10²)
+base6 = d3.range(30).map((i) => {
+  const p = (i + 0.5) / 30;
+  let lo = -8, hi = 8;
+  for (let k = 0; k < 60; k++) {
+    const m = (lo + hi) / 2;
+    if (0.5 * (1 + erf6(m / Math.SQRT2)) < p) lo = m; else hi = m;
+  }
+  return 170 + 10 * (lo + hi) / 2;
+})
+
+viewof a6 = Inputs.range([-2, 3], {step: 0.01, value: 1, label: "a (násobek)"})
+viewof b6 = Inputs.range([-200, 200], {step: 1, value: 0, label: "b (posun)"})
+```
+
+```{ojs}
+//| echo: false
+{
+  const set = (a, b) => {
+    for (const [el, v] of [[viewof a6, a], [viewof b6, b]]) {
+      el.value = v;
+      el.dispatchEvent(new Event("input", {bubbles: true}));
+    }
+  };
+  return html`<div style="display:flex;gap:8px;flex-wrap:wrap">
+    ${Inputs.button("Původní", {reduce: () => set(1, 0)})}
+    ${Inputs.button("cm → palce", {reduce: () => set(1 / 2.54, 0)})}
+    ${Inputs.button("z-skór", {reduce: () => set(1 / 10, -17)})}
+  </div>`;
+}
+```
+
+```{ojs}
+//| echo: false
+{
+  const y = base6.map((v) => a6 * v + b6);
+  const all = [...base6, ...y], ext = d3.extent(all), pad = (ext[1] - ext[0]) * 0.06 + 1;
+  const mu = 170, sd = 10, muY = a6 * mu + b6, sdY = Math.abs(a6) * sd;
+  const bar = (m, s, row, col) => Plot.link([{x1: m - s, x2: m + s}], {x1: "x1", x2: "x2", y1: row, y2: row, stroke: col, strokeWidth: 6, strokeOpacity: 0.35});
+  const plot = Plot.plot({
+    width, height: 220, style: plotStyle, marginLeft: 70,
+    x: {domain: [ext[0] - pad, ext[1] + pad], grid: true, label: null},
+    y: {domain: [-0.7, 1.7], ticks: [0, 1], tickFormat: (d) => d === 1 ? "původní X" : "nové Y", label: null},
+    marks: [
+      Plot.link(base6.map((v, i) => ({x1: v, x2: y[i]})), {x1: "x1", x2: "x2", y1: 1, y2: 0, stroke: C.contextLight}),
+      bar(mu, sd, 1, C.context), bar(muY, sdY, 0, C.primary),
+      Plot.dot(base6, {x: (v) => v, y: 1, r: 4, fill: C.context}),
+      Plot.dot(y, {x: (v) => v, y: 0, r: 4, fill: C.primary}),
+      Plot.ruleX([mu], {y1: 0.7, y2: 1.3, stroke: C.accent, strokeWidth: 2}),
+      Plot.ruleX([muY], {y1: -0.3, y2: 0.3, stroke: C.accent, strokeWidth: 2})
+    ]
+  });
+  return html`${plot}<div style="font-size:14px">
+    E(Y) = a·E(X) + b = ${cz6(a6, 2)}·170 + ${b6} = <b>${cz6(muY)}</b>,
+    σ<sub>Y</sub> = |a|·σ<sub>X</sub> = ${cz6(Math.abs(a6), 2)}·10 = <b>${cz6(sdY)}</b>,
+    Var(Y) = a²·Var(X) = ${cz6(a6 * a6 * 100)}. Oranžová svislice je střední hodnota, světlá úsečka rozsah ± σ.</div>`;
+}
+```
+
+## Součet dvou veličin
+
+U součtu $X+Y$ je střední hodnota jednoduchá: **vždy** $E(X+Y)=E(X)+E(Y)$, ať jsou veličiny jakkoli závislé. Rozptyl je zrádnější:
+
+$$\operatorname{Var}(X+Y)=\operatorname{Var}(X)+\operatorname{Var}(Y)+2\operatorname{Cov}(X,Y),$$
+
+kde [kovariance]{.highlight-term} $\operatorname{Cov}(X,Y)=E\big[(X-\mu_X)(Y-\mu_Y)\big]$ měří, jak se veličiny pohybují společně. Dělená směrodatnými odchylkami je to [korelace]{.highlight-term} $\rho=\frac{\operatorname{Cov}(X,Y)}{\sigma_X\sigma_Y}\in[-1,1]$. Pro **nezávislé** veličiny je $\rho=0$ a rozptyly se prostě sčítají.
+
+### Geometrický pohled
+
+Pokud si směrodatné odchylky nakreslíme jako **délky šipek** a korelaci jako **úhel mezi nimi**, $\cos\theta=\rho$, pak je součtový vektor úhlopříčkou rovnoběžníku a jeho délka $\sigma_{X+Y}$ vychází z kosinové věty
+
+$$\sigma_{X+Y}^2=\sigma_X^2+\sigma_Y^2+2\sigma_X\sigma_Y\cos\theta .$$
+
+Pro $\rho=0$ je úhel pravý a vzorec se mění na **Pythagorovu větu** $\sigma_{X+Y}^2=\sigma_X^2+\sigma_Y^2$. Nekorelované veličiny jsou na sebe v tomto smyslu **kolmé**, a stejnou kolmost využívá [rozklad rozptylu](../02-statistika/05-analyza-rozptylu-geometricky.qmd). Posuvníkem měňte $\rho$: pro $\rho>0$ se šipky svírají ostrým úhlem a součet je delší, pro $\rho<0$ se zkracuje, pro $\rho=-1$ jsou šipky proti sobě. V obrázku vpravo je simulace dvojic $(X,Y)$ a dole histogram součtu s teoretickou křivkou.
+
+```{ojs}
+//| echo: false
+viewof sx6 = Inputs.range([0.5, 3], {step: 0.1, value: 2, label: "σ_X"})
+viewof sy6 = Inputs.range([0.5, 3], {step: 0.1, value: 1.5, label: "σ_Y"})
+viewof rho6 = Inputs.range([-1, 1], {step: 0.05, value: 0, label: "ρ (korelace)"})
+```
+
+```{ojs}
+//| echo: false
+// 500 pevných dvojic nezávislých standardních normálních čísel (stejné při každém spuštění)
+z6 = {
+  const r = d3.randomLcg(11), nrm = d3.randomNormal.source(r)(0, 1);
+  return d3.range(500).map(() => [nrm(), nrm()]);
+}
+```
+
+```{ojs}
+//| echo: false
+{
+  const th = Math.acos(rho6);
+  const A = [sx6, 0], B = [sy6 * Math.cos(th), sy6 * Math.sin(th)], S = [A[0] + B[0], A[1] + B[1]];
+  const sS = Math.hypot(S[0], S[1]);                       // σ_{X+Y} z kosinové věty
+  const w2 = Math.max(260, Math.floor((width - 16) / 2));
+  const arrow = (p, col, w) => Plot.link([{x1: 0, y1: 0, x2: p[0], y2: p[1]}], {x1: "x1", y1: "y1", x2: "x2", y2: "y2", stroke: col, strokeWidth: w, markerEnd: "arrow"});
+
+  const vec = Plot.plot({
+    width: w2, style: plotStyle, aspectRatio: 1, marginLeft: 30,
+    x: {domain: [-3.5, 6.5], label: null}, y: {domain: [-0.5, 3.5], label: null},
+    marks: [
+      Plot.link([{x1: A[0], y1: A[1], x2: S[0], y2: S[1]}, {x1: B[0], y1: B[1], x2: S[0], y2: S[1]}],
+                {x1: "x1", y1: "y1", x2: "x2", y2: "y2", stroke: C.contextLight, strokeDasharray: "4,3"}),
+      arrow(A, C.primary, 3), arrow(B, C.context, 3), arrow(S, C.accent, 4),
+      Plot.text([{x: A[0] / 2, y: 0}], {x: "x", y: "y", text: ["σ_X"], dy: 14, fill: C.primaryText, fontWeight: "bold"}),
+      Plot.text([{x: B[0] / 2, y: B[1] / 2}], {x: "x", y: "y", text: ["σ_Y"], dy: -10, dx: -8, fill: C.context, fontWeight: "bold"}),
+      Plot.text([{x: S[0], y: S[1]}], {x: "x", y: "y", text: [`σ_(X+Y) = ${cz6(sS)}`], dy: -12, fill: C.accent, fontWeight: "bold"}),
+      Plot.ruleY([0], {stroke: C.grid})
+    ]
+  });
+
+  // simulace: X = σ_X·z1, Y = σ_Y·(ρ·z1 + √(1−ρ²)·z2)
+  const sim = z6.map(([u, v]) => ({x: sx6 * u, y: sy6 * (rho6 * u + Math.sqrt(1 - rho6 * rho6) * v)}));
+  const scatter = Plot.plot({
+    width: w2, style: plotStyle, aspectRatio: 1, marginLeft: 30,
+    x: {domain: [-9, 9], label: "X"}, y: {domain: [-9, 9], label: "Y"},
+    marks: [
+      Plot.ruleX([0], {stroke: C.grid}), Plot.ruleY([0], {stroke: C.grid}),
+      Plot.dot(sim, {x: "x", y: "y", r: 2, fill: C.primary, fillOpacity: 0.5})
+    ]
+  });
+
+  const sums = sim.map((d) => d.x + d.y), bw = 0.8;
+  const bins = d3.bin().domain([-14, 14]).thresholds(d3.range(-14, 14.001, bw))(sums)
+    .map((b) => ({x1: b.x0, x2: b.x1, h: b.length / (sums.length * bw)}));
+  const curve = d3.range(-14, 14.001, 0.2).map((x) => ({x, y: npdf6(x, sS)}));
+  const hist = Plot.plot({
+    width, height: 200, style: plotStyle,
+    x: {domain: [-14, 14], label: "X + Y"}, y: {axis: null},
+    marks: [
+      Plot.rectY(bins, {x1: "x1", x2: "x2", y: "h", fill: C.primary, fillOpacity: 0.6, stroke: C.bg}),
+      Plot.line(curve, {x: "x", y: "y", stroke: C.accent, strokeWidth: 2}),
+      Plot.ruleY([0], {stroke: C.context})
+    ]
+  });
+  const sdSample = d3.deviation(sums);
+  return html`<div style="display:flex;flex-wrap:wrap;gap:16px">${vec}${scatter}</div>${hist}
+    <div style="font-size:14px">Var(X+Y) = σ<sub>X</sub>² + σ<sub>Y</sub>² + 2ρσ<sub>X</sub>σ<sub>Y</sub> =
+    ${cz6(sx6 ** 2)} + ${cz6(sy6 ** 2)} + ${cz6(2 * rho6 * sx6 * sy6)} = <b>${cz6(sS * sS)}</b>,
+    σ<sub>X+Y</sub> = <b>${cz6(sS)}</b> (v simulaci ${cz6(sdSample)}).
+    ${rho6 === 0 ? "Při ρ = 0 je to Pythagorova věta." : ""}</div>`;
+}
+```
+
+:::{.callout-note}
+**Rozdíl** $X-Y$ má stejnou střední hodnotu jako $E(X)-E(Y)$, ale rozptyl $\operatorname{Var}(X-Y)=\operatorname{Var}(X)+\operatorname{Var}(Y)-2\operatorname{Cov}(X,Y)$. U nezávislých veličin se tedy rozptyly **sčítají, i když veličiny odečítáme**. Odečtení jedné nejistoty od druhé nejistotu nesníží.
+:::
+
+## Průměr $n$ nezávislých veličin
+
+Průměr $\bar X=\frac1n(X_1+\dots+X_n)$ z nezávislých veličin se **stejným** rozdělením (střední hodnota $\mu$, směrodatná odchylka $\sigma$) je lineární kombinace s vahami $\frac1n$. Podle předchozích vzorců
+
+$$E(\bar X)=\mu,\qquad \operatorname{Var}(\bar X)=n\cdot\frac{\sigma^2}{n^2}=\frac{\sigma^2}{n},\qquad \sigma_{\bar X}=\frac{\sigma}{\sqrt n}.$$
+
+Průměr se tedy ustaluje na stejné hodnotě $\mu$, ale kolísá s **odmocninou** z počtu pozorování stále méně. To je přesně ten zužující se trychtýř $\pm 1/\sqrt n$ z [kapitoly o zákonu velkých čísel](../01-pravdepodobnost/01-klasicka-prst.qmd): u mince je $\sigma=0{,}5$, takže $2\sigma/\sqrt n = 1/\sqrt n$. Čtyřikrát přesnější průměr vyžaduje šestnáctkrát víc dat.
+
+Posuvníkem měňte $n$. Histogram ukazuje 1500 simulovaných průměrů z $n$ pozorování, křivka je normální rozdělení s teoretickou střední hodnotou $\mu$ a směrodatnou odchylkou $\sigma/\sqrt n$. Všimněte si dvou věcí: histogram se zužuje podle vzorce a **tvar se blíží zvonu i tehdy, když jednotlivá pozorování zvonovitá nejsou** (centrální limitní věta).
+
+```{ojs}
+//| echo: false
+sources6 = ({
+  "Rovnoměrná na 0 až 10": {mu: 5, sd: 10 / Math.sqrt(12), dom: [0, 10], draw: (r) => 10 * r()},
+  "Exponenciální (průměr 5)": {mu: 5, sd: 5, dom: [0, 14], draw: (r) => -5 * Math.log(1 - r())},
+  "Mince (0 nebo 1)": {mu: 0.5, sd: 0.5, dom: [0, 1], draw: (r) => (r() < 0.5 ? 1 : 0)}
+})
+
+viewof src6 = Inputs.select(Object.keys(sources6), {label: "Původní rozdělení"})
+viewof n6 = Inputs.range([1, 200], {step: 1, value: 1, label: "n (velikost průměru)"})
+```
+
+```{ojs}
+//| echo: false
+{
+  const s = sources6[src6], M = 1500;
+  const r = d3.randomLcg(5);
+  const means = d3.range(M).map(() => d3.mean(d3.range(n6), () => s.draw(r)));
+  const sdT = s.sd / Math.sqrt(n6);
+  const lo = s.dom[0], hi = s.dom[1], nb = 40, bw = (hi - lo) / nb;
+  const bins = d3.bin().domain([lo, hi]).thresholds(d3.range(lo, hi + 1e-9, bw))(means)
+    .map((b) => ({x1: b.x0, x2: b.x1, h: b.length / (M * bw)}));
+  const curve = d3.range(lo, hi + 1e-9, (hi - lo) / 400).map((x) => ({x, y: npdf6(x - s.mu, sdT)}));
+  const plot = Plot.plot({
+    width, height: 260, style: plotStyle,
+    x: {domain: [lo, hi], label: "průměr X̄"}, y: {axis: null},
+    marks: [
+      Plot.rectY(bins, {x1: "x1", x2: "x2", y: "h", fill: C.primary, fillOpacity: 0.6, stroke: C.bg}),
+      Plot.line(curve, {x: "x", y: "y", stroke: C.accent, strokeWidth: 2}),
+      Plot.ruleX([s.mu], {stroke: C.context}),
+      Plot.ruleY([0], {stroke: C.context})
+    ]
+  });
+  return html`${plot}<div style="font-size:14px">n = ${n6}: σ/√n = ${cz6(s.sd)}/√${n6} = <b>${cz6(sdT, 3)}</b>,
+    ve simulaci je směrodatná odchylka průměrů ${cz6(d3.deviation(means), 3)}. Šedá svislice je μ = ${cz6(s.mu)}.</div>`;
+}
+```
+
+## Obecná lineární kombinace
+
+Pro $Y=c_1X_1+\dots+c_kX_k$ platí
+
+$$E(Y)=\sum_i c_i\,\mu_i,\qquad \operatorname{Var}(Y)=\sum_i c_i^2\sigma_i^2+2\sum_{i<j}c_ic_j\operatorname{Cov}(X_i,X_j).$$
+
+Pro nezávislé veličiny zbude jen první součet $\operatorname{Var}(Y)=\sum c_i^2\sigma_i^2$. V maticové podobě je rozptyl kvadratická forma $\mathbf c^\top\boldsymbol\Sigma\,\mathbf c$ kovarianční matice $\boldsymbol\Sigma$, tedy skalární součin vektoru vah s ním samým v „metrice“ dané kovariancemi. Součet a průměr jsou jen speciální volby $\mathbf c$.
+
+### Příklad: dvě měření téže veličiny
+
+Dvěma přístroji měříme stejnou veličinu, první má chybu $\sigma_1$, druhý $\sigma_2$. Vážený průměr $Y=c\,X_1+(1-c)\,X_2$ má stejnou střední hodnotu, ale rozptyl
+
+$$\operatorname{Var}(Y)=c^2\sigma_1^2+(1-c)^2\sigma_2^2+2c(1-c)\,\rho\,\sigma_1\sigma_2 .$$
+
+Jak váhu $c$ zvolit? Posuvníkem ji měňte a sledujte křivku směrodatné odchylky. Minimum leží **uvnitř** intervalu $\langle 0,1\rangle$ a je pod oběma jednotlivými chybami, když jsou chyby málo korelované: kombinace dvou měření je přesnější než kterékoli z nich. Optimum dává víc váhy přesnějšímu přístroji (pro $\rho=0$ jsou váhy úměrné $1/\sigma_i^2$).
+
+```{ojs}
+//| echo: false
+viewof s1_6 = Inputs.range([0.5, 3], {step: 0.1, value: 2, label: "σ₁ (1. přístroj)"})
+viewof s2_6 = Inputs.range([0.5, 3], {step: 0.1, value: 1, label: "σ₂ (2. přístroj)"})
+viewof rhoD6 = Inputs.range([-0.9, 0.9], {step: 0.05, value: 0, label: "ρ (korelace chyb)"})
+viewof c6 = Inputs.range([-0.5, 1.5], {step: 0.01, value: 0.5, label: "c (váha 1. přístroje)"})
+```
+
+```{ojs}
+//| echo: false
+{
+  const v = (c) => c * c * s1_6 ** 2 + (1 - c) ** 2 * s2_6 ** 2 + 2 * c * (1 - c) * rhoD6 * s1_6 * s2_6;
+  const sd = (c) => Math.sqrt(v(c));
+  const den = s1_6 ** 2 + s2_6 ** 2 - 2 * rhoD6 * s1_6 * s2_6;
+  const cOpt = (s2_6 ** 2 - rhoD6 * s1_6 * s2_6) / den;
+  const xs = d3.range(-0.5, 1.5001, 0.01);
+  const plot = Plot.plot({
+    width, height: 280, style: plotStyle, marginLeft: 50,
+    x: {domain: [-0.5, 1.5], label: "váha c (1. přístroj)"},
+    y: {grid: true, label: "σ kombinace", domain: [0, d3.max(xs, sd) * 1.05]},
+    marks: [
+      Plot.line(xs, {x: (c) => c, y: sd, stroke: C.accent, strokeWidth: 2}),
+      Plot.ruleX([0, 1], {stroke: C.contextLight, strokeDasharray: "4,3"}),
+      Plot.dot([{c: 0, s: s2_6}, {c: 1, s: s1_6}], {x: "c", y: "s", r: 5, fill: C.context}),
+      Plot.text([{c: 0, s: s2_6}, {c: 1, s: s1_6}], {x: "c", y: "s", text: ["jen 2. přístroj", "jen 1. přístroj"], dy: -12, fill: C.context}),
+      Plot.dot([{c: cOpt, s: sd(cOpt)}], {x: "c", y: "s", r: 5, fill: C.text}),
+      Plot.dot([{c: c6, s: sd(c6)}], {x: "c", y: "s", r: 8, fill: C.primary})
+    ]
+  });
+  return html`${plot}<div style="font-size:14px">Pro c = ${cz6(c6)} je σ = <b>${cz6(sd(c6), 3)}</b>
+    (1. přístroj samostatně ${cz6(s1_6)}, 2. samostatně ${cz6(s2_6)}). Nejmenší možná σ = ${cz6(sd(cOpt), 3)} pro c = ${cz6(cOpt, 3)} (tmavá tečka, modrá je vaše volba c).</div>`;
+}
+```
+
+::: {.callout-tip}
+## 💡 Jak na to v Excelu?
+* **Střední hodnota a rozptyl souboru dat:** `=PRŮMĚR(A1:A100)`, `=VAR.P(A1:A100)` (populační), `=VAR.S(A1:A100)` (výběrový)
+* **Kovariance a korelace dvou sloupců:** `=KOVARIANCE.P(A1:A100; B1:B100)`, `=CORREL(A1:A100; B1:B100)`
+* **Rozptyl součtu** dvou sloupců si ověříte jako `=VAR.P(A1:A100+B1:B100)` (maticový vzorec) a porovnáním s $\operatorname{Var}(X)+\operatorname{Var}(Y)+2\operatorname{Cov}(X,Y)$.
+:::
+
+::: {.callout-note}
+## Klíčové poznatky
+- $E(c_1X_1+\dots+c_kX_k)=\sum c_i\mu_i$: střední hodnota je lineární **vždy**, i pro závislé veličiny
+- $\operatorname{Var}(aX+b)=a^2\operatorname{Var}(X)$: posun rozptyl nemění, násobení ho násobí čtvercem
+- $\operatorname{Var}(X+Y)=\operatorname{Var}(X)+\operatorname{Var}(Y)+2\operatorname{Cov}(X,Y)$; u nezávislých veličin se rozptyly sčítají (i pro rozdíl)
+- Geometricky: směrodatné odchylky jsou délky, korelace je $\cos\theta$, nezávislost je kolmost (Pythagorova věta)
+- Průměr $n$ nezávislých pozorování: $\sigma_{\bar X}=\sigma/\sqrt n$, zvon se zužuje a blíží se normálnímu rozdělení
+- Vážený průměr dvou měření může být přesnější než kterékoli z nich, optimální váhy dávají víc váhy přesnějšímu
+:::

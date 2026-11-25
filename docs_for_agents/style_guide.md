@@ -1,12 +1,12 @@
 <!--
   GENEROVÁNO automaticky (python main.py style --force). Needitovat ručně.
   Sekce 5 a 6 vkládá Python (crew/style_guide.py), ostatní píše LLM.
-  Datum: 2026-11-07
+  Datum: 2026-11-25
   Zdroje (sha256):
-    _quarto.yml: c74feaf4035a964f97d22c947aeecf65562d25fb01013f725f70ca0afd5ba2e5
-    hag_custom.scss: d46d1ad3bc41f58b3d9669f964c38522b7df1e73f979dcc0ee516f469a386362
-    jhrules.py: 15818ee72f2047b6e6e56c82a6a3b70695696f34962597a48878566828d7e392
-    assets/jhrules.js: fc6dfc072963a1cc5fcf8f74800f73bc8313ac557703e8c735672487ccda0fe0
+    _quarto.yml: d88d8a0d3ba0ab1a955bc8832f0b13c1253561cbc651d8162f2a04a18a61a793
+    hag_custom.scss: db62784b2f8866682f3012be3fc99e232de15ad9e5dac9098572427fccf11d64
+    jhrules.py: 3eb42555026ceadf007f2f14f88df4534a515527a62ccb8e9c4f37d0fa58eebf
+    assets/jhrules.js: 0a55ee3e90b7fb8791c3e16a54baed17e7bad0c0f68b35489f3010565d30b6c5
 -->
 
 # Style Guide: Statistika pohledem geometra

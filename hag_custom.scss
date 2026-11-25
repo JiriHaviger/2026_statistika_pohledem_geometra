@@ -264,3 +264,20 @@ mjx-container[display="true"] { overflow-x: auto; overflow-y: hidden; max-width:
 .callout-tip {
   border-left-color: $primary !important;
 }
+
+// Hlavičky bloků v barvách palety (jinak Quarto použije výchozí zelenou, oranžovou a jasně modrou, které
+// se neshodují s grafy): note i tip světle modře jako highlight-term, caution šedě jako kontext,
+// important tlumenou bordó jako varování.
+.callout {
+  &.callout-note, &.callout-tip {
+    .callout-header { background-color: rgba($jh-primary-light, 0.35) !important; }
+  }
+  &.callout-caution {
+    border-left-color: $jh-context !important;
+    .callout-header { background-color: rgba($jh-context-light, 0.5) !important; }
+  }
+  &.callout-important {
+    border-left-color: $jh-warning !important;
+    .callout-header { background-color: rgba($jh-warning, 0.1) !important; }
+  }
+}
