@@ -1,4 +1,18 @@
-# Deskriptivní statistiky z tabulky dat
+# Čteme z tabulky: statistiky z četností
+
+Zpracovávat data do tabulek četností začal už v 17. století londýnský obchodník [John Graunt (1620–1674)]{.smallcaps}.
+
+::: {.column-margin .osobnost}
+![](../assets/portrety/graunt-tabulka.jpg){.light-content}
+
+![](../assets/portrety/graunt-tabulka-dark.jpg){.dark-content}
+
+**John Graunt**  
+*1620 – 1674, Londýn*
+
+Anglický obchodník, který v knize o úmrtnostních tabulkách (1662) jako jeden z prvních zpracoval data do tabulek četností a hledal v nich pravidelnosti.
+<small>Portrét není dostupný pod volnou licencí</small>
+:::
 
 Představte si, že jsme provedli průzkum spokojenosti zákazníků s novou službou, kde zákazníci hodnotili spokojenost na škále od 1 (velmi nespokojený) do 10 (velmi spokojený). Zde je souhrn dat z odpovědí 200 náhodně vybraných zákazníků:
 
@@ -86,12 +100,12 @@ Plot.plot({
 
 ## Ukazatele polohy: kvantily z tabulky četností
 
+Pokud budeme hledat kvantily v tabulce, zaměříme se na sloupec *Kumulativní (Fᵢ)* ve kterém hledáme, kdy poprvé dosáhneme dané hodnoty.
+
 ::: {.callout-note .zapamatuj}
 ## Zapamatujte si: kvantil z tabulky
 Kvantil z tabulky je první hodnota, u které kumulativní relativní četnost dosáhne zadané hladiny.
 :::
-
-Pokud budeme hledat kvantily v tabulce, zaměříme se na sloupec *Kumulativní (Fᵢ)* ve kterém hledáme, kdy poprvé dosáhneme dané hodnoty.
 
 ::: {.callout-note .priklad}
 ## Příklad: kvantily z tabulky četností
@@ -108,8 +122,6 @@ Různé způsoby výpočtu percentilů mohou vést k různým, ale podobným vý
 :::
 
 ## Kvantilové ukazatele variability: z tabulky četností
-
-### Vážený průměr
 
 Průměr z tabulky četností můžeme spočítat jako vážený průměr, kde každou hodnotu "vážíme" její četností $n_i$ nebo relativní četností $p_i$.
 
@@ -272,6 +284,92 @@ Plot.plot({
   ]
 })
 ```
+
+::: {.callout-note .otestujte}
+## Otestujte se
+
+Odpovězte na otázky, výsledek se ukáže hned. Odpověď můžete měnit.
+
+```{ojs}
+//| echo: false
+import {kviz} from "../assets/kviz.js"
+```
+
+```{ojs}
+//| echo: false
+kviz([
+  {
+    "zadani": "Učitel zaznamenal za měsíc počet zameškaných hodin u 50 studentů.",
+    "tabulka": [
+      [
+        "Počet zameškaných hodin x",
+        "0",
+        "1",
+        "2",
+        "3"
+      ],
+      [
+        "Počet studentů n",
+        "10",
+        "20",
+        "15",
+        "5"
+      ]
+    ]
+  },
+  {
+    "q": "Průměrný počet zameškaných hodin na studenta",
+    "options": [
+      "1,3",
+      "1,5",
+      "1,6"
+    ],
+    "correct": 0,
+    "why": "(0·10 + 1·20 + 2·15 + 3·5) / 50."
+  },
+  {
+    "q": "Kumulativní relativní četnost pro x = 1",
+    "options": [
+      "0,4",
+      "0,6",
+      "0,8"
+    ],
+    "correct": 1,
+    "why": "(10 + 20) / 50."
+  },
+  {
+    "q": "Medián z tabulky",
+    "options": [
+      "0",
+      "1",
+      "2"
+    ],
+    "correct": 1,
+    "why": "F(0) = 0,2 < 0,5 ≤ F(1) = 0,6."
+  },
+  {
+    "q": "Horní kvartil Q₃ z tabulky",
+    "options": [
+      "1",
+      "2",
+      "3"
+    ],
+    "correct": 1,
+    "why": "F(1) = 0,6 < 0,75 ≤ F(2) = 0,9."
+  },
+  {
+    "q": "Rozptyl počtu zameškaných hodin",
+    "options": [
+      "0,81",
+      "1,3",
+      "2,5"
+    ],
+    "correct": 0,
+    "why": "Σx²p − průměr² = 2,5 − 1,69."
+  }
+])
+```
+:::
 
 ::: {.callout-important}
 ## Klíčové poznatky

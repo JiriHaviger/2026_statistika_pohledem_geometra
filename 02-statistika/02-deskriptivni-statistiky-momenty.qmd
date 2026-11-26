@@ -1,4 +1,4 @@
-# Momentové statistiky
+# Těžiště, rozptyl a tvar: momenty dat
 Dvě firmy mají stejný průměrný plat. V jedné berou všichni zhruba stejně, ve druhé má ředitel plat stonásobně vyšší než ostatní. Samotný průměr tedy o datech řekne jen málo a potřebujeme popsat i to, jak moc se hodnoty rozptylují a jak jsou rozložené. K tomu slouží momentové statistiky: průměr, rozptyl, šikmost a špičatost. Počítají se ze samotných hodnot, nejen z jejich pořadí, proto vyžadují proměnnou alespoň **kardinální** (viz kapitola o typech proměnných). 
 
 ## Momentová míra polohy
@@ -324,6 +324,18 @@ $$
  
 ## Momentové míry tvaru rozdělení
 
+S momentovými statistikami je spojeno jméno britského statistika [Karla Pearsona (1857–1936)]{.smallcaps}, který zavedl směrodatnou odchylku, momentovou metodu i pojem špičatosti.
+
+::: {.column-margin .osobnost}
+![](../assets/portrety/pearson.jpg)
+
+**Karl Pearson**  
+*1857 – 1936, Londýn*
+
+Britský statistik. Zavedl pojem směrodatné odchylky (1893), momentovou metodu a termín špičatost (kurtosis, 1905).
+<small>Portrét: Wikimedia Commons, volné dílo</small>
+:::
+
 Připomeňme, že základním nástrojem vizualizace kardinálních dat je histogram. Tvarem rozdělení tedy rozumíme tvar histogramu - jestli je symetrický, zešikmený , vodorovný, $\dots$ .
 
 ```{ojs}
@@ -381,7 +393,7 @@ Plot.plot({
 ```
 
 
-### šikmost
+## Šikmost
 
 Jak číselně odlišit data, tkerá jsou symetrická od dat, která symetrická nejsou? Pokud využijeme odchylky, pak musíme **zdůraznit větší odchylky** a **potlačit malé odchylky**, a zároveň **zachovat znaménko** odchylky. Abychom získali míru která je nezávislá na poloze a variabilitě konkrétních dat, musíme data nejprve **standardizovat**, tedy převést na 
 
@@ -490,7 +502,7 @@ Plot.plot({
 Vztah mezi šikmostí průměrem, mediánem a tvarem distribuce.
 :::
 
-### Špičatost
+## Špičatost
 
 Jak číselně odlišit data, která mají většinu hodnot blízko průměru od hodnot, která mají rozprostření dat volnější a vzdálenější hodnoty nejsou vyjímkou (*heavy tails, těžké ocasy*)? Protože zešikmení máme popsané pomocí skew, nezáleží nám nyní na směru ochylky, musíme však velmi zvýraznit odlehlé hodnoty. K tomu nám poslouží čtvrtá mocnina $z$, pomocí které určujeme [špičatost]{.highlight-term} (*kurtoisis, kurt*), kterou určíme pomocí vzorce 
 
@@ -676,6 +688,88 @@ Plot.plot({
 ```
 
 Momentové charakteristiky různých rozdělení. Osa $x$ obsahuje standardizovaná data $z_i$, osa y transformovaná data $z_i^k$ a jejich průměr. Modrá oblast je oblast útlumu, data z této oblasti mají potlačený vliv a data mimo naopak posílený. 
+:::
+
+::: {.callout-note .otestujte}
+## Otestujte se
+
+Odpovězte na otázky, výsledek se ukáže hned. Odpověď můžete měnit.
+
+```{ojs}
+//| echo: false
+import {kviz} from "../assets/kviz.js"
+```
+
+```{ojs}
+//| echo: false
+kviz([
+  {
+    "zadani": "Dvě kavárny mají stejnou průměrnou denní tržbu. U kavárny A leží tržby všech dnů blízko průměru. U kavárny B tržba kolísá a většina dnů je pod průměrem, ale občas přijde výjimečně dobrý den."
+  },
+  {
+    "q": "Která kavárna má větší rozptyl?",
+    "options": [
+      "A",
+      "B"
+    ],
+    "correct": 1,
+    "why": "Hodnoty jsou rozprostřené dál od průměru."
+  },
+  {
+    "q": "Šikmost tržeb kavárny B je",
+    "options": [
+      "záporná",
+      "kladná",
+      "nulová"
+    ],
+    "correct": 1,
+    "why": "Delší ocas rozdělení je vpravo."
+  },
+  {
+    "zadani": "Kavárna měla ve třech dnech tržbu 2, 4 a 6 tisíc Kč."
+  },
+  {
+    "q": "Průměr",
+    "options": [
+      "3",
+      "4",
+      "6"
+    ],
+    "correct": 1,
+    "why": "(2 + 4 + 6) / 3."
+  },
+  {
+    "q": "Součet odchylek od průměru",
+    "options": [
+      "0",
+      "4",
+      "12"
+    ],
+    "correct": 0,
+    "why": "Průměr je těžiště, odchylky −2, 0 a 2 se vyruší."
+  },
+  {
+    "q": "Rozptyl (dělíme n)",
+    "options": [
+      "2",
+      "2,67",
+      "8"
+    ],
+    "correct": 1,
+    "why": "(4 + 0 + 4) / 3."
+  },
+  {
+    "q": "Směrodatná odchylka",
+    "options": [
+      "1,63",
+      "2,67",
+      "4"
+    ],
+    "correct": 0,
+    "why": "Odmocnina z rozptylu 8/3."
+  }
+])
+```
 :::
 
 ::: {.callout-important}

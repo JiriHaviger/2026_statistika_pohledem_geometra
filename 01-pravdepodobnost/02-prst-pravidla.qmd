@@ -1,5 +1,5 @@
 ---
-title: "Příklady, základní pojmy a vzorce"
+title: "Pravidla hry: jevy, součty a součiny"
 ---
 
 ```{ojs}
@@ -11,11 +11,54 @@ import {columnWidth, animation, drawText, clamp, ease, makeButton} from "../asse
 width = columnWidth(Generators)
 ```
 
+Otázky tohoto druhu se poprvé systematicky řešily v 17. století, kdy [Blaise Pascal (1623–1662)]{.smallcaps} a [Pierre de Fermat (asi 1607–1665)]{.smallcaps} hledali, jak spravedlivě rozdělit sázku v přerušené hře.
+
+::: {.column-margin .osobnost}
+![](../assets/portrety/pascal.jpg)
+
+**Blaise Pascal**  
+*1623 – 1662, Francie*
+
+Francouzský matematik a filozof. V korespondenci s Fermatem z roku 1654 řešili, jak spravedlivě rozdělit sázku v přerušené hře. Tato výměna dopisů bývá označována za počátek teorie pravděpodobnosti.
+<small>Portrét: Wikimedia Commons, volné dílo</small>
+:::
+
+::: {.column-margin .osobnost}
+![](../assets/portrety/fermat.jpg)
+
+**Pierre de Fermat**  
+*asi 1607 – 1665, Francie*
+
+Francouzský právník a matematik, Pascalův partner v dopisech o rozdělení sázky.
+<small>Portrét: Wikimedia Commons, volné dílo</small>
+:::
+
 Jaké jsou základní otázky, které lze řešit pomocí teorie pravděpodobnosti? Pojďme si to ukázat na několika příkladech:
 
 **Člověče, nezlob se:** házíme jednou kostkou. Jaké jsou možnosti, co nám padne? Co nám reálně padlo? Jaká je pravděpodobnost, že to bude číslo větší než 4?
 
 **Karty:** Z balíčku 52 karet (4 barvy po 13 kartách) vybereme kartu. Kolik možností máme, když nás zajímá jenom barva? Jakou barvu jsme vylosovali? Jaká je pravděpodobnost, že vybereme piky?
+
+
+Zkusme tyto situace zobecnit a formalizovat. 
+
+| Pojem | Definice |
+|:---|:---|
+|[Náhodný pokus]{.highlight-term} | jakákoli situace, kde výsledek není jistý, ale lze ho opakovat za stejných podmínek.|
+|[Základní prostor ($\Omega$)]{.highlight-term} | množina všech možných elementárních jevů, které mohou nastat při daném náhodném pokusu.|
+|[Elementární jev]{.highlight-term} | nejzákladnější nerozložitelný výsledek jednoho pokusu, značí se $\omega \in \Omega$.|
+|[Jev $A$]{.highlight-term} | libovolná ale přesně definovaná podmnožina $A\subseteq \Omega$.|
+: Základní pojmy a jejich definice {#tbl-definice}
+
+Na prvních dvou příkladech vypadají tyto pojmy takto:
+
+::: {.example-box}
+| Příklad | Základní množina $\Omega$ | Elementární jev $\omega$ | nastal jev $A$? |
+|:---|:---|:---|:---|
+| **Člověče, nezlob se**    | $\{  1, 2, 3, 4, 5, 6 \}$         | Padla 4           | Padlo sudé číslo? |
+| **Karty**                | {srdce, káry, piky, kříže}         | Vybralo se srdce           | Vybraly se kříže? |
+: Základní pojmy na prvních dvou příkladech {#02-tbl-pojmypriklady}
+:::
 
 ::: {.callout-note .priklad collapse="true"}
 ## Další příklady 
@@ -29,29 +72,19 @@ Jaké jsou základní otázky, které lze řešit pomocí teorie pravděpodobnos
 **Reklama:** prohlížíme web, na něm je reklamní banner. Můžeme ho ignorovat, nebo na něj kliknout. Kliknuli jste na něj? Jaká je pravděpodobnost, že na něj návštěvník stránky klikne?
 
 **Stromy:** máme les vysazený před dvaceti lety. Jaká je výška stromů v tomto lese? Kolik měří nejbližší strom? Jaká je pravděpodobnost, že strom bude vyšší než 50 metrů?
-:::
 
-Zkusme tyto situace zobecnit a formalizovat. 
-
-| Pojem | Definice |
-|:---|:---|
-|[Náhodný pokus]{.highlight-term} | jakákoli situace, kde výsledek není jistý, ale lze ho opakovat za stejných podmínek.|
-|[Základní prostor ($\Omega$)]{.highlight-term} | množina všech možných elementárních jevů, které mohou nastat při daném náhodném pokusu.|
-|[Elementární jev]{.highlight-term} | nejzákladnější nerozložitelný výsledek jednoho pokusu, značí se $\omega \in \Omega$.|
-|[Jev $A$]{.highlight-term} | libovolná ale přesně definovaná podmnožina $A\subseteq \Omega$.|
-: Základní pojmy a jejich definice {#tbl-definice}
+Stejné pojmy pro tyto příklady:
 
 ::: {.example-box}
 | Příklad | Základní množina $\Omega$ | Elementární jev $\omega$ | nastal jev $A$? |
 |:---|:---|:---|:---|
-| **Člověče, nezlob se**    | $\{  1, 2, 3, 4, 5, 6 \}$         | Padla 4           | Padlo sudé číslo? |
-| **Karty**                | {srdce, káry, piky, kříže}         | Vybralo se srdce           | Vybraly se kříže? |
 | **Pojišťovna**            | $\{  A,B,C,D \}$ osoby v autě         | Byl zraněn A           | Nebyl nikdo zraněn? |
 | **Acylpyrin**             | $\{$  nižší, stejná, vyšší $\}$ teplota     | Teplota se snížila          | Snížila se teplota? |
 | **Bonbóny**               | $\{$ červený, modrý $\}$   | vybraný je modrý | Je vybraný modrý? |
 | **Reklama**               | $\{$ ano, ne $\}$                 | ano, kliknul      | kliknul?|
 | **Stromy**                | $(40, 80)$ metrů                  | strom měří 55,4 m  | je strom větší než 60 m? |
-: Základní pojmy a jejich příklady {#02-tbl-pojmypriklady}
+: Základní pojmy na dalších příkladech {#02-tbl-pojmypriklady-dalsi}
+:::
 :::
 
 
@@ -77,8 +110,6 @@ $$P(A\cup B) = P(A) + P(B)$$
 Tento vztah se označuje jako **pravidlo součtu** pro slovní vyjádření **buď ... anebo ...** Platí jen pro neslučitelné jevy.
 :::
 
-### Slučitelné jevy
-
 Pokračujeme v příkladu **karty**: když vybereme kartu, může to být srdce (jev $A$) nebo král (jev $B$), ale také srdcový král ($A\land B$), ostatní nás v tuto chvíli nezajímá. Karta může být srdcový král, obě vlastnosti mohou nastat současně. Jevům, které mohou nastat současně, říkáme [slučitelné]{.highlight-term}. Pravděpodobnost, že vytáhnu srdce nebo krále, musíme rozdělit na tři neslučitelné případy: srdce, ale ne král ($A\land \bar{B}$), král, ale ne srdce ($\bar{A} \land B$), a srdcový král ($A \land B$). Pak je $P(A\lor B) = P(A\land \bar{B}) + P(\bar{A} \land B) + P(A \land B)$, resp. v množinové notaci
 $P(A\cup B) = P(A\cap \bar{B}) + P(\bar{A} \cap B) + P(A \cap B)$. Pokud bychom se chtěli přiblížit tvaru pro neslučitelné jevy, můžeme také psát
 
@@ -98,14 +129,9 @@ Bez odečtení průniku bychom srdcového krále započítali dvakrát a dostali
 Neslučitelné jevy (nemohou nastat současně) jsou naopak silně závislé: jakmile nastal jeden, druhý už nastat nemůže. Nezávislost si proto nepleťte s neslučitelností.
 :::
 
-### Ukázka: neslučitelné a slučitelné jevy
-
 ::: {.callout-note}
-## Jak ovládat ukázku
-V ukázce jsou $A$ a $B$ dva svislé pruhy v obdélníku s 2000 náhodnými body (modré jsou body v $A$ nebo v $B$, oranžové v obou). Posuvník **Posun B** přesouvá $B$ k $A$.
-Dokud se pruhy nedotýkají, jsou jevy neslučitelné a součet $P(A)+P(B)$ je přesně $P(A\cup B)$.
-Jakmile se překrývají (slučitelné jevy), součet počítá průnik dvakrát a je větší než $P(A\cup B)$ právě o $P(A\cap B)$.
-V histogramu mají sloupce $A$ a $B$ oranžový díl, tedy průnik (stejná barva jako body v obou jevech), a jsou posunuté tak, aby na sebe tyto díly navazovaly. Sloupec sjednocení je slepený přes průnik, takže ho obsahuje jen jednou, $P(A\cup B)=P(A)+P(B)-P(A\cap B)$. Osa a tmavá čárka (teoretická hodnota) platí pro sjednocení a pro základnu sloupce $B$.
+## Jak číst ukázku
+Modré body jsou v $A$ nebo v $B$, oranžové v obou. Posunujte $B$ k $A$: dokud se pruhy nedotýkají, je $P(A)+P(B)$ přesně $P(A\cup B)$. Jakmile se překrývají, součet započítá průnik dvakrát a je větší o $P(A\cap B)$. V histogramu proto sloupec sjednocení obsahuje průnik jen jednou.
 :::
 
 ```{ojs}
@@ -246,16 +272,9 @@ $$P(B\mid A)=\frac{P(A\cap B)}{P(A)}$$
 Pravděpodobnost krále mezi srdci je $P(B\mid A)=\frac{1}{13}$, ale pravděpodobnost srdce mezi králi je $P(A\mid B)=\frac{1}{4}$. Podmínka mění, „z čeho“ se pravděpodobnost počítá, proto jde o dvě různá čísla.
 :::
 
-### Ukázka: podmíněná pravděpodobnost
-
 ::: {.callout-note}
-## Jak ovládat ukázku
-Do obdélníku, který je celým výsledkovým prostorem, se postupně přidávají náhodné body (plynule, nebo po 10 a po 100).
-Tři obdélníky jsou jevy $A$, $B$ a $C$. Horní řada tlačítek vybírá, **čí pravděpodobnost** sledujeme (body v tomto jevu jsou modré, ostatní šedé),
-dolní řada **podmínku** (**Celek** = bez podmínky). Vybraná podmínka se roztáhne na celou plochu, body mimo ni zmizí
-a čitatel i jmenovatel se počítají jen z toho, co zbylo. Modré body jsou pak průnik sledovaného jevu s podmínkou.
-Sloupce vpravo ukazují živý odhad $P(\cdot \mid \text{podmínka})$, oranžová čárka je teoretická hodnota, ke které odhad konverguje.
-Všimněte si, že $P(C \mid A) = 0$ (obdélníky se nepřekrývají) a $P(A \mid A) = 1$.
+## Jak číst ukázku
+Tři obdélníky jsou jevy $A$, $B$ a $C$. Zvolte, čí pravděpodobnost sledujete a při jaké podmínce: body mimo podmínku zmizí a pravděpodobnost se počítá jen z toho, co zbylo. Modré body jsou průnik sledovaného jevu s podmínkou, oranžová čárka je teoretická hodnota. Všimněte si, že $P(C \mid A) = 0$ (obdélníky se nepřekrývají) a $P(A \mid A) = 1$.
 :::
 
 ```{ojs}
@@ -483,14 +502,9 @@ Tento vztah se označuje jako **pravidlo součinu** pro slovní vyjádření **.
 
 Tato rovnice se používá jako definice [nezávislosti jevů]{.highlight-term}. Pokud známe obě strany rovnice, lze tento vztah využít k testování nezávislosti dvou jevů.
 
-### Ukázka: nezávislost jevů
-
 ::: {.callout-note}
-## Jak ovládat ukázku
-Jev $A$ je svislý pruh a jev $B$ vodorovný pruh, jejich průnik je obdélník o stranách $P(A)$ a $P(B)$,
-takže jeho plocha je přesně $P(A)\cdot P(B)$. Posuvník **míra závislosti** přesouvá $B$ postupně dovnitř $A$ (pravděpodobnost $P(B)$ se přitom nemění).
-Tlačítko **B** zúží vesmír na $B$, modré body jsou vždy body v $A$. Levá dvojice sloupců porovnává $P(A)$ a $P(A\mid B)$, pravá $P(A\cap B)$ a $P(A)\cdot P(B)$.
-Šedé sloupce jsou hodnoty, které by platily při nezávislosti, oranžová čárka je teorie.
+## Jak číst ukázku
+Průnik svislého pruhu $A$ a vodorovného pruhu $B$ je obdélník o stranách $P(A)$ a $P(B)$, jeho plocha je $P(A)\cdot P(B)$. Posouvejte $B$ dovnitř $A$ a sledujte, jak se $P(A\cap B)$ vzdaluje od součinu: šedé sloupce platí při nezávislosti, oranžová čárka je teorie. Tlačítko **B** zúží vesmír na $B$, levá dvojice sloupců pak porovnává $P(A)$ a $P(A\mid B)$.
 :::
 
 ::: {.callout-caution}
@@ -711,14 +725,122 @@ Je to jen hrubý náznak, jak o nezávislosti rozhodovat ze vzorku. Správné te
 }
 ```
 
-### Průnik: nezávislé a závislé jevy
-
 Pokud máme nezávislé jevy, pak
 $$P(A\cap B) = P(A)\cdot P(B)$$
 
 Pokud máme jevy závislé, vycházíme z definice podmíněné pravděpodobnosti $P(B\mid A)=\frac{P(A\cap B)}{P(A)}$, kterou jen upravíme
 
 $$P(A\cap B)=P(A)\cdot P(B\mid A)$$
+
+::: {.callout-note .otestujte}
+## Otestujte se
+
+Odpovězte na otázky, výsledek se ukáže hned. Odpověď můžete měnit.
+
+```{ojs}
+import {kviz} from "../assets/kviz.js"
+```
+
+```{ojs}
+kviz([
+  {
+    "zadani": "V prvním ročníku je 100 studentů. Podle oboru: 50 ekonomika, 30 management a 20 datová věda. Podle bydlení: 40 bydlí na koleji a 60 mimo kolej. Rozdělení obou znaků je v tabulce. Jednoho studenta vybereme náhodně.",
+    "tabulka": [
+      [
+        "",
+        "kolej",
+        "mimo kolej"
+      ],
+      [
+        "ekonomika",
+        "20",
+        "30"
+      ],
+      [
+        "management",
+        "6",
+        "24"
+      ],
+      [
+        "datová věda",
+        "14",
+        "6"
+      ]
+    ]
+  },
+  {
+    "q": "Jsou jevy „ekonomika“ a „management“ slučitelné?",
+    "options": [
+      "slučitelné",
+      "neslučitelné"
+    ],
+    "correct": 1,
+    "why": "Student nemůže studovat oba obory současně."
+  },
+  {
+    "q": "P(student nebydlí na koleji)",
+    "options": [
+      "0,4",
+      "0,6",
+      "0,5"
+    ],
+    "correct": 1,
+    "why": "Doplněk: 1 − 0,4."
+  },
+  {
+    "q": "P(ekonomika nebo kolej)",
+    "options": [
+      "0,5",
+      "0,7",
+      "0,9"
+    ],
+    "correct": 1,
+    "why": "0,5 + 0,4 − 0,2. Průnik se nesmí započítat dvakrát."
+  },
+  {
+    "q": "P(kolej | datová věda)",
+    "options": [
+      "0,14",
+      "0,4",
+      "0,7"
+    ],
+    "correct": 2,
+    "why": "Mezi 20 studenty datové vědy bydlí na koleji 14."
+  },
+  {
+    "q": "Jsou jevy „ekonomika“ a „kolej“ nezávislé?",
+    "options": [
+      "ano",
+      "ne"
+    ],
+    "correct": 0,
+    "why": "P(A ∩ B) = 0,20 a P(A)·P(B) = 0,5 · 0,4 = 0,20."
+  },
+  {
+    "q": "Jsou jevy „datová věda“ a „kolej“ nezávislé?",
+    "options": [
+      "ano",
+      "ne"
+    ],
+    "correct": 1,
+    "why": "P(A ∩ B) = 0,14, ale P(A)·P(B) = 0,2 · 0,4 = 0,08."
+  },
+  {
+    "zadani": "V seminární skupině je 6 studentů, 2 z nich studují datovou vědu. Učitel vybere dva studenty bez vracení."
+  },
+  {
+    "q": "P(oba vybraní studují datovou vědu)",
+    "options": [
+      "0,111",
+      "0,067",
+      "0,333"
+    ],
+    "correct": 1,
+    "why": "2/6 · 1/5 ≈ 0,067. Po prvním výběru zbývá jediný student datové vědy z pěti."
+  }
+])
+```
+:::
 
 ::: {.callout-important}
 ## Klíčové poznatky

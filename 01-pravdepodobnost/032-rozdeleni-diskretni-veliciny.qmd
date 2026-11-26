@@ -1,5 +1,5 @@
 ---
-title: "Rozdělení pravděpodobnosti diskrétní veličiny"
+title: "Kolik šancí připadá na kterou hodnotu"
 ---
 
 ```{ojs}
@@ -23,8 +23,6 @@ Sázková kancelář nabízí hru s upravenou kostkou. Aby mohla určit férovou
 ## Zapamatujte si
 Pravděpodobnosti všech hodnot jsou nezáporné a jejich součet je vždy $1$.
 :::
-
-### Příklad: upravená kostka
 
 ::: {.callout-note .priklad}
 ## Zadání
@@ -86,11 +84,9 @@ Vzorec je stručný, ale pro čtenáře méně přehledný než tabulka a graf.
 
 $$F(x)=\sum_{k:\,x_k\leq x} p_k.$$
 
-### Grafy PMF a CDF
-
 ::: {.callout-note}
-## Jak ovládat ukázku
-Posuvníkem vybíráme bod $t$ a sledujeme, jak se v CDF mění hodnota $F(t)$.
+## Jak číst ukázku
+Posunujte bod $t$ a sledujte, jak se v CDF mění hodnota $F(t)$: roste jen ve skocích, jejichž výška je pravděpodobnost dané hodnoty.
 :::
 
 ```{ojs}
@@ -149,16 +145,9 @@ Plot.plot({
 Všimněte si, že CDF je **spojitá zprava**. V bodě $x=5$ graf „vyskočí“ na hodnotu $F(5)=3/6$ a plné kolečko leží na horním schodu. Prázdné kolečko ukazuje limitu zleva, která je $1/6$. Důvod je, že $P(X\leq 5)=P(X\leq 5{,}5)$: mezi $5$ a $5{,}5$ nepřibyla žádná možná hodnota, takže se pravděpodobnost nezměnila. Výška každého schodu je přesně hodnota $p_k$ v daném bodě.
 :::
 
-### Simulace: od PMF a CDF k hodům
-
 ::: {.callout-note}
-## Jak ovládat ukázku
-Vyberte rozdělení a pouštějte hody. Nahoře se vypisují výsledky, v grafech je oranžově teorie
-(pravděpodobnostní funkce PMF a distribuční funkce CDF) a modře to, co vychází z hodů. S přibývajícími hody
-se modrá přibližuje k oranžové. U délky slov z *R.U.R.* žádná teorie neexistuje, oranžově je tam rozdělení délek
-v celém díle a modře rozdělení z právě přečtených slov. I dvě poloviny téhož textu se mírně liší: největší rozdíl
-relativní četnosti některé délky mezi první a druhou polovinou díla je asi 0,02 (u šestipísmenných slov). Rozdělení
-z krátkého úseku textu tedy kolísá, ale s přibývajícími slovy se k celku přibližuje.
+## Jak číst ukázku
+Oranžově je teorie (PMF a CDF), modře to, co vychází z hodů. Přidávejte hody a sledujte, jak se modrá blíží k oranžové. U délky slov z *R.U.R.* žádná teorie neexistuje: oranžově je rozdělení délek v celém díle, modře rozdělení z právě přečtených slov. I dvě poloviny téhož textu se mírně liší (největší rozdíl relativní četnosti je asi 0,02), ale s přibývajícími slovy se rozdělení z úseku k celku přibližuje.
 :::
 
 ```{ojs}
@@ -393,8 +382,6 @@ import {textCz} from "../assets/text-cz.js"
 }
 ```
 
-### Vlastnosti
-
 ::: {.callout-note .zapamatuj}
 ## Zapamatujte si: vlastnosti PMF a CDF
 Pro PMF platí
@@ -412,14 +399,31 @@ a navíc pro interval $P(a<X\leq b)=F(b)-F(a)$.
 
 Rozdělení lze shrnout několika čísly, která říkají, kde leží „střed“ a jak velký je rozptyl.
 
-[Střední hodnota]{.highlight-term} $E(X)=\mu$ je očekávaný výsledek při velmi mnoha opakováních:
+Pojem očekávané hodnoty, který dnes nazýváme střední hodnotou, zavedl už v roce 1657 nizozemský fyzik [Christiaan Huygens (1629–1695)]{.smallcaps}.
 
-$$E(X)=\sum_k x_k\, p_k.$$
+::: {.column-margin .osobnost}
+![](../assets/portrety/huygens.jpg)
 
-[Rozptyl]{.highlight-term} $\operatorname{Var}(X)=\sigma^2$ měří, jak moc se hodnoty rozptylují kolem střední hodnoty:
+**Christiaan Huygens**  
+*1629 – 1695, Haag*
 
-$$\operatorname{Var}(X)=\sum_k \bigl(x_k-\mu\bigr)^2\, p_k,
-\qquad \sigma=\sqrt{\operatorname{Var}(X)}.$$
+Nizozemský fyzik a matematik. Jeho spis *De ratiociniis in ludo aleae* (1657) je považován za první vytištěnou práci o pravděpodobnosti a zavedl pojem očekávané hodnoty.
+<small>Portrét: Wikimedia Commons, volné dílo</small>
+:::
+
+[Střední hodnota]{.highlight-term} $\mu$ je očekávaný výsledek při velmi mnoha opakováních:
+
+$$\mu=\sum_k x_k\, p_k.$$
+
+[Rozptyl]{.highlight-term} $\sigma^2$ měří, jak moc se hodnoty rozptylují kolem střední hodnoty:
+
+$$\sigma^2=\sum_k \bigl(x_k-\mu\bigr)^2\, p_k,
+\qquad \sigma=\sqrt{\sigma^2}.$$
+
+::: {.callout-note collapse="true"}
+## Pro zájemce: jiné značení
+V literatuře se střední hodnota značí také $E(X)$ a rozptyl $\operatorname{Var}(X)$. V této knize používáme $\mu$ a $\sigma^2$.
+:::
 
 [Medián]{.highlight-term} je hodnota, která rozděluje rozdělení na dvě poloviny: $P(X\leq m)\geq 0{,}5$ a $P(X\geq m)\geq 0{,}5$.
 
@@ -428,7 +432,7 @@ mean32 = d3.sum(kostka32, d => d.x * d.p)
 var32 = d3.sum(kostka32, d => (d.x - mean32) ** 2 * d.p)
 ```
 
-Pro naši kostku vychází $E(X)=$ ${mean32.toFixed(3).replace(".", ",")} a $\operatorname{Var}(X)=$ ${var32.toFixed(3).replace(".", ",")}, tedy $\sigma\approx$ ${Math.sqrt(var32).toFixed(3).replace(".", ",")}. 
+Pro naši kostku vychází $\mu=$ ${mean32.toFixed(3).replace(".", ",")} a $\sigma^2=$ ${var32.toFixed(3).replace(".", ",")}, tedy $\sigma\approx$ ${Math.sqrt(var32).toFixed(3).replace(".", ",")}. 
 
 ::: {.callout-warning}
 ## Pozor: střední hodnota není nejčastější výsledek
@@ -438,6 +442,89 @@ Střední hodnota $16/3$ není hodnotou, které kostka může nabýt. Jde o prů
 ::: {.callout-note .priklad}
 ## Příklad: medián kostky
 U mediánu je kostka poučná: $F(5)=0{,}5$ přesně, takže podmínce vyhovuje každé číslo z intervalu $[5,6]$. Obvykle se volí střed tohoto intervalu, tedy $5{,}5$.
+:::
+
+::: {.callout-note .otestujte}
+## Otestujte se
+
+Odpovězte na otázky, výsledek se ukáže hned. Odpověď můžete měnit.
+
+```{ojs}
+import {kviz} from "../assets/kviz.js"
+```
+
+```{ojs}
+kviz([
+  {
+    "zadani": "Studijní oddělení eviduje, kolik žádostí o uznání předmětu vyřídí referentka za den (veličina X). Rozdělení je v tabulce.",
+    "tabulka": [
+      [
+        "x",
+        "0",
+        "1",
+        "2",
+        "3"
+      ],
+      [
+        "p(x)",
+        "0,1",
+        "0,4",
+        "0,3",
+        "0,2"
+      ]
+    ]
+  },
+  {
+    "q": "P(X ≤ 1)",
+    "options": [
+      "0,4",
+      "0,5",
+      "0,7"
+    ],
+    "correct": 1,
+    "why": "0,1 + 0,4."
+  },
+  {
+    "q": "F(2) = P(X ≤ 2)",
+    "options": [
+      "0,3",
+      "0,7",
+      "0,8"
+    ],
+    "correct": 2,
+    "why": "0,1 + 0,4 + 0,3."
+  },
+  {
+    "q": "Střední hodnota μ",
+    "options": [
+      "1,5",
+      "1,6",
+      "1,8"
+    ],
+    "correct": 1,
+    "why": "0·0,1 + 1·0,4 + 2·0,3 + 3·0,2 = 1,6."
+  },
+  {
+    "q": "Může referentka za den vyřídit právě 1,6 žádosti?",
+    "options": [
+      "ano",
+      "ne"
+    ],
+    "correct": 1,
+    "why": "Střední hodnota je průměr z mnoha dnů, ne hodnota jednoho dne."
+  },
+  {
+    "q": "Rozptyl σ²",
+    "options": [
+      "0,84",
+      "1,6",
+      "3,4"
+    ],
+    "correct": 0,
+    "why": "Průměr čtverců hodnot je 3,4, tedy σ² = 3,4 − 1,6² = 0,84."
+  }
+])
+```
 :::
 
 ::: {.callout-important}
@@ -450,7 +537,7 @@ U mediánu je kostka poučná: $F(5)=0{,}5$ přesně, takže podmínce vyhovuje 
 | distribuční funkce | $F(x)=P(X\leq x)=\sum_{k:\,x_k\leq x}p_k$, schodovitá, neklesající, spojitá zprava |
 | limity | $F(-\infty)=0$ a $F(+\infty)=1$ |
 | interval | $P(a<X\leq b)=F(b)-F(a)$ |
-| střední hodnota | $E(X)=\sum_k x_k\,p_k$ |
-| rozptyl | $\operatorname{Var}(X)=\sum_k (x_k-\mu)^2\,p_k$ |
+| střední hodnota | $\mu=\sum_k x_k\,p_k$ |
+| rozptyl | $\sigma^2=\sum_k (x_k-\mu)^2\,p_k$ |
 | medián | $F(m)\geq 0{,}5$ a $P(X\geq m)\geq 0{,}5$, nemusí být určen jednoznačně |
 :::

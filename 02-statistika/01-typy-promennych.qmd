@@ -1,4 +1,4 @@
-# Deskriptivní statistiky
+# Jak popsat data: kde leží a jak se rozprostírají
 
 Představte si, že máte seznam studentů a u každého z nich výsledek testu ze statistiky (údaje můžeme mít uložené například jako sloupec hodnot v excelu). [Deskriptivní statistiky]{.highlight-term} jsou čísla, která souhrně charakterizují **velikost** hodnot a jejich **rozložení** nějaké **proměnné**, v našem příkladu výsledků testu. Nejprve si pojďme ujasnit co se rozumí pod pojmem proměnná a jaké typy proměnných máme.
 
@@ -376,6 +376,18 @@ Podobný způsob vizualizace můžeme provést i pro větší množství dat z p
 }
 ```
 
+::: {.column-margin .osobnost}
+![](../assets/portrety/sturges-histogram.jpg){.light-content}
+
+![](../assets/portrety/sturges-histogram-dark.jpg){.dark-content}
+
+**Herbert Sturges**  
+*americký statistik*
+
+Své pravidlo pro počet tříd histogramu publikoval v roce 1926 v článku *The Choice of a Class Interval*.
+<small>Portrét není dostupný pod volnou licencí</small>
+:::
+
 Pro málo kategorií nám graf příliš neřekne, pro příliš mnoho je pak nezachycuje trend v datech ale spíše odchylky od trendu. Proto se stanovilo několik pravidel, jak "optimálně" nastavit počet kategorií. Nejčastěji využívané je Sturgessovo pravidlo $k=\lfloor 1+\log_2(n)\rfloor$, kde uvedené závorky značí zaokrouhlení na celá čísla dolů. Toto pravilo je však někdy nahrazováno jinými, viz [@R-hist-bins]
 
 ## Střední hodnota založená na uspořádání
@@ -508,8 +520,8 @@ Plot.plot({
 :::
 
 ::: {.callout-note}
-## Jak ovládat ukázku
-Celý postup si můžete projít po krocích na dvanácti jiných hodnotách, než jsou data o domácnostech výše. Tlačítky **Zpět / Přehrát / Další** (nebo tečkami) se prochází pět kroků: data v pořadí měření, přeřazení od nejmenšího (body se spojí úsečkami), medián, kvartily a libovolný percentil zvolený posuvníkem. Čára ke kvantilu vede od osy $x$ (s pozicí $k$) svisle až k bodu na úsečce mezi dvěma sousedními body a odtud vodorovně k ose $y$, kde se objeví hodnota. Tlačítkem *Nová data* se hodnoty vylosují znovu.
+## Jak číst ukázku
+Postup má pět kroků: data v pořadí měření, seřazení od nejmenšího, medián, kvartily a libovolný percentil. Čára ke kvantilu vede od osy $x$ svisle k bodu na úsečce mezi sousedními body a odtud vodorovně na osu $y$, kde se objeví hodnota. Zkuste posunout percentil nebo vylosovat nová data a sledujte, jak se kvantil mění.
 :::
 
 ```{ojs}
@@ -761,6 +773,20 @@ V našem příkladu je maximální rozdíl mezi domácnostmi $10$ vozidel, v pro
 
 ## Odlehlé hodnoty a box-plot
 
+Krabicový graf, který pracuje s kvartily a hradbami, zpopularizoval americký statistik [John W. Tukey (1915–2000)]{.smallcaps}.
+
+::: {.column-margin .osobnost}
+![](../assets/portrety/tukey-boxplot.jpg){.light-content}
+
+![](../assets/portrety/tukey-boxplot-dark.jpg){.dark-content}
+
+**John W. Tukey**  
+*1915 – 2000, USA*
+
+Americký statistik. Krabicový graf (box-plot) zpopularizoval v knize *Exploratory Data Analysis* (1977).
+<small>Portrét není dostupný pod volnou licencí</small>
+:::
+
 Často je třeba stanovit, zda v souboru nejsou data, která  výzraně vybočují od středu. Ve statistice se nejčastěji používá rozsah $4\cdot \operatorname{IQR}$ pro hodnoty akceptovatelné - prostřední IQR máme dané kvartliy, na každou stranu přidáme ještě $1.5\cdot \operatorname{IQR}$ a získáme hranice, hradby. **Dolní hradbu** (*Lower fence, LF*) určíme jako $Q1-1.5\cdot \operatorname{IQR}$, **horní hradbu** (*Upper fence, UF*) jako $Q3+1.5\cdot
 IQR$. Z našich dat 
 
@@ -782,8 +808,6 @@ V našich datech tedy nemáme žádné odlehlé hodnoty pod dolní hradbou ale j
 ## Pozor: odlehlá hodnota není automaticky chyba
 Hradby jen upozorní na hodnoty, které stojí za prověření. Domácnost s 11 vozidly může být zcela správný údaj. Rozhodnout, zda hodnotu vyloučit, je věcná, ne statistická otázka.
 :::
-
-### Box-plot
 
 Důležité kvantily a odlehlé hodnoty  se často znázorňují do grafu, který se nazývá [box-plot]{.highlight-term}: obdélník ukazuje na 1Q, med a 3Q, levý "vous" ukazuje buď minimum, nebo dolní hradbu, pravý "vous" maximum nebo horní hradbu, červenou tečkou je znázorněna odlehlá hodnota. Můžete se setkat s různými variantami, ale tato je nejčastější. 
 
@@ -856,6 +880,74 @@ Plot.plot({
   ]
 })
 ```
+
+::: {.callout-note .otestujte}
+## Otestujte se
+
+Odpovězte na otázky, výsledek se ukáže hned. Odpověď můžete měnit.
+
+```{ojs}
+//| echo: false
+import {kviz} from "../assets/kviz.js"
+```
+
+```{ojs}
+//| echo: false
+kviz([
+  {
+    "zadani": "Realitní kancelář sleduje měsíční nájem osmi bytů v jedné čtvrti (Kč, uspořádané): 9 000, 9 500, 10 000, 10 000, 11 000, 12 000, 15 000, 45 000."
+  },
+  {
+    "q": "Modus",
+    "options": [
+      "10 000",
+      "10 500",
+      "15 188"
+    ],
+    "correct": 0,
+    "why": "Nejčastější hodnota."
+  },
+  {
+    "q": "Medián",
+    "options": [
+      "10 000",
+      "10 500",
+      "15 188"
+    ],
+    "correct": 1,
+    "why": "(10 000 + 11 000) / 2."
+  },
+  {
+    "q": "Který údaj lépe vystihuje typický nájem?",
+    "options": [
+      "průměr 15 188 Kč",
+      "medián 10 500 Kč"
+    ],
+    "correct": 1,
+    "why": "Průměr zvedá jediný velmi drahý byt."
+  },
+  {
+    "q": "Mezikvartilové rozpětí IQR",
+    "options": [
+      "2 875",
+      "3 000",
+      "12 750"
+    ],
+    "correct": 0,
+    "why": "Q₁ = 9 875 a Q₃ = 12 750, rozdíl 2 875."
+  },
+  {
+    "q": "Je nájem 45 000 Kč odlehlá hodnota?",
+    "options": [
+      "ano",
+      "ne"
+    ],
+    "correct": 0,
+    "why": "Horní hradba je 12 750 + 1,5 · 2 875 = 17 062,5."
+  }
+])
+```
+:::
 
 ::: {.callout-important}
 ## Klíčové poznatky

@@ -1,4 +1,4 @@
-# Rozklad rozptylu geometricky
+# Pythagoras ve statistice: rozptyl jako vzdálenost
 
 Pythagorova věta se ve statistice objevuje na nečekaném místě: rozptyl dat je vlastně čtverec délky jedné úsečky. Uvidíme to na nejmenším možném příkladu, na dvou domácnostech.
 
@@ -18,6 +18,18 @@ Vysvětlení značení:
 - $\mathbf{1}$ - vektor jedniček, protože chceme pro každou hodnoty $y_i$ stejnou hodnotu $b_0$, 
 - $\mathbf{\epsilon}$ vektor odchylek dat od modelu, který nám říká, jak moc se data od modelu liší. 
 
+
+Hledání modelu s nejmenší velikostí odchylek, dnes nazývané metoda nejmenších čtverců, uveřejnil v roce 1809 německý matematik [Carl Friedrich Gauss (1777–1855)]{.smallcaps}.
+
+::: {.column-margin .osobnost}
+![](../assets/portrety/gauss.jpg)
+
+**Carl Friedrich Gauss**  
+*1777 – 1855, Göttingen*
+
+Německý matematik. Metodu nejmenších čtverců, tedy hledání modelu s nejmenší velikostí vektoru odchylek, publikoval v roce 1809 (nezávisle na něm ji v roce 1805 zveřejnil Legendre).
+<small>Portrét: Wikimedia Commons, volné dílo</small>
+:::
 
 Za *nejlepší* odhad parametru budeme považovat ten, který má **nejmenší velikost vektoru** $\mathbf{\epsilon}$.
 
@@ -254,6 +266,18 @@ $$\|\mathbf{y}\|^2 = \|b_0\mathbf{1}\|^2 + \|\mathbf{e}\|^2$$
 
 ## Rozptyl a směrodatná odchylka
 
+Pojem rozptylu a rozklad celkové variability na složky, který se nazývá analýza rozptylu, zavedl ve 20. letech 20. století britský statistik [Ronald Fisher (1890–1962)]{.smallcaps}.
+
+::: {.column-margin .osobnost}
+![](../assets/portrety/fisher.jpg)
+
+**Ronald Aylmer Fisher**  
+*1890 – 1962, Londýn*
+
+Britský statistik a genetik. Termín *variance* (rozptyl) použil v roce 1918 a analýzu rozptylu rozpracoval v následujících letech.
+<small>Portrét: Wikimedia Commons, volné dílo</small>
+:::
+
 $\|\mathbf{e}\|^2$ vyjadřuje celkovou odchylku dat od vekotru průměrů,  přepočítáno na jedno pozorování dostaneme veličiny zvanou [rozptyl]{.highlight-term} a označovanou jako $var$ nebo $\sigma^2$ a která se tedy rovná $= \frac{\|\mathbf{e}\|^2}{n}$
 
 $$
@@ -267,6 +291,76 @@ $$
 $$
 
  
+
+::: {.callout-note .otestujte}
+## Otestujte se
+
+Odpovězte na otázky, výsledek se ukáže hned. Odpověď můžete měnit.
+
+```{ojs}
+//| echo: false
+import {kviz} from "../assets/kviz.js"
+```
+
+```{ojs}
+//| echo: false
+kviz([
+  {
+    "zadani": "Dva studenti získali v testu 8 a 2 body, tedy vektor dat y = (8, 2). Modelem je jediné číslo b₀ stejné pro oba studenty."
+  },
+  {
+    "q": "Nejlepší b₀ (kolmá projekce na přímku jedniček)",
+    "options": [
+      "5",
+      "6",
+      "8"
+    ],
+    "correct": 0,
+    "why": "Je to průměr (8 + 2) / 2."
+  },
+  {
+    "q": "Vektor odchylek e = y − b₀·1",
+    "options": [
+      "(3, −3)",
+      "(3, 3)",
+      "(5, 5)"
+    ],
+    "correct": 0,
+    "why": "(8 − 5, 2 − 5)."
+  },
+  {
+    "q": "‖e‖²",
+    "options": [
+      "6",
+      "18",
+      "36"
+    ],
+    "correct": 1,
+    "why": "3² + (−3)². Pythagorova věta: 68 = 50 + 18."
+  },
+  {
+    "q": "Rozptyl ‖e‖² / n",
+    "options": [
+      "9",
+      "18",
+      "3"
+    ],
+    "correct": 0,
+    "why": "18 / 2."
+  },
+  {
+    "q": "Směrodatná odchylka",
+    "options": [
+      "3",
+      "9",
+      "4,5"
+    ],
+    "correct": 0,
+    "why": "Odmocnina z rozptylu 9."
+  }
+])
+```
+:::
 
 ::: {.callout-important}
 ## Klíčové poznatky

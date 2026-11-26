@@ -1,4 +1,4 @@
-# Vlastnosti metrik a aritmetika dat
+# Co se stane s čísly, když je přepočítáme
 
 Ředitel firmy oznámí, že všem zaměstnancům zvýší plat o 1 000 Kč. O rok později přidá všem 10 %. V obou případech si polepší všichni, ale rozdíly mezi nimi se mění různě. Jak se při takových úpravách chovají průměr, rozptyl nebo medián?
 
@@ -25,8 +25,6 @@ Tato data lze popsat následujícími charakteristikami (zaokrouhlenými na dvě
 |$range$        |   10.00|
 |$IQR$          |   2.75|
 |$var, sd$     |   8.89, 2.98  |
-
-### Posun a násobení
 
 Zkusme vytvořit nové soubory dat tak, že nejprve přičteme hodnotu 2 ke každému číslu ($X+2$) a nebo ho vynásobíme ($X\cdot 2$) 
 
@@ -56,7 +54,17 @@ Pokud stát požaduje od všech stejnou částku (např. televizní poplatky), v
 
 ## Transformace dat
 
-### Z-skór
+Směrodatnou odchylku, na které standardizace stojí, zavedl v roce 1893 britský statistik [Karl Pearson (1857–1936)]{.smallcaps}.
+
+::: {.column-margin .osobnost}
+![](../assets/portrety/pearson.jpg)
+
+**Karl Pearson**  
+*1857 – 1936, Londýn*
+
+Pojem *standard deviation* použil poprvé v roce 1893. Je také autorem korelačního koeficientu.
+<small>Portrét: Wikimedia Commons, volné dílo</small>
+:::
 
 Zkusme naše data [standardizovat]{.highlight-term} tak, abychom eliminovali posun a zároveň upravili variabilitu. Cílem je, aby data s rozdílnou polohou a rozdílnou variabilitou  byla porovnateln (např počet vozidel v rodině a celkový roční příjem rodiny). Jednou z tradičních standardizací je převod hodnot $x_i$ na $z-skór$ pomocí vzorce 
 
@@ -67,8 +75,6 @@ $$z_i=\frac{x_i-\bar{x}}{sd}$$
 Z skór tedy získáme nejprve posunem dat o průměr a poté vydělením směrodatnou odchylkou. Získané proměnná $z$ pak má průměr nula a směrodatnou odchylku 1. Tato standardizace je vhodná pro data alespoň přibližně symetrická kolem průměru, jinými slovy kdy je průměr blízko mediánu,$\bar{x}-mdn\to 0$. 
 :::
 
-### Robustní standardizace
-
 Variantou odolnou vůči odlehlým hodotám je [robustní standardizace]{.highlight-term}m která každé hodnotě $x_i$ přiřadí hodnotu 
 
 $$x_r=\frac{x_i-mdn}{iqr}$$ 
@@ -77,8 +83,6 @@ $$x_r=\frac{x_i-mdn}{iqr}$$
 ## Zapamatujte si: robustní standardizace
 Robustní standarizaci tedy získáme posunem dat o medián a vydělením mezikvartilovým rozpětím. Získaná proměnná $x_r$ pak má medán nula a iqr jedna. Rubustní standardizace je vhodná pro data zešikmená, kdy většina hodnot je na jedné straně od průměru, jinými slovy medián a průměr jsou daleko.  
 :::
-
-### Normalizace rozsahu
 
 Jinou bežně používanou trasformací je [normalizace]{.highlight-term} rozsahu, které každé hodnotě $x$ přiřadí hodnotu 
 
@@ -90,8 +94,6 @@ $$x_{n}=\frac{x-min}{range}$$
 :::
 
 Existují i další transformace, které jsou založené na rozdělení dat, ale těmi se nyní zabývat nebudeme. 
-
-### Srovnání transformací
 
 |statistika     |$X$              |$z(X)$         |$x_r$        |$x_n$        |
 |:--|:--|:--|:--|:--|
@@ -154,6 +156,78 @@ Plot.plot({
   ]
 })
 ```
+
+::: {.callout-note .otestujte}
+## Otestujte se
+
+Odpovězte na otázky, výsledek se ukáže hned. Odpověď můžete měnit.
+
+```{ojs}
+//| echo: false
+import {kviz} from "../assets/kviz.js"
+```
+
+```{ojs}
+//| echo: false
+kviz([
+  {
+    "zadani": "Zaměstnanci firmy mají průměrnou mzdu 40 000 Kč a směrodatnou odchylku 5 000 Kč."
+  },
+  {
+    "q": "Všem se plošně přidá 2 000 Kč. Nový průměr a směrodatná odchylka",
+    "options": [
+      "42 000 a 5 000",
+      "42 000 a 7 000",
+      "40 000 a 5 000"
+    ],
+    "correct": 0,
+    "why": "Posun mění polohu, rozestupy zůstanou."
+  },
+  {
+    "q": "Místo toho se všem zvýší mzda o 10 % (×1,1). Nová směrodatná odchylka",
+    "options": [
+      "5 000",
+      "5 500",
+      "6 000"
+    ],
+    "correct": 1,
+    "why": "Násobí se číslem 1,1, rozptyl se násobí 1,21."
+  },
+  {
+    "q": "Z-skór zaměstnance s mzdou 50 000 Kč (původní data)",
+    "options": [
+      "1",
+      "2",
+      "10 000"
+    ],
+    "correct": 1,
+    "why": "(50 000 − 40 000) / 5 000."
+  },
+  {
+    "zadani": "Mzdy leží mezi 30 000 Kč (minimum) a 60 000 Kč (maximum)."
+  },
+  {
+    "q": "Po normalizaci rozsahu má mzda 45 000 Kč hodnotu",
+    "options": [
+      "0,25",
+      "0,5",
+      "0,75"
+    ],
+    "correct": 1,
+    "why": "(45 − 30) / 30."
+  },
+  {
+    "q": "Pro silně zešikmená data se spíš hodí",
+    "options": [
+      "z-skór",
+      "robustní standardizace"
+    ],
+    "correct": 1,
+    "why": "Používá medián a IQR, které odlehlé hodnoty tolik neovlivní."
+  }
+])
+```
+:::
 
 ::: {.callout-important}
 ## Klíčové poznatky

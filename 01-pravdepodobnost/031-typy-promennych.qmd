@@ -1,5 +1,5 @@
 ---
-title: "Typy proměnných"
+title: "Co vlastně měříme: od kategorií k číslům"
 ---
 
 ```{ojs}
@@ -30,6 +30,20 @@ Typ proměnné určuje, **co s hodnotami smíme počítat**. Rozhoduje význam �
 
 ## Čtyři základní typy
 
+Rozdělení proměnných do čtyř úrovní měření zavedl v roce 1946 americký psycholog [Stanley Smith Stevens (1906–1973)]{.smallcaps} a používá se dodnes.
+
+::: {.column-margin .osobnost}
+![](../assets/portrety/stevens-urovne-mereni.jpg){.light-content}
+
+![](../assets/portrety/stevens-urovne-mereni-dark.jpg){.dark-content}
+
+**Stanley Smith Stevens**  
+*1906 – 1973, USA*
+
+Americký psycholog. V článku *On the Theory of Scales of Measurement* (1946) rozlišil čtyři úrovně měření: nominální, ordinální, intervalovou a poměrovou.
+<small>Portrét není dostupný pod volnou licencí</small>
+:::
+
 [Nominální proměnná]{.highlight-term} pouze pojmenovává. Příklady jsou krevní skupina, kraj bydliště nebo pohlaví. Pořadí kategorií je libovolné: když je prohodíme, informace zůstane stejná. Zvláštním případem je [dichotomická]{.highlight-term} (binární) proměnná, která má jen dvě hodnoty (úspěch/neúspěch, ano/ne). Jakmile jim přiřadíme čísla $1$ a $0$, získáme veličinu, kterou známe z Bernoulliho pokusu: $P(X=1)=\pi$, $P(X=0)=1-\pi$. Je to nejjednodušší možné rozdělení a stavební kámen mnoha dalších.
 
 [Ordinální proměnná]{.highlight-term} má kategorie s jasným pořadím, ale **neznámými rozestupy**. Příklady jsou známka ve škole, spokojenost (nízká, střední, vysoká) nebo pořadí v závodě. Víme, že druhý doběhl před třetím, ale nevíme, o kolik.
@@ -43,12 +57,9 @@ Nominální a ordinální proměnné jsou **kvalitativní** (kategoriální). Ob
 - [intervalová]{.highlight-term} proměnná nemá pevnou nulu, mají smysl rozdíly, ale ne podíly. Příkladem je teplota ve stupních Celsia: $20\,^\circ\mathrm{C}$ není „dvakrát tepleji“ než $10\,^\circ\mathrm{C}$.
 - [poměrová]{.highlight-term} proměnná má nulu danou věcně (věk, příjem, hmotnost, rychlost), takže smysl mají i podíly: $20$ kg je dvakrát víc než $10$ kg.
 
-### Ukázka: úrovně měření
-
 ::: {.callout-note}
-## Jak ovládat ukázku
-Osm lidí je zvážených na poměrové stupnici (nahoře, číslo je hmotnost v kg, barva značí skupinu A, B nebo C). Tlačítky vyberte úroveň měření: kopie bodů se přesunou na dolní osu a v popiscích zůstane jen to, co daná úroveň měření zachovává.
-Původní body nahoře se nemění.
+## Jak číst ukázku
+Osm lidí je zváženo na poměrové stupnici (číslo je hmotnost v kg, barva značí skupinu A, B nebo C). Vyberte nižší úroveň měření a sledujte, co se stane s kopiemi bodů dole: v popiscích zůstane jen to, co daná úroveň zachovává. Původní body nahoře se nemění.
 :::
 
 ```{ojs}
@@ -212,71 +223,6 @@ Průměr pořadí v závodě nebo průměr krevních skupin nemá smysl, i když
 
 Jednotlivé statistiky (modus, medián, průměr, rozptyl) jsou stručně popsané v [kapitole o deskriptivních statistikách](../02-statistika/01-typy-promennych.qmd). Zde stačí vědět, že vyšší typ proměnné jich dovoluje víc než nižší.
 
-### Ukázka: určete typ proměnné
-
-::: {.callout-note}
-## Jak ovládat ukázku
-U každé položky vyberte typ proměnné. Vpravo se hned ukáže, zda sedí, a jaké operace a statistiky daný typ dovoluje
-(tučně je to, co přibývá oproti nižšímu typu).
-:::
-
-```{ojs}
-items31 = [
-  {text: "Barva očí", type: "nominální"},
-  {text: "Teplota vzduchu ve °C", type: "intervalová"},
-  {text: "Pořadí v cíli závodu", type: "ordinální"},
-  {text: "Počet dětí v rodině", type: "poměrová"},
-  {text: "Teplota v kelvinech", type: "poměrová"},
-  {text: "Poštovní směrovací číslo", type: "nominální"},
-  {text: "Známka ve škole (1–5)", type: "ordinální"},
-  {text: "Rok narození", type: "intervalová"}
-]
-
-types31 = ["nominální", "ordinální", "intervalová", "poměrová"]
-
-// co typ dovoluje: každý vyšší typ umí vše z nižších a navíc nové (levels31[i] je novinka typu i)
-levels31 = [
-  {sym: ["=", "≠"], stat: ["modus"]},
-  {sym: ["<", ">"], stat: ["medián"]},
-  {sym: ["−"], stat: ["průměr"]},
-  {sym: ["÷"], stat: ["podíl"]}
-]
-```
-
-```{ojs}
-{
-  const tbl = html`<table style="font-size:14px;border-collapse:collapse"></table>`;
-  // jednotlivé symboly: nové tučně, zděděné šedě
-  const spans = (level, key) => levels31.slice(0, level + 1).flatMap((lv, i) =>
-    lv[key].map((x) => html`<span style="margin-right:10px;${i === level ? `font-weight:bold;color:${C.primaryText}` : `color:${C.context}`}">${x}</span>`));
-
-  items31.forEach((it) => {
-    const sel = html`<select>${["—", ...types31].map((t) => html`<option>${t}</option>`)}</select>`;
-    const verdict = html`<td style="padding:4px 14px 4px 0;white-space:nowrap"></td>`;
-    const ops = html`<td style="padding:4px 0"></td>`;
-    const update = () => {
-      const a = sel.value;
-      const done = a !== "—", ok = a === it.type;
-      verdict.textContent = !done ? "" : ok ? "✓ správně" : "✗ zkuste to znovu";
-      verdict.style.color = ok ? C.primaryText : C.warning;
-      ops.replaceChildren();
-      if (ok) {
-        const level = types31.indexOf(a);
-        ops.append(html`<div style="font-size:16px">${spans(level, "sym")}</div>`,
-                   html`<div style="font-size:12px">${spans(level, "stat")}</div>`);
-      }
-    };
-    sel.addEventListener("change", update);
-    tbl.append(html`<tr style="vertical-align:middle">
-      <td style="padding:4px 14px 4px 0">${it.text}</td>
-      <td style="padding:4px 14px 4px 0">${sel}</td>
-      ${verdict}${ops}
-    </tr>`);
-  });
-  return tbl;
-}
-```
-
 ## Popisná statistika z dat: tabulka četností
 
 Pro diskrétní proměnné (nominální, ordinální i kardinální diskrétní) je základním nástrojem **tabulka četností**. Tady je počet dětí ve 20 náhodně vybraných domácnostech.
@@ -396,6 +342,136 @@ U spojitých proměnných se oba grafy nahradí histogramem a křivkou hustoty (
 ## Typ proměnné a pravděpodobnostní rozdělení
 
 Typ proměnné říká, jakého druhu hodnoty veličina nabývá. Otázku, **s jakou pravděpodobností** je nabývá, a jak tu informaci zapsat přehledně a úplně, řeší pravděpodobnostní rozdělení (viz [kapitola o rozdělení pravděpodobnosti diskrétní veličiny](032-rozdeleni-diskretni-veliciny.qmd)).
+
+::: {.callout-note .otestujte}
+## Otestujte se
+
+Určete typ proměnné u každé položky. Vpravo se hned ukáže, zda sedí, a u správné odpovědi i operace a statistiky, které daný typ dovoluje (tučně je to, co přibývá oproti nižšímu typu).
+
+```{ojs}
+items31 = [
+  {text: "Barva očí", type: "nominální"},
+  {text: "Teplota vzduchu ve °C", type: "intervalová"},
+  {text: "Pořadí v cíli závodu", type: "ordinální"},
+  {text: "Počet dětí v rodině", type: "poměrová"},
+  {text: "Teplota v kelvinech", type: "poměrová"},
+  {text: "Poštovní směrovací číslo", type: "nominální"},
+  {text: "Známka ve škole (1–5)", type: "ordinální"},
+  {text: "Rok narození", type: "intervalová"}
+]
+
+types31 = ["nominální", "ordinální", "intervalová", "poměrová"]
+
+// co typ dovoluje: každý vyšší typ umí vše z nižších a navíc nové (levels31[i] je novinka typu i)
+levels31 = [
+  {sym: ["=", "≠"], stat: ["modus"]},
+  {sym: ["<", ">"], stat: ["medián"]},
+  {sym: ["−"], stat: ["průměr"]},
+  {sym: ["÷"], stat: ["podíl"]}
+]
+```
+
+```{ojs}
+{
+  const tbl = html`<table style="font-size:14px;border-collapse:collapse"></table>`;
+  // jednotlivé symboly: nové tučně, zděděné šedě
+  const spans = (level, key) => levels31.slice(0, level + 1).flatMap((lv, i) =>
+    lv[key].map((x) => html`<span style="margin-right:10px;${i === level ? `font-weight:bold;color:${C.primaryText}` : `color:${C.context}`}">${x}</span>`));
+
+  items31.forEach((it) => {
+    const sel = html`<select>${["—", ...types31].map((t) => html`<option>${t}</option>`)}</select>`;
+    const verdict = html`<td style="padding:4px 14px 4px 0;white-space:nowrap"></td>`;
+    const ops = html`<td style="padding:4px 0"></td>`;
+    const update = () => {
+      const a = sel.value;
+      const done = a !== "—", ok = a === it.type;
+      verdict.textContent = !done ? "" : ok ? "✓ správně" : "✗ zkuste to znovu";
+      verdict.style.color = ok ? C.primaryText : C.warning;
+      ops.replaceChildren();
+      if (ok) {
+        const level = types31.indexOf(a);
+        ops.append(html`<div style="font-size:16px">${spans(level, "sym")}</div>`,
+                   html`<div style="font-size:12px">${spans(level, "stat")}</div>`);
+      }
+    };
+    sel.addEventListener("change", update);
+    tbl.append(html`<tr style="vertical-align:middle">
+      <td style="padding:4px 14px 4px 0">${it.text}</td>
+      <td style="padding:4px 14px 4px 0">${sel}</td>
+      ${verdict}${ops}
+    </tr>`);
+  });
+  return tbl;
+}
+```
+
+Další otázky k typům proměnných:
+
+```{ojs}
+import {kviz} from "../assets/kviz.js"
+```
+
+```{ojs}
+kviz([
+  {
+    "zadani": "Autopůjčovna eviduje u každého vozu několik údajů. Určete u nich typ proměnné."
+  },
+  {
+    "q": "Typ pohonu (benzín, nafta, elektro, hybrid)",
+    "options": [
+      "nominální",
+      "ordinální",
+      "kardinální diskrétní",
+      "kardinální spojitá"
+    ],
+    "correct": 0,
+    "why": "Jen pojmenování, bez pořadí."
+  },
+  {
+    "q": "Stav vozu (výborný, dobrý, opotřebený)",
+    "options": [
+      "nominální",
+      "ordinální",
+      "kardinální diskrétní",
+      "kardinální spojitá"
+    ],
+    "correct": 1,
+    "why": "Pořadí je jasné, rozestupy neznáme."
+  },
+  {
+    "q": "Počet dveří",
+    "options": [
+      "nominální",
+      "ordinální",
+      "kardinální diskrétní",
+      "kardinální spojitá"
+    ],
+    "correct": 2,
+    "why": "Izolované číselné hodnoty."
+  },
+  {
+    "q": "Spotřeba v l/100 km",
+    "options": [
+      "nominální",
+      "ordinální",
+      "kardinální diskrétní",
+      "kardinální spojitá"
+    ],
+    "correct": 3,
+    "why": "Může nabýt libovolné hodnoty v intervalu."
+  },
+  {
+    "q": "Smíme spočítat průměrný typ pohonu?",
+    "options": [
+      "ano",
+      "ne"
+    ],
+    "correct": 1,
+    "why": "U nominální proměnné jde jen o četnosti a modus."
+  }
+])
+```
+:::
 
 ::: {.callout-important}
 ## Klíčové poznatky

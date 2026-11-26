@@ -1,5 +1,5 @@
 ---
-title: "Teoretická a experimentální pravděpodobnost"
+title: "Dvě cesty k pravděpodobnosti: z logiky a z pokusů"
 ---
 
 ```{ojs}
@@ -17,10 +17,14 @@ Meteorolog oznámí, že zítra bude pršet s pravděpodobností 30 %. Znamená 
 
 Ve školách se pravděpodobnost učí na příkladech házení kostky a řeší se například, jaká je pravděpodobnost, že padne sudé číslo. Pokud házíme kostkou, pak může padnout šest hodnot: $\Omega= \{1,2,3,4,5,6\}$, a sudá čísla z toho jsou tři: $A=\{2,4,6\}$. Pravděpodobnost se pak spočítá jako počet příznivých možností dělený počtem všech možností:
 
-::: {.column-margin}
-<!-- ![Pierre-Simon Laplace](https://m.media-amazon.com/images/I/512+nstKt9L.jpg) -->
-**Pierre-Simon Laplace**
+::: {.column-margin .osobnost}
+![](../assets/portrety/laplace.jpg)
+
+**Pierre-Simon Laplace**  
 *1749 – 1827, Paříž*
+
+Francouzský matematik a astronom. Klasickou definici pravděpodobnosti shrnul ve spisech *Théorie analytique des probabilités* (1812) a *Essai philosophique sur les probabilités* (1814).
+<small>Portrét: Wikimedia Commons, volné dílo</small>
 :::
 
 $$P(\text{sudé}) = \frac{|A|}{|\Omega|}=\frac{3}{6} = 0.5$$
@@ -32,11 +36,9 @@ Klasická pravděpodobnost je počet příznivých možností dělený počtem v
 
 Takto definovaná pravděpodobnost je založena na principu [stejně pravděpodobných možných výsledků]{.highlight-term}. 
 
-### Co když výsledky nejsou stejně pravděpodobné?
-
 Ale co když výsledky nejsou stejně pravděpodobné, například kdybychom stěny kostky přelepili tak, že strany 1 a 2 by byly modré a stěny 3, 4, 5 a 6 červené? Pak pravděpodobnost červené > pravděpodobnost modré! Na základním principu to však nic nemění, protože máme možnosti $\Omega= \{m,m,c,c,c,c\}$, a pravděpodobnost každé jednotlivé stěny je stále stejná. 
 
-Takto pojatá definice pravděpodobnosti byla prokazatelně používána již od 16. století, ale její kodifikovaná verze je připisována [Pierru Laplaceovi (1749-1827)]{.smallcaps}. 
+Takto pojatá definice pravděpodobnosti byla prokazatelně používána již od 16. století, ale její kodifikovaná verze je připisována [Pierru Laplaceovi (1749–1827)]{.smallcaps}. 
 
 
 :::{.callout-caution}
@@ -46,18 +48,22 @@ Uvedený příklad vychází z tradičního pojetí. O tom, jak bylo toto pojet�
 
 ## "Zákon velkých čísel"
 
-Pravděpodobnost často chápeme intuitivně jako míru nejistoty v náhodných jevech – například pravděpodobnost, že při hodu férovou mincí padne panna. Ale co přesně znamená pravděpodobnost 50 %? [Jacob Bernoulli (1655-1705)]{.smallcaps}, jeden z prvních matematiků, kteří se tímto problémem systematicky zabývali, navrhl, že pravděpodobnost je něco, co se projevuje v dlouhodobém opakování pokusu. Představte si, že házíte mincí tisíckrát: i když v prvních deseti hodech může osmkrát padnout panna, s rostoucím počtem hodů se podíl hodů, při nichž padla panna, výrazně blíží k 1/2. 
+Pravděpodobnost často chápeme intuitivně jako míru nejistoty v náhodných jevech – například pravděpodobnost, že při hodu férovou mincí padne líc. Ale co přesně znamená pravděpodobnost 50 %? [Jacob Bernoulli (1655–1705)]{.smallcaps}, jeden z prvních matematiků, kteří se tímto problémem systematicky zabývali, navrhl, že pravděpodobnost je něco, co se projevuje v dlouhodobém opakování pokusu. Představte si, že házíte mincí tisíckrát: i když v prvních deseti hodech může osmkrát padnout líc, s rostoucím počtem hodů se podíl hodů, při nichž padl líc, výrazně blíží k 1/2. 
 
+::: {.column-margin .osobnost}
+![](../assets/portrety/bernoulli.jpg)
 
-### Ukázka: relativní četnost se ustaluje
+**Jacob Bernoulli**  
+*1655 – 1705, Basilej*
+
+Švýcarský matematik. Zákon velkých čísel dokázal v knize *Ars conjectandi*, která vyšla až po jeho smrti (1713).
+<small>Portrét: Wikimedia Commons, volné dílo</small>
+:::
+
 
 ::: {.callout-note}
-## Jak ovládat ukázku
-Vyberte situaci (mince, kostka, kostka s nestejnými stranami nebo písmena v textu) a řekněte, co je „úspěch“. Každý výsledek se zapíše do posloupnosti nahoře, úspěch je oranžový, a dole se z posloupnosti počítá relativní četnost úspěchu (úspěchy děleno pokusy). Přidávejte pokusy a sledujte, jak se „roztřesená“ pozorovaná data postupně uklidňují.
-
-U mince a kostky se výsledky losují a cílová hodnota $\pi$ je dána situací: pás kolem ní má šířku $\pm 0{,}05$ a šedý trychtýř je $\pm 1/\sqrt{n}$. Osa počtu pokusů je odmocninová, aby byl vidět začátek i konec.
-
-U písmen se nic nelosuje. Písmena se čtou popořadě z textu Karla Čapka *R.U.R.* (1920, volné dílo, [Wikisource](https://cs.wikisource.org/wiki/R.U.R.)) a cílovou hodnotu předem neznáme, takže se nekreslí. Text je rozdělen na tři stejné části, které se čtou současně: první modře, druhá a třetí šedě. Všechny tři četnosti se mají ustálit na téže hodnotě. Světlý pás kolem modré čáry je $\pm 2\sqrt{f(1-f)/n}$, počítané jen z dat, a s rostoucím $n$ se zužuje.
+## Jak číst ukázku
+Nahoře je posloupnost výsledků (úspěch je oranžový), dole relativní četnost úspěchu. Přidávejte pokusy a sledujte, jak se z roztřesených hodnot stává ustálená čára. U mince a kostky je cílová hodnota $\pi$ dána situací: pás kolem ní má šířku $\pm 0{,}05$ a šedý trychtýř je $\pm 1/\sqrt{n}$ (osa pokusů je odmocninová, aby byl vidět začátek i konec). U písmen z textu Karla Čapka *R.U.R.* (1920, volné dílo, [Wikisource](https://cs.wikisource.org/wiki/R.U.R.)) cílovou hodnotu předem neznáme. Text je rozdělen na tři stejné části (první modře, druhá a třetí šedě) a všechny tři četnosti se mají ustálit na téže hodnotě. Zkuste přepnout situaci a porovnat, jak rychle se četnost ustálí.
 :::
 
 ```{ojs}
@@ -66,7 +72,7 @@ import {textCz} from "../assets/text-cz.js"
 
 ```{ojs}
 situations1 = [
-  {name: "Mince", faces: ["P", "O"]},
+  {name: "Mince", faces: ["L", "R"]},
   {name: "Kostka 1–6", faces: [1, 2, 3, 4, 5, 6]},
   {name: "Kostka 3-4-4-5-5-5", faces: [3, 4, 4, 5, 5, 5]},
   {name: "Písmena v českém textu", text: true}
@@ -90,7 +96,7 @@ successDefs1 = {
     ];
   }
   if (sit1.name === "Mince") {
-    return [{label: "Panna", test: (x) => x === "P"}, {label: "Orel", test: (x) => x === "O"}];
+    return [{label: "Líc", test: (x) => x === "L"}, {label: "Rub", test: (x) => x === "R"}];
   }
   if (sit1.name === "Kostka 1–6") {
     return [
@@ -281,12 +287,10 @@ $$\lim_{n\to \infty}\frac{n_A}{n}=P(A)$$
 
 ::: {.callout-warning}
 ## Pozor: zákon velkých čísel nic „nedorovnává“
-Po sérii panen není další hod o nic pravděpodobněji orel. Relativní četnost se ustaluje proto, že se dřívější odchylky „ředí“ rostoucím počtem pokusů, ne proto, že by je mince vyrovnávala.
+Po sérii líců není další hod o nic pravděpodobněji rub. Relativní četnost se ustaluje proto, že se dřívější odchylky „ředí“ rostoucím počtem pokusů, ne proto, že by je mince vyrovnávala.
 :::
 
-### Model urny
-
-Bernoulli tento princip ilustroval na modelu urny: představte si nádobu s fixním počtem černých a bílých kuliček (v neznámém poměru). Každé losování s vrácením je nezávislý pokus. Pokud losujete velmi mnohokrát a spočítáte podíl vytažených černých kuliček, tento podíl se s rostoucím počtem losování přibližuje skutečnému (neznámému) poměru černých kuliček v urně. Tímto způsobem **odhalujeme skrytou pravděpodobnost empiricky, z dat**.
+[Bernoulli]{.smallcaps} tento princip ilustroval na modelu urny: představte si nádobu s fixním počtem černých a bílých kuliček (v neznámém poměru). Každé losování s vrácením je nezávislý pokus. Pokud losujete velmi mnohokrát a spočítáte podíl vytažených černých kuliček, tento podíl se s rostoucím počtem losování přibližuje skutečnému (neznámému) poměru černých kuliček v urně. Tímto způsobem **odhalujeme skrytou pravděpodobnost empiricky, z dat**.
 
 
 ## Bernoulli vs Laplace - dva přístupy k pravděpodobnosti 
@@ -303,7 +307,87 @@ Rozlišujeme dva hlavní způsoby, jak nahlížet na pravděpodobnost výsledku.
 Každý přístup má nejen své historické ukotvení, ale také praktické využití. **Laplaceův přístup** je ideální např. pro sázení na výhru při losování, zatímco **Bernoulliův přístup** je vhodný např. na určení výše pojistného pro zahraniční cestu (pravděpodobnost úrazu při cestách pro velké množství pojištěnců konverguje k hodnotě, kterou neznáme).
 :::
 
-## Shrnutí
+::: {.callout-note .otestujte}
+## Otestujte se
+
+Odpovězte na otázky, výsledek se ukáže hned. Odpověď můžete měnit.
+
+```{ojs}
+import {kviz} from "../assets/kviz.js"
+```
+
+```{ojs}
+kviz([
+  {
+    "zadani": "Ve studijní skupině je 24 studentů, 6 z nich nosí brýle. Učitel náhodně vybere jednoho studenta k odpovědi."
+  },
+  {
+    "q": "Pravděpodobnost, že vybraný student nosí brýle",
+    "options": [
+      "0,06",
+      "0,25",
+      "0,40",
+      "0,75"
+    ],
+    "correct": 1,
+    "why": "6 příznivých možností z 24 stejně pravděpodobných."
+  },
+  {
+    "q": "O jaký přístup k pravděpodobnosti jde?",
+    "options": [
+      "klasický (a priori)",
+      "experimentální (a posteriori)"
+    ],
+    "correct": 0,
+    "why": "Počítáme z logiky úlohy, bez pokusů."
+  },
+  {
+    "zadani": "Pojišťovna eviduje 10 000 pojištěnců, z nichž 480 mělo za rok úraz na cestách. Pravděpodobnost úrazu odhaduje z těchto dat."
+  },
+  {
+    "q": "Odhad pravděpodobnosti úrazu",
+    "options": [
+      "0,0048",
+      "0,048",
+      "0,48"
+    ],
+    "correct": 1,
+    "why": "480 / 10 000 = 0,048."
+  },
+  {
+    "q": "O jaký přístup jde tentokrát?",
+    "options": [
+      "klasický (a priori)",
+      "experimentální (a posteriori)"
+    ],
+    "correct": 1,
+    "why": "Vycházíme z pozorovaných dat."
+  },
+  {
+    "zadani": "Férová mince padla pětkrát za sebou líc."
+  },
+  {
+    "q": "Pravděpodobnost líce v dalším hodu",
+    "options": [
+      "větší než 1/2",
+      "menší než 1/2",
+      "přesně 1/2"
+    ],
+    "correct": 2,
+    "why": "Hody jsou nezávislé, mince si výsledky nepamatuje."
+  },
+  {
+    "q": "Relativní četnost úspěchů se s rostoucím počtem pokusů blíží pravděpodobnosti.",
+    "options": [
+      "ano",
+      "ne"
+    ],
+    "correct": 0,
+    "why": "To je zákon velkých čísel."
+  }
+])
+```
+:::
 
 ::: {.callout-important}
 ## Klíčové poznatky

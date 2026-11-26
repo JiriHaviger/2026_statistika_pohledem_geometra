@@ -1,5 +1,5 @@
 ---
-title: "Typická rozdělení diskrétních proměnných"
+title: "Známé tváře náhody: binomické, geometrické a Poissonovo"
 ---
 
 ```{ojs}
@@ -55,10 +55,19 @@ Konstantu $3$ z předchozího výpočtu můžeme zobecnit pomocí binomického �
 
 ## Binomické rozdělení 
 
-::: {.callout-note .zapamatuj}
-## Zapamatujte si: kdy použít binomické rozdělení
-Popisuje pravděpodobnost několika úspěchů. Typickou otázkou je například: *„Jaká je pravděpodobnost, že když hodíme šesti kostkami, tak padnou dvě šestky?“*
+Pokus s právě dvěma výsledky nese jméno [Jacoba Bernoulliho (1655–1705)]{.smallcaps}, který opakované nezávislé pokusy zkoumal v knize *Ars conjectandi*.
+
+::: {.column-margin .osobnost}
+![](../assets/portrety/bernoulli.jpg)
+
+**Jacob Bernoulli**  
+*1655 – 1705, Basilej*
+
+Po něm se jmenuje Bernoulliho pokus (úspěch, nebo neúspěch), ze kterého binomické rozdělení vzniká, a Bernoulliho schéma opakovaných nezávislých pokusů.
+<small>Portrét: Wikimedia Commons, volné dílo</small>
 :::
+
+Popisuje pravděpodobnost několika úspěchů. Typickou otázkou je například: *„Jaká je pravděpodobnost, že když hodíme šesti kostkami, tak padnou dvě šestky?“*
 
 ::: {.callout-note}
 ## Binomické rozdělení (předpoklady)
@@ -114,13 +123,21 @@ Plot.plot({
 
 Funkce, kterou jsme takto zavedli, se nazývá pravděpodobnostní funkce (*probability mass function*, PMF); její obecný popis najdete v [kapitole o rozdělení diskrétní veličiny](032-rozdeleni-diskretni-veliciny.qmd). Matematické podrobnosti o binomickém rozdělení viz @wikipedia-binomial.  
 
-### Galtonova deska (binomické rozdělení)
+Jak se z binomického rozdělení při velkém počtu pokusů stává zvonovitá křivka, názorně předvedl britský vědec [Francis Galton (1822–1911)]{.smallcaps} svou deskou s hřebíky.
+
+::: {.column-margin .osobnost}
+![](../assets/portrety/galton.jpg)
+
+**Francis Galton**  
+*1822 – 1911, Londýn*
+
+Britský vědec. Kolem roku 1873 sestrojil „kvinkunx“, desku s hřebíky, kterou dnes nazýváme Galtonova deska a která ukazuje, jak se binomické rozdělení blíží zvonovité křivce.
+<small>Portrét: Wikimedia Commons, volné dílo</small>
+:::
 
 ::: {.callout-note}
-## Jak ovládat ukázku
-Kulička v každé řadě hřebíků spadne vpravo s pravděpodobností $\pi$, jinak vlevo.
-Počet odrazů vpravo z $n$ řad je binomická veličina. Osa y ukazuje podíl kuliček v přihrádce.
-Oranžová úsečka je teoretický podíl (pravděpodobnost přihrádky) a modrý sloupec je skutečný podíl ze spadlých kuliček.
+## Jak číst ukázku
+Kulička v každé řadě hřebíků spadne vpravo s pravděpodobností $\pi$, počet odrazů vpravo z $n$ řad je binomická veličina. Osa $y$ je podíl kuliček v přihrádce: oranžová úsečka je teorie, modrý sloupec skutečný podíl. Zkuste změnit $\pi$ a sledujte, jak se hromádka posouvá a přestává být souměrná.
 :::
 
 ```{ojs}
@@ -243,10 +260,7 @@ viewof pi4 = Inputs.range([0.1, 0.9], {step: 0.05, value: 0.5, label: "Prst vpra
 Binomické rozdělení patří do skupiny **diskrétních pravděpodobnostních rozdělení**. To znamená, že náhodná veličina v těchto případech nabývá pouze jasně oddělených, spočetných hodnot (typicky celých čísel $0, 1, 2, \dots$). Kromě binomického rozdělení se v praxi často setkáváme s dalšími typy, které modelují odlišné situace, několik jich zde uvedeme:
 
 ## Geometrické rozdělení
-::: {.callout-note .zapamatuj}
-## Zapamatujte si: kdy použít geometrické rozdělení
 Popisuje „čekání na první úspěch“. Typickou otázkou je například: *„Jaká je pravděpodobnost, že budeme muset hodit kostkou právě pětkrát, než poprvé padne šestka?“* Viz podrobněji @shafer2012intro.
-:::
 
 ::: {.callout-note appearance="simple"}
 ## Geometrické rozdělení (předpoklady)
@@ -277,12 +291,22 @@ Plot.plot({
 ```
 
 
+::: {.callout-note collapse="true"}
+## Pro zájemce: negativně binomické rozdělení
+Geometrické rozdělení čeká na **první** úspěch. Čekáme-li na **$r$-tý** úspěch, jde o [negativně binomické rozdělení]{.highlight-term}. Má dva parametry: počet požadovaných úspěchů $r$ a pravděpodobnost úspěchu $\pi$. Je-li $X$ počet pokusů potřebných k $r$-tému úspěchu, pak
+
+$$p(x) = \binom{x-1}{r-1}\cdot \pi^r\cdot (1-\pi)^{x-r}, \qquad x=r,\,r+1,\,\dots,\qquad \mu=\frac{r}{\pi}.$$
+
+Pro $r=1$ dostaneme geometrické rozdělení.
+
+**Příklad:** dotazník vyplní 25 % oslovených. Pravděpodobnost, že pátý souhlas získáme právě u osmého oslovených, je $\binom{7}{4}\cdot 0{,}25^5\cdot 0{,}75^3\approx 0{,}014$. V průměru je potřeba oslovit $5/0{,}25=20$ lidí.
+
+**Pozor na Excel:** funkce `NEGBINOM.DIST` počítá **neúspěchy** před $r$-tým úspěchem, ne pokusy. Proto se v ní zadává $x-r$ a $r$, tedy `=NEGBINOM.DIST(x-r; r; p; NE)`. Pro geometrické rozdělení ($r=1$) vychází `x-1`.
+:::
+
 ## Hypergeometrické rozdělení
 
-::: {.callout-note .zapamatuj}
-## Zapamatujte si: kdy použít hypergeometrické rozdělení
 Podobá se binomickému, ale na rozdíl od něj modeluje výběry **bez vracení**. Použijeme ho například při výpočtu pravděpodobnosti, že mezi pěti vytaženými kartami z balíčku budou právě dvě esa [@grinstead2012introduction].
-:::
 
 ::: {.callout-note appearance="simple"}
 ## Předpoklady (Hypergeometrické)
@@ -324,14 +348,9 @@ Plot.plot({
 })
 ```
 
-### Hypergeometrické rozdělení: výběr bez vracení
-
 ::: {.callout-note}
-## Jak ovládat ukázku
-V urně je $N$ kuliček, z toho $M$ modrých. Vytáhneme $n$ kuliček a zajímá nás počet modrých mezi nimi. Pokud tažené kuličky **nevracíme**,
-každý tah změní složení urny a počet modrých má hypergeometrické rozdělení. Pokud je **vracíme**, tahy jsou nezávislé a vychází binomické
-rozdělení $\mathrm{Bi}(n;\,M/N)$. Přepínač nahoře ukazuje obě varianty: oranžová úsečka je teorie vybrané varianty, šedá úsečka
-teorie té druhé. Rozdíl je největší u malé urny a mizí, když je urna proti výběru velká.
+## Jak číst ukázku
+Z urny s $N$ kuličkami, z toho $M$ modrých, vytáhneme $n$ kuliček. Bez vracení má počet modrých hypergeometrické rozdělení, s vracením binomické $\mathrm{Bi}(n;\,M/N)$. Oranžová úsečka je teorie vybrané varianty, šedá teorie druhé. Zkuste zmenšit urnu: rozdíl mezi variantami roste, u velké urny zmizí.
 :::
 
 ```{ojs}
@@ -507,10 +526,19 @@ viewof n6 = Inputs.range([1, Math.min(10, N6)], {step: 1, value: Math.min(5, N6)
 ```
 
 ## Poissonovo rozdělení
-::: {.callout-note .zapamatuj}
-## Zapamatujte si: kdy použít Poissonovo rozdělení
-Vyjadřuje pravděpodobnost výskytu $k$ událostí v určitém pevném intervalu (času, plochy atd.). Například počet pacientů přicházejících na pohotovost během jedné hodiny [@wikipedia_poisson].
+Rozdělení vzácných událostí popsal francouzský matematik [Siméon Denis Poisson (1781–1840)]{.smallcaps}, po kterém se jmenuje.
+
+::: {.column-margin .osobnost}
+![](../assets/portrety/poisson.jpg)
+
+**Siméon Denis Poisson**  
+*1781 – 1840, Paříž*
+
+Francouzský matematik a fyzik. Rozdělení popsal v práci o pravděpodobnosti soudních rozsudků (1837). Slavný příklad s počtem vojáků usmrcených kopnutím koně pochází až od Ladislause Bortkiewicze (1898).
+<small>Portrét: Wikimedia Commons, volné dílo</small>
 :::
+
+Vyjadřuje pravděpodobnost výskytu $k$ událostí v určitém pevném intervalu (času, plochy atd.). Například počet pacientů přicházejících na pohotovost během jedné hodiny [@wikipedia_poisson].
 
 ::: {.callout-note appearance="simple"}
 ## Předpoklady (Poisson)
@@ -566,15 +594,9 @@ Plot.plot({
 
 
 
-### Poissonovo rozdělení: body padají do časových intervalů
-
 ::: {.callout-note}
-## Jak ovládat ukázku
-Události přicházejí náhodně v čase (v průměru $\lambda$ na interval). Kurzor jede po ose
-a po každém intervalu se spočítá, kolik bodů v něm bylo, a číslo se vypíše pod osu. Dole roste histogram
-počtů bodů v intervalu, oranžové úsečky jsou teoretická Poissonova PMF. Tlačítko **+1 interval** posune kurzor
-o jeden interval, **Dokončit sadu** spočítá všechny zobrazené intervaly najednou. Při větším $\lambda$ je
-na ose méně intervalů, aby body zůstaly čitelné.
+## Jak číst ukázku
+Události přicházejí náhodně v čase, v průměru $\lambda$ na interval. Po každém intervalu se spočítá, kolik bodů v něm bylo, a dole roste histogram těchto počtů. Oranžové úsečky jsou teoretická Poissonova PMF. Sledujte, jak se s přibývajícími intervaly histogram blíží teorii. Při větším $\lambda$ je na ose méně intervalů, aby body zůstaly čitelné.
 :::
 
 ```{ojs}
@@ -716,15 +738,9 @@ viewof lam4 = Inputs.range([0.5, 10], {step: 0.5, value: 3, label: "Průměr na 
 }
 ```
 
-### Geometrické rozdělení a jeho vztah k Poissonovu
-
 ::: {.callout-note}
-## Jak ovládat ukázku
-Čas rozdělíme na malé **sloty**. V každém slotu nastane událost s pravděpodobností $\pi=\lambda/m$, kde $m$ je počet slotů
-v jednom **bloku** a $\lambda$ průměrný počet událostí na blok. Na tentýž proud událostí se dá dívat dvěma způsoby.
-Vlevo se počítá, **kolik událostí je v bloku** (blíží se Poissonovu rozdělení). Vpravo se měří, **kolik slotů uplyne mezi dvěma
-událostmi**, tedy jak dlouho se čeká na další. To je geometrické rozdělení $P(X=k)=(1-\pi)^{k-1}\,\pi$. Čím větší $m$
-(kratší sloty), tím přesněji platí Poissonovo rozdělení pro počty.
+## Jak číst ukázku
+Čas je rozdělen na krátké sloty a v každém nastane událost s pravděpodobností $\pi=\lambda/m$. Vlevo se počítá, kolik událostí je v bloku (blíží se Poissonovu rozdělení), vpravo kolik slotů uplyne mezi dvěma událostmi (geometrické rozdělení). Zkuste zvětšit $m$, tedy zkrátit sloty: Poissonovo rozdělení pak pro počty platí přesněji.
 :::
 
 ```{ojs}
@@ -879,18 +895,282 @@ viewof m5 = Inputs.radio([10, 20, 40], {value: 20, label: "Slotů v bloku (m)"})
 Těmito (a dalšími) rozděleními se v tomto textu nebudeme dále podrobně zabývat, ale je dobré o nich vědět.
 
 
+## Typické úlohy z distribuční funkce
+
+Pravděpodobnosti intervalů se u všech diskrétních rozdělení počítají z distribuční funkce $F(x)=P(X\leq x)$, ať ji máme z tabulky, nebo z Excelu. Ukážeme to na jednom rozdělení. Test má $10$ otázek, u každé jsou čtyři odpovědi a jen jedna je správná. Student odpovídá náhodným tipem, počet správných odpovědí je $X\sim\mathrm{Bi}(10;\,0{,}25)$. Hodnoty distribuční funkce jsou v tabulce.
+
+| $k$ | 0 | 1 | 2 | 3 | 4 | 5 | 6 |
+|:---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| $F(k)$ | 0,0563 | 0,2440 | 0,5256 | 0,7759 | 0,9219 | 0,9803 | 0,9965 |
+
+: Distribuční funkce $\mathrm{Bi}(10;\,0{,}25)$ {#tbl-cdf-binom}
+
+::: {.callout-note .zapamatuj}
+## Zapamatujte si: převod na distribuční funkci
+Protože $X$ nabývá jen celých čísel, je $P(X<x_0)=P(X\leq x_0-1)$. Každé zadání se převede na hodnoty $F$:
+
+| Zadání | Převod na $F$ | Excel (binomické) |
+|:---|:---:|:---|
+| $P(X<x_0)$ | $F(x_0-1)$ | `=BINOM.DIST(x0-1; n; p; ANO)` |
+| $P(X\leq x_0)$ | $F(x_0)$ | `=BINOM.DIST(x0; n; p; ANO)` |
+| $P(X>x_0)$ | $1-F(x_0)$ | `=1-BINOM.DIST(x0; n; p; ANO)` |
+| $P(X\geq x_0)$ | $1-F(x_0-1)$ | `=1-BINOM.DIST(x0-1; n; p; ANO)` |
+| $P(a\leq X\leq b)$ | $F(b)-F(a-1)$ | `=BINOM.DIST(b; n; p; ANO)-BINOM.DIST(a-1; n; p; ANO)` |
+:::
+
+::: {.callout-note .priklad}
+## Příklad: pravděpodobnost z distribuční funkce
+Jaká je pravděpodobnost, že student odpoví správně
+
+- na méně než $3$ otázky, $P(X<3)$,
+- nejvýše na $3$ otázky, $P(X\leq 3)$,
+- na více než $3$ otázky, $P(X>3)$,
+- alespoň na $3$ otázky, $P(X\geq 3)$,
+- na $2$ až $4$ otázky včetně, $P(2\leq X\leq 4)$?
+
+$$\begin{aligned}
+P(X<3) &= F(2) &&= 0{,}5256\\
+P(X\leq 3) &= F(3) &&= 0{,}7759\\
+P(X>3) &= 1-F(3) &&= 1-0{,}7759 = 0{,}2241\\
+P(X\geq 3) &= 1-F(2) &&= 1-0{,}5256 = 0{,}4744\\
+P(2\leq X\leq 4) &= F(4)-F(1) &&= 0{,}9219-0{,}2440 = 0{,}6779
+\end{aligned}$$
+:::
+
+Opačná úloha hledá z pravděpodobnosti hodnotu. Distribuční funkce diskrétní veličiny skáče, takže přesnou rovnost $F(x)=p$ většinou nenajdeme.
+
+::: {.callout-note .zapamatuj}
+## Zapamatujte si: kvantil diskrétní veličiny
+Kvantil $Q(p)$ je **nejmenší hodnota** $x$, pro kterou je $F(x)\geq p$. V tabulce se najde první $k$ s $F(k)\geq p$. Úloha $P(X>x_0)\leq p_0$ se převede na $F(x_0)\geq 1-p_0$, tedy $x_0=Q(1-p_0)$. V Excelu `=BINOM.INV(n; p; hladina)`.
+:::
+
+::: {.callout-note .priklad}
+## Příklad: hodnota z pravděpodobnosti
+Nejvýše kolik správných odpovědí dosáhne student s pravděpodobností alespoň $90$ %? Kolik správných odpovědí překročí jen $5$ % studentů?
+
+$$\begin{aligned}
+P(X\leq x_0)\geq 0{,}9 &\;\Rightarrow\; F(3)=0{,}7759<0{,}9,\; F(4)=0{,}9219\geq 0{,}9 \;\Rightarrow\; x_0=4\\[4pt]
+P(X>x_0)\leq 0{,}05 &\;\Rightarrow\; F(x_0)\geq 0{,}95:\; F(4)=0{,}9219<0{,}95,\; F(5)=0{,}9803\geq 0{,}95 \;\Rightarrow\; x_0=5
+\end{aligned}$$
+:::
+
 ::: {.callout-tip}
 ## 💡 Jak na to v Excelu?
 Pokud potřebujete tyto pravděpodobnosti spočítat v tabulkovém procesoru, použijte následující funkce. Poslední hodnotu ve funkci nastavte na `NE` (nebo `0`) pro pravděpodobnost přesné hodnoty, nebo na `ANO` (nebo `1`) pro kumulativní pravděpodobnost.
 
 * **Binomické:** `=BINOM.DIST(x; n; p; NE)`
+* **Binomické, kvantil:** `=BINOM.INV(n; p; hladina)` (nejmenší $x$, pro které je $F(x)\geq$ hladina)
 * **Hypergeometrické:** `=HYPGEOM.DIST(x; n; M; N; NE)`
 * **Geometrické:** `=NEGBINOM.DIST(x-1; 1; p; NE)` *(Excel nemá přímou funkci GEOM.DIST, používá se negativně binomické rozdělení s jedním úspěchem: $x-1$ neúspěchů před prvním úspěchem v $x$-tém pokusu)*
+* **Negativně binomické:** `=NEGBINOM.DIST(x-r; r; p; NE)` *(počet pokusů $x$ do $r$-tého úspěchu)*
 * **Poissonovo:** `=POISSON.DIST(x; lambda; NE)`
+:::
+
+::: {.callout-note .otestujte}
+## Otestujte se
+
+Odpovězte na otázky, výsledek se ukáže hned. Odpověď můžete měnit.
+
+```{ojs}
+import {kviz} from "../assets/kviz.js"
+```
+
+```{ojs}
+kviz([
+  {
+    "zadani": "Test má 8 otázek, u každé jsou 4 odpovědi a jen jedna je správná. Student odpovídá náhodným tipem."
+  },
+  {
+    "q": "Počet správných odpovědí má rozdělení",
+    "options": [
+      "binomické",
+      "geometrické",
+      "hypergeometrické",
+      "Poissonovo"
+    ],
+    "correct": 0,
+    "why": "Pevný počet nezávislých pokusů se dvěma výsledky."
+  },
+  {
+    "q": "Parametry tohoto rozdělení",
+    "options": [
+      "π = 0,25",
+      "n = 8 a π = 0,25",
+      "λ = 2",
+      "N = 8, M = 2 a n = 4"
+    ],
+    "correct": 1,
+    "why": "Binomické rozdělení má dva parametry: počet pokusů n a pravděpodobnost úspěchu π."
+  },
+  {
+    "q": "P(student nemá správně ani jednu otázku)",
+    "options": [
+      "0,10",
+      "0,25",
+      "0,75"
+    ],
+    "correct": 0,
+    "why": "0,75⁸ ≈ 0,100."
+  },
+  {
+    "zadani": "Student opakuje zápočtový test. V každém pokusu uspěje s pravděpodobností 0,4, pokusy jsou nezávislé."
+  },
+  {
+    "q": "Počet pokusů do prvního úspěchu má rozdělení",
+    "options": [
+      "binomické",
+      "geometrické",
+      "hypergeometrické",
+      "Poissonovo"
+    ],
+    "correct": 1,
+    "why": "Čekáme na první úspěch."
+  },
+  {
+    "q": "Parametry tohoto rozdělení",
+    "options": [
+      "π = 0,4",
+      "n = 5 a π = 0,4",
+      "λ = 2,5",
+      "N = 10, M = 4 a n = 5"
+    ],
+    "correct": 0,
+    "why": "Geometrické rozdělení má jediný parametr: pravděpodobnost úspěchu π."
+  },
+  {
+    "q": "P(uspěje až napotřetí)",
+    "options": [
+      "0,144",
+      "0,216",
+      "0,400"
+    ],
+    "correct": 0,
+    "why": "0,6 · 0,6 · 0,4: dvakrát neúspěch, potom úspěch."
+  },
+  {
+    "zadani": "Studijní skupina má 25 studentů, 10 z nich pracuje při studiu. Učitel vybere do komise tři studenty náhodně bez vracení."
+  },
+  {
+    "q": "Počet pracujících studentů v komisi má rozdělení",
+    "options": [
+      "binomické",
+      "geometrické",
+      "hypergeometrické",
+      "Poissonovo"
+    ],
+    "correct": 2,
+    "why": "Výběr bez vracení z konečného souboru."
+  },
+  {
+    "q": "Parametry tohoto rozdělení",
+    "options": [
+      "n = 3 a π = 0,4",
+      "N = 25, M = 10 a n = 3",
+      "λ = 1,2",
+      "π = 0,4"
+    ],
+    "correct": 1,
+    "why": "Hypergeometrické rozdělení má tři parametry: velikost souboru N, počet úspěchů v něm M a velikost výběru n."
+  },
+  {
+    "q": "P(v komisi není žádný pracující student)",
+    "options": [
+      "0,20",
+      "0,22",
+      "0,60"
+    ],
+    "correct": 0,
+    "why": "C(15,3) / C(25,3) ≈ 0,198."
+  },
+  {
+    "zadani": "Ordinaci praktického lékaře v průměru volá 6 pacientů za hodinu, hovory jsou nezávislé."
+  },
+  {
+    "q": "Počet hovorů za hodinu má rozdělení",
+    "options": [
+      "binomické",
+      "geometrické",
+      "hypergeometrické",
+      "Poissonovo"
+    ],
+    "correct": 3,
+    "why": "Nezávislé události s konstantní průměrnou četností v čase."
+  },
+  {
+    "q": "Parametry tohoto rozdělení",
+    "options": [
+      "λ = 6",
+      "n = 6 a π = 0,5",
+      "N = 6, M = 3 a n = 6",
+      "π = 1/6"
+    ],
+    "correct": 0,
+    "why": "Poissonovo rozdělení má jediný parametr: průměrný počet událostí λ."
+  },
+  {
+    "q": "P(za hodinu nezavolá nikdo)",
+    "options": [
+      "0,002",
+      "0,06",
+      "0,17"
+    ],
+    "correct": 0,
+    "why": "e⁻⁶ ≈ 0,0025."
+  },
+  {
+    "zadani": "Další situace: rozhodněte jen o typu rozdělení."
+  },
+  {
+    "q": "Počet překlepů na stránce textu (v průměru 2 na stránku)",
+    "options": [
+      "binomické",
+      "geometrické",
+      "hypergeometrické",
+      "Poissonovo"
+    ],
+    "correct": 3,
+    "why": "Události v pevné jednotce, jeden parametr λ."
+  },
+  {
+    "q": "Počet dnů z pěti, kdy student přijde pozdě (každý den s pravděpodobností 0,2 nezávisle)",
+    "options": [
+      "binomické",
+      "geometrické",
+      "hypergeometrické",
+      "Poissonovo"
+    ],
+    "correct": 0,
+    "why": "Pevný počet nezávislých pokusů, n = 5 a π = 0,2."
+  },
+  {
+    "q": "Kolikátý den po sobě student poprvé přijde pozdě (každý den s pravděpodobností 0,2)",
+    "options": [
+      "binomické",
+      "geometrické",
+      "hypergeometrické",
+      "Poissonovo"
+    ],
+    "correct": 1,
+    "why": "Čekání na první úspěch."
+  },
+  {
+    "q": "Počet pojištěnců se škodou mezi 50 náhodně vybranými (u každého 2 %, nezávisle)",
+    "options": [
+      "binomické",
+      "geometrické",
+      "hypergeometrické",
+      "Poissonovo"
+    ],
+    "correct": 0,
+    "why": "Binomické rozdělení s n = 50 a π = 0,02."
+  }
+])
+```
 :::
 
 ::: {.callout-important}
 ## Klíčové poznatky
+- Pravděpodobnost se počítá z distribuční funkce: $P(X<x_0)=F(x_0-1)$, $P(X\leq x_0)=F(x_0)$, $P(X>x_0)=1-F(x_0)$, kvantil je nejmenší $x$ s $F(x)\geq p$
 - Pravděpodobnostní rozdělení je souhrn všech možných výsledků s jejich pravděpodobnostmi
 - U malého počtu možností se zadává nejčastěji tabulkou
 - U většího počtu možností grafem
