@@ -18,11 +18,21 @@ třídou přidanou ke stejnému bloku.
 | Upozornění | `::: {.callout-caution}` | šedá `$jh-context` | jako Poznámka |
 | Pozor | `::: {.callout-warning}` | cihlová `$jh-warning` | jako Poznámka |
 | Zapamatujte si | `::: {.callout-note .zapamatuj}` | okrová `$jh-accent` | jako Poznámka |
+| Otestujte se | `::: {.callout-note .otestujte}` | okrová `$jh-accent` (v tmavém režimu ztmavená o `$callout-otestujte-darken`) | plná hlavička jako Klíčové poznatky, uvnitř kvíz `assets/kviz.js` |
 
 - Ikony se nezobrazují. Barva titulku a pruhu je stejná.
 - **Klíčové poznatky** (závěr kapitoly) jsou vždy `callout-important`, ne `callout-note`.
 - Pojem se při definici zvýrazní `[pojem]{.highlight-term}` (tmavě modrý štítek s bílým písmem, v obou režimech stejný).
 - Zelená a červená jsou jen pro bloky a text. **V grafech a animacích zůstává jen modrá, šedá a okrový akcent.**
+
+## Nadpisy a členění
+
+- V textu jen úrovně `#` (název) a `##`, úroveň `###` se nepoužívá (v záložkách a okrajích ano). Ukázky a bloky se nadpisem nečlení, stačí jejich titulek v calloutu.
+- Po nadpisu vždy následuje běžný text, nikdy přímo callout, kód ani tabulka.
+- Callout nad interaktivní ukázkou se jmenuje **Jak číst ukázku** (ne „Jak ovládat ukázku“), podrobně `pisani-kapitol.md`.
+- **Shrnutí** a **Otestujte se** nemají vlastní nadpis `##`: jsou to calloutu (`callout-important`, `callout-note .otestujte`).
+- Kvíz je před Klíčovými poznatky: `::: {.callout-note .otestujte}` s nadpisem `## Otestujte se`, uvnitř dvě OJS buňky (`import {kviz} from "../assets/kviz.js"` a `kviz([...])`). Rozložení je zadání | odpovědi | výsledek, položka `{zadani, tabulka}` vloží delší zadání příkladu a za ním následuje více otázek. Otázky mají být praktické (autopůjčovna, servis, pojišťovna…) a bez umělého natahování, počet není pevný.
+- Ilustrace u osobností bez volného portrétu mají světlou a tmavou variantu: `![](…x.jpg){.light-content}` a `![](…x-dark.jpg){.dark-content}`.
 
 ## Soubory
 

@@ -3,6 +3,7 @@
 @docs_for_agents/AGENTS.md
 @docs_for_agents/animace-konvence.md
 @docs_for_agents/bloky-a-tmavy-rezim.md
+@docs_for_agents/pisani-kapitol.md
 
 ## Tento projekt
 
@@ -16,12 +17,16 @@ Starý název „Havi Notes“ se už nepoužívá.
   Kapitoly mají jednotnou YAML hlavičku (jen `title:`, bez nadpisu `#`). Společná nastavení složky jsou v `_metadata.yml`
   (u pravděpodobnosti `execute: echo: false`), takže se v buňkách nepíše `//| echo: false`.
   Úvod části (`01-pravdepodobnost/intro.qmd`, zapojený přes `part:` v `_quarto.yml`) je záměrně obecný, **nevyjmenovává kapitoly**
-  (jen průběh části, barevnou konvenci a ovládání ukázek), takže přidání kapitoly nevyžaduje jeho úpravu.
-  Texty knihy vykají (ne tykání).
+  (jen průběh části a jak je kapitoly uspořádány; barevná konvence a ovládání ukázek jsou v `index.qmd`), takže přidání kapitoly nevyžaduje jeho úpravu.
+  Texty knihy vykají (ne tykání). Nadpisy jen `##` (bez `###`), po nadpisu vždy text, ne callout; pravidla v `bloky-a-tmavy-rezim.md`.
+  Jména osob v textu se píšou kapitálkami s roky v závorce: `[Jméno (1749–1827)]{.smallcaps}` (pomlčka mezi roky).
+  Historické osobnosti jsou také v okraji (`::: {.column-margin .osobnost}`, portrét z `assets/portrety/`, jen volná licence);
+  v textu vždy stojí věta, proč tam osoba je. Na každé stránce má být aspoň jedna.
 - `_drafts/` – pracovní místo pro rozpracované texty (Quarto složky začínající `_` nerenderuje).
 - `_archiv/` – odložený generátor kapitol (CrewAI), staré podklady a zálohy. Nepoužívá se, nečíst a neupravovat bez pokynu
   (Quarto složku s `_` nerenderuje). Kniha se píše a ladí přímo s Claudem.
-- `docs_for_agents/` – konvence pro Clauda (`animace-konvence.md`, `bloky-a-tmavy-rezim.md`, `jhrules/README.md`)
+- `docs_for_agents/` – konvence pro Clauda (`animace-konvence.md`, `bloky-a-tmavy-rezim.md`, `pisani-kapitol.md`, `jhrules/README.md`),
+  skripty pro portréty a ilustrace (`skripty/`)
   a vzorové OJS buňky `ojs_vzory.qmd` (prohlídka: `quarto preview` tohoto souboru).
 
 ### Pravidla

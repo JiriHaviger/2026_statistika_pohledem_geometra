@@ -23,6 +23,7 @@ $jh-green-dark:    #475F1A;   // tmavá olivová: bloky „Příklad“
 // Bloky (callouty): podbarvení těla. Tmavý režim (hag_dark.scss) hodnoty zvyšuje.
 $callout-tint:       0.05;
 $callout-solid-tint: 0.075;
+$callout-otestujte-darken: 0%;   // ztmavení hlavičky Otestujte se (světlý režim: čistá akcentová barva)
 
 // Bootstrap / Quarto
 $body-bg:          $jh-bg;
@@ -261,6 +262,64 @@ div.callout {
   &.callout-important { @include jh-callout-solid($jh-primary-dark, $jh-primary); }
   &.callout-note.priklad { @include jh-callout($jh-green-dark); }
   &.callout-note.zapamatuj { @include jh-callout($jh-accent); }
+  &.callout-note.otestujte { @include jh-callout-solid(darken($jh-accent, $callout-otestujte-darken), $jh-accent); }
 
   &.callout-style-minimal .callout-header { display: none !important; }
 }
+
+// Historická osobnost v okraji: portrét a stručná poznámka (zápis: ::: {.column-margin .osobnost})
+.osobnost {
+  font-size: 0.85rem;
+  line-height: 1.35;
+  img { width: 100%; height: auto; margin-bottom: 0.4rem; }
+  p { margin: 0 0 0.35rem 0; }
+  .osobnost-jmeno { font-weight: 700; }
+  .osobnost-roky { color: $jh-context; }
+}
+
+// Jména osob v textu se sázejí kapitálkami (zápis: [Jméno (roky)]{.smallcaps})
+.smallcaps {
+  font-variant: small-caps;
+  letter-spacing: 0.02em;
+}
+
+// Rozbalovací výběry v ukázkách: čitelné ve světlém i tmavém režimu (barvy se berou z motivu)
+select {
+  color: $body-color;
+  background-color: $body-bg;
+  border: 1px solid $jh-context;
+  option { color: $body-color; background-color: $body-bg; }
+}
+
+// Přepínač světlého a tmavého režimu (pod logem): zvýrazněný akcentem a s popiskem
+.quarto-color-scheme-toggle {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.2rem 0.75rem 0.2rem 0.5rem !important;
+  border: 1px solid $jh-accent;
+  border-radius: 1rem;
+  background-color: rgba($jh-accent, 0.12);
+  color: $jh-accent !important;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none !important;
+  white-space: nowrap;
+  .bi::before { width: 1.5rem !important; height: 1.5rem !important; background-size: 1.5rem 1.5rem !important; }
+  &::after { content: "Světlý / tmavý režim"; }
+  &:hover { background-color: rgba($jh-accent, 0.25); }
+}
+
+// Rezervované místo pro OJS ukázky: buňka je při načtení stránky prázdná a pak se vyplní,
+// bez rezervy by stránka pod ní poskočila. Třída se přidává buňce zápisem //| classes: rez-440
+// (číslo je výška v pixelech, mírně pod skutečnou výškou, ať nevzniká prázdné místo).
+.cell.rez-slider-2 .cell-output-display, .cell.rez-slider-3 .cell-output-display { min-height: 34px; }   // každý viewof je zvláštní výstup, rezerva na jeden řádek
+.cell.rez-260 .cell-output-display { min-height: 260px; }
+.cell.rez-300 .cell-output-display { min-height: 300px; }
+.cell.rez-320 .cell-output-display { min-height: 320px; }
+.cell.rez-330 .cell-output-display { min-height: 330px; }
+.cell.rez-400 .cell-output-display { min-height: 400px; }
+.cell.rez-420 .cell-output-display { min-height: 420px; }
+.cell.rez-440 .cell-output-display { min-height: 440px; }
+.cell.rez-560 .cell-output-display { min-height: 560px; }
+
