@@ -16,7 +16,8 @@ book:
   author: "Jirka Haviger"
   date: today
   date-format: "D. M. YYYY"
-  repo-url: https://github.com/JiriHaviger/2026_statistika_pohledem_geometra
+  # repo-url (ikona GitHubu v postranním panelu) je vypnutý, překrýval se s přepínačem režimu:
+  # repo-url: https://github.com/JiriHaviger/2026_statistika_pohledem_geometra
   site-url: https://jirihaviger.github.io/2026_statistika_pohledem_geometra/
   chapters:
     - index.qmd
@@ -27,6 +28,8 @@ book:
         - 01-pravdepodobnost/031-typy-promennych.qmd
         - 01-pravdepodobnost/032-rozdeleni-diskretni-veliciny.qmd
         - 01-pravdepodobnost/04-prst-diskretni.qmd
+        - 01-pravdepodobnost/05-prst-spojita-rozdeleni.qmd
+        - 01-pravdepodobnost/055-prst-spojita-typicka.qmd
     - part: "**Deskriptivní statistika**"
       chapters:
         - 02-statistika/01-typy-promennych.qmd
