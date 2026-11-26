@@ -22,10 +22,16 @@ Každá kapitola začíná konkrétní otázkou, pojmy zavádí na příkladech 
 
 ## Jak číst obrázky a ukázky
 
+::: {.callout-note}
+## Význam barev v ukázkách
 Interaktivní ukázky používají stále stejné barvy:
 
 - **modrá** je to, co se skutečně pozorovalo nebo nasimulovalo (hody, výběry, četnosti z dat),
 - **oranžová** zvýrazňuje to, na co se právě soustředíte, nejčastěji teoretickou hodnotu, ke které se pozorování blíží,
 - **šedá** je kontext, tedy to, co zrovna není předmětem pozornosti.
+:::
 
+::: {.callout-note}
+## Ovládání ukázek
 Ukázky můžete pouštět plynule, nebo po krocích tlačítky **+1**, **+10** a **+100**, a vždy je lze vrátit na začátek tlačítkem **Restart**. Prvních několik kroků stojí za to sledovat pomalu, protože v nich je vidět celý princip. S rostoucím počtem pokusů se pozorování uklidňuje a blíží se teorii.
+:::

@@ -61,13 +61,23 @@ Zkusme tyto situace zobecnit a formalizovat.
 Příklad **karty**: pravděpodobnost, že vytáhnu piky (jev $A$), je $\frac{13}{52}$, pravděpodobnost, že vytáhnu něco jiného, je $\frac{39}{52}$, ale lze to také vyjádřit jinak: $\frac{39}{52}=\frac{52-13}{52}=1-\frac{13}{52}$. Pravděpodobnost doplňku jevu $A$ je tedy
 $$P(\bar{A})=1-P(A).$$
 
+::: {.callout-note .zapamatuj}
+## Zapamatujte si
+Je-li přímý výpočet složitý, často je snazší spočítat pravděpodobnost opačného jevu a odečíst ji od jedničky.
+:::
+
 ## Pravděpodobnost sjednocení jevů
 Abychom mohli postoupit s pravděpodobností od jednotlivých jevů, potřebujeme nadefinovat aritmetiku pro pravděpodobnosti. Nejprve ale rozdělíme jevy na takové, které mohou nastat současně, a ty, které ne.
 
 Příklad **karty**: když vybereme kartu, může to být buď srdce (jev $A$), nebo piky (jev $B$), ostatní nás v tuto chvíli nezajímá. Karta nemůže být srdce a piky současně. Jevům, které nemohou nastat současně, říkáme [neslučitelné]{.highlight-term}. Pravděpodobnost, že vytáhnu srdce nebo piky, je $P(A\lor B) = P(A) + P(B)$, resp. v množinové notaci
 $$P(A\cup B) = P(A) + P(B)$$
 
-Tento vztah se označuje jako **pravidlo součtu** pro slovní vyjádření **buď ... anebo ...**
+::: {.callout-note .zapamatuj}
+## Zapamatujte si: pravidlo součtu
+Tento vztah se označuje jako **pravidlo součtu** pro slovní vyjádření **buď ... anebo ...** Platí jen pro neslučitelné jevy.
+:::
+
+### Slučitelné jevy
 
 Pokračujeme v příkladu **karty**: když vybereme kartu, může to být srdce (jev $A$) nebo král (jev $B$), ale také srdcový král ($A\land B$), ostatní nás v tuto chvíli nezajímá. Karta může být srdcový král, obě vlastnosti mohou nastat současně. Jevům, které mohou nastat současně, říkáme [slučitelné]{.highlight-term}. Pravděpodobnost, že vytáhnu srdce nebo krále, musíme rozdělit na tři neslučitelné případy: srdce, ale ne král ($A\land \bar{B}$), král, ale ne srdce ($\bar{A} \land B$), a srdcový král ($A \land B$). Pak je $P(A\lor B) = P(A\land \bar{B}) + P(\bar{A} \land B) + P(A \land B)$, resp. v množinové notaci
 $P(A\cup B) = P(A\cap \bar{B}) + P(\bar{A} \cap B) + P(A \cap B)$. Pokud bychom se chtěli přiblížit tvaru pro neslučitelné jevy, můžeme také psát
@@ -76,10 +86,27 @@ $$P(A\cup B) = P(A) + P(B) - P(A \cap B)$$
 
 Průnik odečítáme, protože v součtu je zahrnut dvakrát: jednou jako součást $A$ a podruhé jako součást $B$. Neslučitelné jevy mají průnik prázdný, takže i ty spadají pod tento vzorec.
 
+::: {.callout-note .priklad}
+## Příklad: srdce nebo král
+V balíčku je 13 srdcí, 4 králové a jeden srdcový král, takže
+$P(A\cup B)=\frac{13}{52}+\frac{4}{52}-\frac{1}{52}=\frac{16}{52}$.
+Bez odečtení průniku bychom srdcového krále započítali dvakrát a dostali $\frac{17}{52}$.
+:::
+
+::: {.callout-warning}
+## Pozor: neslučitelné neznamená nezávislé
+Neslučitelné jevy (nemohou nastat současně) jsou naopak silně závislé: jakmile nastal jeden, druhý už nastat nemůže. Nezávislost si proto nepleťte s neslučitelností.
+:::
+
+### Ukázka: neslučitelné a slučitelné jevy
+
+::: {.callout-note}
+## Jak ovládat ukázku
 V ukázce jsou $A$ a $B$ dva svislé pruhy v obdélníku s 2000 náhodnými body (modré jsou body v $A$ nebo v $B$, oranžové v obou). Posuvník **Posun B** přesouvá $B$ k $A$.
 Dokud se pruhy nedotýkají, jsou jevy neslučitelné a součet $P(A)+P(B)$ je přesně $P(A\cup B)$.
 Jakmile se překrývají (slučitelné jevy), součet počítá průnik dvakrát a je větší než $P(A\cup B)$ právě o $P(A\cap B)$.
 V histogramu mají sloupce $A$ a $B$ oranžový díl, tedy průnik (stejná barva jako body v obou jevech), a jsou posunuté tak, aby na sebe tyto díly navazovaly. Sloupec sjednocení je slepený přes průnik, takže ho obsahuje jen jednou, $P(A\cup B)=P(A)+P(B)-P(A\cap B)$. Osa a tmavá čárka (teoretická hodnota) platí pro sjednocení a pro základnu sloupce $B$.
+:::
 
 ```{ojs}
 {
@@ -214,13 +241,22 @@ Pokud budeme pokračovat v příkladu **karty** (jev $A$ je „srdce“, jev $B$
 
 $$P(B\mid A)=\frac{P(A\cap B)}{P(A)}$$
 
-Podmíněnou pravděpodobnost si můžete vyzkoušet v simulaci.
+::: {.callout-warning}
+## Pozor: $P(B\mid A)$ není $P(A\mid B)$
+Pravděpodobnost krále mezi srdci je $P(B\mid A)=\frac{1}{13}$, ale pravděpodobnost srdce mezi králi je $P(A\mid B)=\frac{1}{4}$. Podmínka mění, „z čeho“ se pravděpodobnost počítá, proto jde o dvě různá čísla.
+:::
+
+### Ukázka: podmíněná pravděpodobnost
+
+::: {.callout-note}
+## Jak ovládat ukázku
 Do obdélníku, který je celým výsledkovým prostorem, se postupně přidávají náhodné body (plynule, nebo po 10 a po 100).
 Tři obdélníky jsou jevy $A$, $B$ a $C$. Horní řada tlačítek vybírá, **čí pravděpodobnost** sledujeme (body v tomto jevu jsou modré, ostatní šedé),
 dolní řada **podmínku** (**Celek** = bez podmínky). Vybraná podmínka se roztáhne na celou plochu, body mimo ni zmizí
 a čitatel i jmenovatel se počítají jen z toho, co zbylo. Modré body jsou pak průnik sledovaného jevu s podmínkou.
 Sloupce vpravo ukazují živý odhad $P(\cdot \mid \text{podmínka})$, oranžová čárka je teoretická hodnota, ke které odhad konverguje.
 Všimněte si, že $P(C \mid A) = 0$ (obdélníky se nepřekrývají) a $P(A \mid A) = 1$.
+:::
 
 ```{ojs}
 {
@@ -440,18 +476,29 @@ $P(B)=P(B\mid A)$, dosadíme podmíněnou pravděpodobnost $P(B)=\frac{P(B\land 
 
 $$P(A\cap B) = P(A)\cdot P(B)$$
 
+::: {.callout-note .zapamatuj}
+## Zapamatujte si: pravidlo součinu
 Tento vztah se označuje jako **pravidlo součinu** pro slovní vyjádření **... a současně ...**
+:::
 
 Tato rovnice se používá jako definice [nezávislosti jevů]{.highlight-term}. Pokud známe obě strany rovnice, lze tento vztah využít k testování nezávislosti dvou jevů.
 
-Nezávislost si můžete prohlédnout v simulaci. Jev $A$ je svislý pruh a jev $B$ vodorovný pruh, jejich průnik je obdélník o stranách $P(A)$ a $P(B)$,
+### Ukázka: nezávislost jevů
+
+::: {.callout-note}
+## Jak ovládat ukázku
+Jev $A$ je svislý pruh a jev $B$ vodorovný pruh, jejich průnik je obdélník o stranách $P(A)$ a $P(B)$,
 takže jeho plocha je přesně $P(A)\cdot P(B)$. Posuvník **míra závislosti** přesouvá $B$ postupně dovnitř $A$ (pravděpodobnost $P(B)$ se přitom nemění).
 Tlačítko **B** zúží vesmír na $B$, modré body jsou vždy body v $A$. Levá dvojice sloupců porovnává $P(A)$ a $P(A\mid B)$, pravá $P(A\cap B)$ a $P(A)\cdot P(B)$.
 Šedé sloupce jsou hodnoty, které by platily při nezávislosti, oranžová čárka je teorie.
+:::
 
-Ze vzorku body nikdy nevyjde rovnost přesně, rozdíl $d = \hat P(A\cap B) - \hat P(A)\cdot\hat P(B)$ kolísá náhodně.
+::: {.callout-caution}
+## Upozornění: ze vzorku rovnost nikdy nevyjde přesně
+Rozdíl $d = \hat P(A\cap B) - \hat P(A)\cdot\hat P(B)$ kolísá náhodně.
 Proto je v pravé dvojici světlý pás tolerance (zhruba $\pm 2$ směrodatné chyby rozdílu). Leží-li $d$ v pásu, data nezávislosti neodporují.
 Je to jen hrubý náznak, jak o nezávislosti rozhodovat ze vzorku. Správné testování přijde v kapitole o výběru a populaci.
+:::
 
 ```{ojs}
 {
@@ -663,6 +710,8 @@ Je to jen hrubý náznak, jak o nezávislosti rozhodovat ze vzorku. Správné te
   return node;
 }
 ```
+
+### Průnik: nezávislé a závislé jevy
 
 Pokud máme nezávislé jevy, pak
 $$P(A\cap B) = P(A)\cdot P(B)$$

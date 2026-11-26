@@ -80,13 +80,20 @@ Pojďme se podívat na to, jak na lze charakterizovat variabilitu dat vzhledem k
     \end{align} 
 :::
 
-:::{.callout-note}
+:::{.callout-note .zapamatuj}
+## Zapamatujte si: průměr je těžiště
 To že součet odchylek je nulový ukazuje na to, že se opravdu jedná o těžiště: součet odchylek záporných = součet odchylek kladných, žádná strana není zvýhodněna. 
 :::
+
 
 Abychom získali průměrnou odchylku můžeme buď použít absolutní hodnoty a získat tak hodnotu zvanou ***mean absolute deviance, MAD*** : $MAD=\frac{\sum |x_i-\bar{x}|}{n}$, Nebo spočítat nejprve kvadratické odchylky $(x_i-\bar{x})^2$, určit průměrnou kvadratickou odchylku $\frac{\sum (x_i-\bar{x})^2}{n}$ a poté ji odmocnit. Získáme tím hodnotu které se říká [směrodatná odchylka]{.highlight-term} a značí se symbolem *sd (standard deviation)* 
 
 $$ sd=\sqrt{\frac{\sum (x_i-\bar{x})^2}{n}} $$
+
+::: {.callout-warning}
+## Pozor: dělení $n$, nebo $n-1$
+Vzorec výše dělí počtem pozorování $n$. Statistický software u výběrové směrodatné odchylky často dělí $n-1$, takže stejná data mohou dát mírně odlišný výsledek. Při srovnávání s programem si ověřte, který vzorec používá.
+:::
 
 Koncept směrodatné odchylky lze získat také jinou, geometrickou cestou. Pro zájemce ji zde uvedeme. 
 
@@ -190,7 +197,10 @@ Vektor $\mathbf{x}$ je tedy rozložen do vektoru do směru vektoru $\mathbf{1}$ 
 
 $$\mathbf{x}=\bar{x}\mathbf{1}+\mathbf{e}$$
 
+::: {.callout-note .zapamatuj}
+## Zapamatujte si: rozklad vektoru dat
 Vektor dat jsme rozložili na dvě složky, složku průměru a složku odchylek.
+:::
 
 ```{ojs}
 //| echo: false
@@ -383,7 +393,10 @@ $$
   skew(X)=\frac{\sum z_i^3}{n}
 $$
 
+::: {.callout-note .zapamatuj}
+## Zapamatujte si: jak číst šikmost
 Když je skew záporné znamená to, že větší odchylky jsou vlevo a datsa jsou nahuštěná vpravo, když je šikmost kladná, znamená to že větší odchylky jsou doprava a data jsou nahuštěná vlevo. skew kolem hodnoty 0 znamená symetrické rozdělení  
+:::
 
 ::: {#fig-skewness}
 
@@ -485,7 +498,10 @@ $$
   kurt(X) = \frac{\sum z_i^4}{n}
 $$
 
+::: {.callout-note .zapamatuj}
+## Zapamatujte si: špičatost a normální rozdělení
 Protože se jako základní distribuce bere **normální, gaussova, zvonová** která má  $kurt=3$, uvádí se často vzorec pro *excess kurtosis* $kurt_{excess}=\frac{\sum z_i^4}{n}-3$ který pak lze intepretovat jako odchýlení špičatosti od normálního rozdělení. Podrobněji o normálním rozdělení viz kapitola o normálním rozdělení.
+:::
 
 Následující graf ukazuje vliv velikosti odchylek na jejich "příspěvek" do průměru, rozptylu, šikmosti a špičatosti. Na ose x je hodnota $z$, na jednotlivých křivkách velikosti $|z|,z^2,z^3,z^4$, které tvoří příspěvek do příslušných momentových metrik. 
 
@@ -662,7 +678,8 @@ Plot.plot({
 Momentové charakteristiky různých rozdělení. Osa $x$ obsahuje standardizovaná data $z_i$, osa y transformovaná data $z_i^k$ a jejich průměr. Modrá oblast je oblast útlumu, data z této oblasti mají potlačený vliv a data mimo naopak posílený. 
 :::
 
-## Klíčové poznatky {.unnumbered}
+::: {.callout-important}
+## Klíčové poznatky
 
 |  | |
 |:---|:---| 
@@ -672,3 +689,4 @@ Momentové charakteristiky různých rozdělení. Osa $x$ obsahuje standardizova
 |standardizace|$z_i=\frac{x_i - \bar{x}}{sd}$|
 |šikmost|$skew=\frac{1}{n}\sum z_i^3$|
 |špičatost|$kurt=\frac{1}{n}\sum z_i^4$, nebo $kurt_{excess}=\frac{1}{n}\sum z_i^4-3$|
+:::

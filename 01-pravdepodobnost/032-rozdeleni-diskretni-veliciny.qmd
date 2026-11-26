@@ -19,9 +19,17 @@ Sázková kancelář nabízí hru s upravenou kostkou. Aby mohla určit férovou
 
 [Diskrétní náhodná veličina]{.highlight-term} $X$ nabývá hodnot $x_1, x_2, \dots$ s pravděpodobnostmi $p_k=P(X=x_k)$, kde $p_k$ je pravděpodobnost $k$-té hodnoty. Tyto pravděpodobnosti jsou nezáporné a jejich součet je $1$. Rozdělení lze zadat třemi způsoby: **tabulkou**, **grafem** nebo **vzorcem**.
 
+::: {.callout-note .zapamatuj}
+## Zapamatujte si
+Pravděpodobnosti všech hodnot jsou nezáporné a jejich součet je vždy $1$.
+:::
+
 ### Příklad: upravená kostka
 
+::: {.callout-note .priklad}
+## Zadání
 Kostka má jednu stěnu se čtyřkou, dvě stěny s pětkou a tři stěny se šestkou.
+:::
 
 **Tabulkou:**
 
@@ -65,7 +73,10 @@ p(x)=P(X=x)=
   \end{cases}
 $$
 
+::: {.callout-caution}
+## Upozornění
 Vzorec je stručný, ale pro čtenáře méně přehledný než tabulka a graf.
+:::
 
 ## Dvě tváře pravděpodobnosti: bod versus interval
 
@@ -77,7 +88,10 @@ $$F(x)=\sum_{k:\,x_k\leq x} p_k.$$
 
 ### Grafy PMF a CDF
 
+::: {.callout-note}
+## Jak ovládat ukázku
 Posuvníkem vybíráme bod $t$ a sledujeme, jak se v CDF mění hodnota $F(t)$.
+:::
 
 ```{ojs}
 // pravděpodobnostní funkce jako „tyčinky“: nulová čára s prázdnými kolečky, tyčinky s plnými
@@ -130,16 +144,22 @@ Plot.plot({
 })
 ```
 
+::: {.callout-warning}
+## Pozor: CDF je spojitá zprava
 Všimněte si, že CDF je **spojitá zprava**. V bodě $x=5$ graf „vyskočí“ na hodnotu $F(5)=3/6$ a plné kolečko leží na horním schodu. Prázdné kolečko ukazuje limitu zleva, která je $1/6$. Důvod je, že $P(X\leq 5)=P(X\leq 5{,}5)$: mezi $5$ a $5{,}5$ nepřibyla žádná možná hodnota, takže se pravděpodobnost nezměnila. Výška každého schodu je přesně hodnota $p_k$ v daném bodě.
+:::
 
 ### Simulace: od PMF a CDF k hodům
 
+::: {.callout-note}
+## Jak ovládat ukázku
 Vyberte rozdělení a pouštějte hody. Nahoře se vypisují výsledky, v grafech je oranžově teorie
 (pravděpodobnostní funkce PMF a distribuční funkce CDF) a modře to, co vychází z hodů. S přibývajícími hody
 se modrá přibližuje k oranžové. U délky slov z *R.U.R.* žádná teorie neexistuje, oranžově je tam rozdělení délek
 v celém díle a modře rozdělení z právě přečtených slov. I dvě poloviny téhož textu se mírně liší: největší rozdíl
 relativní četnosti některé délky mezi první a druhou polovinou díla je asi 0,02 (u šestipísmenných slov). Rozdělení
 z krátkého úseku textu tedy kolísá, ale s přibývajícími slovy se k celku přibližuje.
+:::
 
 ```{ojs}
 import {textCz} from "../assets/text-cz.js"
@@ -375,6 +395,8 @@ import {textCz} from "../assets/text-cz.js"
 
 ### Vlastnosti
 
+::: {.callout-note .zapamatuj}
+## Zapamatujte si: vlastnosti PMF a CDF
 Pro PMF platí
 
 $$p(x)\geq 0,\qquad \sum_{x} p(x)=1,$$
@@ -384,6 +406,7 @@ a pro CDF
 $$F \text{ je neklesající},\qquad \lim_{x\to-\infty}F(x)=0,\qquad \lim_{x\to+\infty}F(x)=1,$$
 
 a navíc pro interval $P(a<X\leq b)=F(b)-F(a)$.
+:::
 
 ## Číselné charakteristiky
 
@@ -405,11 +428,20 @@ mean32 = d3.sum(kostka32, d => d.x * d.p)
 var32 = d3.sum(kostka32, d => (d.x - mean32) ** 2 * d.p)
 ```
 
-Pro naši kostku vychází $E(X)=$ ${mean32.toFixed(3).replace(".", ",")} a $\operatorname{Var}(X)=$ ${var32.toFixed(3).replace(".", ",")}, tedy $\sigma\approx$ ${Math.sqrt(var32).toFixed(3).replace(".", ",")}. Střední hodnota $16/3$ není hodnotou, které kostka může nabýt. Jde o průměr při velmi mnoha hodech, ne o „nejčastější výsledek“.
+Pro naši kostku vychází $E(X)=$ ${mean32.toFixed(3).replace(".", ",")} a $\operatorname{Var}(X)=$ ${var32.toFixed(3).replace(".", ",")}, tedy $\sigma\approx$ ${Math.sqrt(var32).toFixed(3).replace(".", ",")}. 
 
+::: {.callout-warning}
+## Pozor: střední hodnota není nejčastější výsledek
+Střední hodnota $16/3$ není hodnotou, které kostka může nabýt. Jde o průměr při velmi mnoha hodech, ne o „nejčastější výsledek“.
+:::
+
+::: {.callout-note .priklad}
+## Příklad: medián kostky
 U mediánu je kostka poučná: $F(5)=0{,}5$ přesně, takže podmínce vyhovuje každé číslo z intervalu $[5,6]$. Obvykle se volí střed tohoto intervalu, tedy $5{,}5$.
+:::
 
-## Klíčové poznatky {.unnumbered}
+::: {.callout-important}
+## Klíčové poznatky
 
 |  |  |
 |:---|:---|
@@ -421,3 +453,4 @@ U mediánu je kostka poučná: $F(5)=0{,}5$ přesně, takže podmínce vyhovuje 
 | střední hodnota | $E(X)=\sum_k x_k\,p_k$ |
 | rozptyl | $\operatorname{Var}(X)=\sum_k (x_k-\mu)^2\,p_k$ |
 | medián | $F(m)\geq 0{,}5$ a $P(X\geq m)\geq 0{,}5$, nemusí být určen jednoznačně |
+:::

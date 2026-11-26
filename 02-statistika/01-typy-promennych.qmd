@@ -103,10 +103,13 @@ Plot.link(minMaxLinesArray, {
 })
 ```
 
-### Příklad {.unnumbered .unlisted}
+::: {.callout-note .priklad}
+## Příklad: motorová vozidla v domácnostech
 Abychom nemluvili jen teoreticky, pojďme si ukázat několik základních deskriptivních statistik na konkrétním a malém příkladu. Máme deset domácností a sledujeme, jaký mají počet motorových vozidel (automobilů, motocyklů, elektrokoloběžek). Získaná data po uspořádání od nejmenšího po největší jsou $\{1, 2, 2, 2, 3, 3, 4, 5, 8, 11\}$. Data jsou **kardinální poměrová**, nula je korektně definovaná. 
 
+
 První otázkou je, kolik aut má "normální" domácnost, kolik je minimum, maximum, případně jaký počet aut má dolních 25% domácností. Jinými slovy kde v našich datech leží střed, kde leží minimum, kde čtvrtina. Protože se ptáme otázkou **kde**, na jakém místě osy, nazývají se takovéto hodnoty **míry polohy**.
+:::
 
 Nejznámější mírou polohy je aritmetický **průměr $\bar{x}$**. Spočítáme ho tak, že sečteme všechny hodnoty a vydělíme je jejich počtem.  Protože však souvisí s dalšími momentovými charakteristikami, podrobněji viz [kapitola o momentových charakteristikách](02-deskriptivni-statistiky-momenty.qmd).
 **Průměr (aritmetický průměr)**:
@@ -114,7 +117,15 @@ Nejznámější mírou polohy je aritmetický **průměr $\bar{x}$**. Spočítá
    m = \bar{x}= \frac{1 + 2 + 2 + 2 + 3 + 3 + 4 + 5 + 8 + 11}{10} = \frac{41}{10} = 4.1
    $$
 
+::: {.callout-note .zapamatuj}
+## Zapamatujte si: jak číst průměr
 Můžeme tedy říci, že průměrná domácnost má $4.1$ motorových vozidel
+:::
+
+::: {.callout-warning}
+## Pozor: průměr je citlivý na odlehlé hodnoty
+Jediná domácnost s 11 vozidly zvedá průměr ($4.1$) nad medián ($3$), který si ji „nevšímá“. Jak se průměr s odlehlými hodnotami chová, se dozvíte v dalších kapitolách.
+:::
 
 ## Míra založená na četnostech
 
@@ -122,9 +133,13 @@ Mírou polohy založenou na četnostech je [Modus (mod)]{.highlight-term}, což 
 
 $\{1, \mathbf{ 2, 2, 2}, 3, 3, 4, 5, 8, 11\}$, tedy $mds=2$. 
 
+::: {.callout-note .zapamatuj}
+## Zapamatujte si: jak číst modus
 Můžeme tedy říci, že nejčastěji má domácnost dvě motorová vozidla.
+:::
 
-::: {.callout-note}
+::: {.callout-caution}
+## Upozornění: kdy lze modus použít
 Modus ůžeme určit pro věechny typy proměnných, nominální, ordinální i kardinální. 
 :::
 
@@ -367,9 +382,13 @@ Pro málo kategorií nám graf příliš neřekne, pro příliš mnoho je pak ne
 
 Mírou polohy založenou na uspořádání je [Medián (mdn)]{.highlight-term}, prostřední hodnota v uspořádaném datovém souboru, případně polovina z dvou prostředních hodnot, pokud máme sudý počet dat. V našem případě je medián mezi 3 a 3, $\{1, 2, 2, 2, \mathbf{ 3, 3}, 4, 5, 8, 11\}$ tedy $\text{mdn} = \frac{3 + 3}{2} = 3$.
 
+::: {.callout-note .zapamatuj}
+## Zapamatujte si: jak číst medián
 Můžeme tedy říci, že 50 % domácností má tři nebo méně aut. 
+:::
 
-::: {.callout-note}
+::: {.callout-caution}
+## Upozornění: kdy lze medián použít
 Medián i další kvantily můžeme určit pro typy proměnných, které mají alespoň uspořádání, tedy proměnné ordinální a kardinální. 
 :::
 
@@ -488,7 +507,10 @@ Plot.plot({
 ```
 :::
 
+::: {.callout-note}
+## Jak ovládat ukázku
 Celý postup si můžete projít po krocích na dvanácti jiných hodnotách, než jsou data o domácnostech výše. Tlačítky **Zpět / Přehrát / Další** (nebo tečkami) se prochází pět kroků: data v pořadí měření, přeřazení od nejmenšího (body se spojí úsečkami), medián, kvartily a libovolný percentil zvolený posuvníkem. Čára ke kvantilu vede od osy $x$ (s pozicí $k$) svisle až k bodu na úsečce mezi dvěma sousedními body a odtud vodorovně k ose $y$, kde se objeví hodnota. Tlačítkem *Nová data* se hodnoty vylosují znovu.
+:::
 
 ```{ojs}
 //| echo: false
@@ -663,6 +685,7 @@ Pokud využijeme vzorce pro celý rozsah dat, získáme **kvantilovou funkci** $
 $$ Q(p)=q \Longleftrightarrow P(x\leq q)=p$$
 
 :::{.callout-note}
+## Jak kvantilovou funkci interpretovat
 Interpretačně nám odpovídá na otázky například *jaký plat má spodních 10% ve firmě?* ($p=0.10, q=...$) Nebo pro inverzní funkci *kolik procent osob ve firmě má plat menší než 40 000?* ($q=40000, p=...$)
 :::
 
@@ -712,7 +735,8 @@ Interpretačně nám odpovídá na otázky například *jaký plat má spodních
 }  
 ```
 
-:::{.callout-note}
+:::{.callout-caution}
+## Upozornění: různé definice kvantilu
 Jiné přístupy se liší v tom, jak vypočtou $k$ (např. $k=(n+1)\cdot p$) případně jak pracují s desetinnou částí (například ji ignorují tedy percentil na pozici $k=6.3$ je vyjádřen hodnotou $x_6$). Podrobněji viz manuál R, [@R-stats]. 
 :::
 
@@ -727,6 +751,7 @@ Základní idea vychází z uspořádaného souboru a pořadí jednotivých hodn
 [Mezikvartilové rozpětí]{.highlight-term} (*inter-quartile-range, IQR*): rozdíl mezi třetím kvartilem a prvním kvartilem, **$IQR=Q_3-Q_1$**.
 
 ::: {.callout-note}
+## Co říkají rozpětí a IQR
 **Range** nám říká, kolik "prostoru" data zabírají. Pozor na to, že rozsah, min a max se nemusí shodovat z rozsahem škály. Například měřené hodnoty mohou mít maximální rozsah 0-20, ale data mohou obsahovat hodnoty 1-11 a tedy min=1 a max=11, range = 10.
 
 **IQR** nám říká, kolik prostoru si zabírá "střední polovina" hodnot,  tedy když ignorujeme čtvrtinu nejmenších a čtvrtinu největších hodnot. 
@@ -752,6 +777,13 @@ IQR$. Z našich dat
  
 
 V našich datech tedy nemáme žádné odlehlé hodnoty pod dolní hradbou ale jednu odlehlou hodnoty nad horní hradbou. 
+
+::: {.callout-warning}
+## Pozor: odlehlá hodnota není automaticky chyba
+Hradby jen upozorní na hodnoty, které stojí za prověření. Domácnost s 11 vozidly může být zcela správný údaj. Rozhodnout, zda hodnotu vyloučit, je věcná, ne statistická otázka.
+:::
+
+### Box-plot
 
 Důležité kvantily a odlehlé hodnoty  se často znázorňují do grafu, který se nazývá [box-plot]{.highlight-term}: obdélník ukazuje na 1Q, med a 3Q, levý "vous" ukazuje buď minimum, nebo dolní hradbu, pravý "vous" maximum nebo horní hradbu, červenou tečkou je znázorněna odlehlá hodnota. Můžete se setkat s různými variantami, ale tato je nejčastější. 
 
@@ -825,7 +857,8 @@ Plot.plot({
 })
 ```
 
-## Klíčové poznatky {.unnumbered}
+::: {.callout-important}
+## Klíčové poznatky
 
 |  | |
 |:---|:---| 
@@ -839,3 +872,4 @@ Plot.plot({
 |kvantil|$q_p=x_c+(x_{c+1}-x_c)\cdot d$, kde $k=c+d$, celá část + desetinná část|
 |variabilita kvantilová|rozsah $range = max-min$, rozsah střední poloviny $IQR=Q_3-Q_1$|
 |odlehlé hodnoty|box plot, odlehlé hodnoty, hranice|
+:::

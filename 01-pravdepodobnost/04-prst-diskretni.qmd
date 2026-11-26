@@ -18,14 +18,17 @@ Pro vizuálně přívětivější zobrazení pravděpodobnostních funkcí zde b
 ---
 
 
-Příklad **acylpyrin**
-
+::: {.callout-note .priklad}
+## Příklad: acylpyrin
 U 80 % pacientů po podání Acylpyrinu nastane snížení teploty (úspěch, $+$), u 20 % stagnace nebo zvýšení teploty (neúspěch, $-$). 
 
 | $k$ | Výsledek | $P(x_k)$ |
 |:---:|:---:|:---:|
 | 1 | $+$ | $0{,}80$ |
 | 2 | $-$ | $0{,}20$ |
+:::
+
+## Od jednoho pokusu k více pokusům
 
 Tohle je rozdělení pro výsledek jednoho pokusu. Co když jich ale máme více? Jaká je například pravděpodobnost, že ze tří pacientů budou dva úspěšně vyléčení (+)? Podívejme se na situaci u dvou, tří nebo obecně $n$ pacientů (v našem případě nezáleží na pořadí, takže $(+, -) = (-, +)$).
 
@@ -36,7 +39,12 @@ Tohle je rozdělení pro výsledek jednoho pokusu. Co když jich ale máme více
 | 3 | $(+++, ++-, +--, ---)$ |
 | $n$ | $\bigcup_{k=0..n} (\underbrace{+\dots +}_{k}, \underbrace{-\dots-}_{n-k})$ |
 
-Na pořadí pacientů nám nezáleží, ale mění se pravděpodobnosti. Například pro situaci tří pacientů, kdy jsou úspěšní všichni, existuje jediná možnost: $(+++)$. Pokud jsou ale úspěšní pouze dva, zahrnuje to tři možnosti: $(++-), (+-+), (-++)$. 
+Na pořadí pacientů nám nezáleží, ale mění se pravděpodobnosti. Například pro situaci tří pacientů, kdy jsou úspěšní všichni, existuje jediná možnost: $(+++)$. Pokud jsou ale úspěšní pouze dva, zahrnuje to tři možnosti: $(++-), (+-+), (-++)$.
+
+::: {.callout-note .zapamatuj}
+## Zapamatujte si
+U nezávislých pokusů se pravděpodobnosti **násobí** (pravidlo součinu) a různé způsoby, jak k témuž počtu úspěchů dojít, se **sčítají** (pravidlo součtu).
+:::
 
 Protože úspěšnost pacienta nezávisí na ostatních, mluvíme o [nezávislých jevech]{.highlight-term} a využijeme pravidla o součinu a součtu:
 $P(+++) = P(+) \cdot P(+) \cdot P(+)$, 
@@ -47,7 +55,10 @@ Konstantu $3$ z předchozího výpočtu můžeme zobecnit pomocí binomického �
 
 ## Binomické rozdělení 
 
+::: {.callout-note .zapamatuj}
+## Zapamatujte si: kdy použít binomické rozdělení
 Popisuje pravděpodobnost několika úspěchů. Typickou otázkou je například: *„Jaká je pravděpodobnost, že když hodíme šesti kostkami, tak padnou dvě šestky?“*
+:::
 
 ::: {.callout-note}
 ## Binomické rozdělení (předpoklady)
@@ -105,9 +116,12 @@ Funkce, kterou jsme takto zavedli, se nazývá pravděpodobnostní funkce (*prob
 
 ### Galtonova deska (binomické rozdělení)
 
+::: {.callout-note}
+## Jak ovládat ukázku
 Kulička v každé řadě hřebíků spadne vpravo s pravděpodobností $\pi$, jinak vlevo.
 Počet odrazů vpravo z $n$ řad je binomická veličina. Osa y ukazuje podíl kuliček v přihrádce.
 Oranžová úsečka je teoretický podíl (pravděpodobnost přihrádky) a modrý sloupec je skutečný podíl ze spadlých kuliček.
+:::
 
 ```{ojs}
 viewof n4 = Inputs.range([3, 14], {step: 1, value: 8, label: "Počet řad (n)"})
@@ -229,7 +243,10 @@ viewof pi4 = Inputs.range([0.1, 0.9], {step: 0.05, value: 0.5, label: "Prst vpra
 Binomické rozdělení patří do skupiny **diskrétních pravděpodobnostních rozdělení**. To znamená, že náhodná veličina v těchto případech nabývá pouze jasně oddělených, spočetných hodnot (typicky celých čísel $0, 1, 2, \dots$). Kromě binomického rozdělení se v praxi často setkáváme s dalšími typy, které modelují odlišné situace, několik jich zde uvedeme:
 
 ## Geometrické rozdělení
- Popisuje „čekání na první úspěch“. Typickou otázkou je například: *„Jaká je pravděpodobnost, že budeme muset hodit kostkou právě pětkrát, než poprvé padne šestka?“* Viz podrobněji @shafer2012intro.
+::: {.callout-note .zapamatuj}
+## Zapamatujte si: kdy použít geometrické rozdělení
+Popisuje „čekání na první úspěch“. Typickou otázkou je například: *„Jaká je pravděpodobnost, že budeme muset hodit kostkou právě pětkrát, než poprvé padne šestka?“* Viz podrobněji @shafer2012intro.
+:::
 
 ::: {.callout-note appearance="simple"}
 ## Geometrické rozdělení (předpoklady)
@@ -262,7 +279,10 @@ Plot.plot({
 
 ## Hypergeometrické rozdělení
 
+::: {.callout-note .zapamatuj}
+## Zapamatujte si: kdy použít hypergeometrické rozdělení
 Podobá se binomickému, ale na rozdíl od něj modeluje výběry **bez vracení**. Použijeme ho například při výpočtu pravděpodobnosti, že mezi pěti vytaženými kartami z balíčku budou právě dvě esa [@grinstead2012introduction].
+:::
 
 ::: {.callout-note appearance="simple"}
 ## Předpoklady (Hypergeometrické)
@@ -306,10 +326,13 @@ Plot.plot({
 
 ### Hypergeometrické rozdělení: výběr bez vracení
 
+::: {.callout-note}
+## Jak ovládat ukázku
 V urně je $N$ kuliček, z toho $M$ modrých. Vytáhneme $n$ kuliček a zajímá nás počet modrých mezi nimi. Pokud tažené kuličky **nevracíme**,
 každý tah změní složení urny a počet modrých má hypergeometrické rozdělení. Pokud je **vracíme**, tahy jsou nezávislé a vychází binomické
 rozdělení $\mathrm{Bi}(n;\,M/N)$. Přepínač nahoře ukazuje obě varianty: oranžová úsečka je teorie vybrané varianty, šedá úsečka
 teorie té druhé. Rozdíl je největší u malé urny a mizí, když je urna proti výběru velká.
+:::
 
 ```{ojs}
 viewof N6 = Inputs.range([10, 60], {step: 5, value: 30, label: "Kuliček v urně (N)"})
@@ -484,7 +507,10 @@ viewof n6 = Inputs.range([1, Math.min(10, N6)], {step: 1, value: Math.min(5, N6)
 ```
 
 ## Poissonovo rozdělení
+::: {.callout-note .zapamatuj}
+## Zapamatujte si: kdy použít Poissonovo rozdělení
 Vyjadřuje pravděpodobnost výskytu $k$ událostí v určitém pevném intervalu (času, plochy atd.). Například počet pacientů přicházejících na pohotovost během jedné hodiny [@wikipedia_poisson].
+:::
 
 ::: {.callout-note appearance="simple"}
 ## Předpoklady (Poisson)
@@ -542,11 +568,14 @@ Plot.plot({
 
 ### Poissonovo rozdělení: body padají do časových intervalů
 
+::: {.callout-note}
+## Jak ovládat ukázku
 Události přicházejí náhodně v čase (v průměru $\lambda$ na interval). Kurzor jede po ose
 a po každém intervalu se spočítá, kolik bodů v něm bylo, a číslo se vypíše pod osu. Dole roste histogram
 počtů bodů v intervalu, oranžové úsečky jsou teoretická Poissonova PMF. Tlačítko **+1 interval** posune kurzor
 o jeden interval, **Dokončit sadu** spočítá všechny zobrazené intervaly najednou. Při větším $\lambda$ je
 na ose méně intervalů, aby body zůstaly čitelné.
+:::
 
 ```{ojs}
 viewof lam4 = Inputs.range([0.5, 10], {step: 0.5, value: 3, label: "Průměr na interval (λ)"})
@@ -689,11 +718,14 @@ viewof lam4 = Inputs.range([0.5, 10], {step: 0.5, value: 3, label: "Průměr na 
 
 ### Geometrické rozdělení a jeho vztah k Poissonovu
 
+::: {.callout-note}
+## Jak ovládat ukázku
 Čas rozdělíme na malé **sloty**. V každém slotu nastane událost s pravděpodobností $\pi=\lambda/m$, kde $m$ je počet slotů
 v jednom **bloku** a $\lambda$ průměrný počet událostí na blok. Na tentýž proud událostí se dá dívat dvěma způsoby.
 Vlevo se počítá, **kolik událostí je v bloku** (blíží se Poissonovu rozdělení). Vpravo se měří, **kolik slotů uplyne mezi dvěma
 událostmi**, tedy jak dlouho se čeká na další. To je geometrické rozdělení $P(X=k)=(1-\pi)^{k-1}\,\pi$. Čím větší $m$
 (kratší sloty), tím přesněji platí Poissonovo rozdělení pro počty.
+:::
 
 ```{ojs}
 viewof lam5 = Inputs.range([1, 6], {step: 0.5, value: 3, label: "Průměr událostí na blok (λ)"})

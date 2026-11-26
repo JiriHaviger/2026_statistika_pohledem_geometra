@@ -6,6 +6,7 @@ Mějme dvě domácnosti, kteří mají počet vozidel v rozsahu 0-10. V tabulce 
 **číslo (parametr) $b_0$**, takové které bude reprezentovat data $\mathbf{y}$. Základní model tedy bude mít tvar
 
 :::{.callout-note}
+## Proč index nula
 parametr označujeme s indexem nula proto, abychom mohli model rozčířit o další čeny s parametry $b_1, b_2, ...$
 :::
 
@@ -55,7 +56,10 @@ prakticky tedy v tabulce s načimi daty **y** přidáme sloupec **$b_0$**, kter�
 
 4. Rozložíme vektor dat $y$ na dvě kolmé složky - složku vysvětlenou modelem a složku kolmou. 
 
+::: {.callout-note .zapamatuj}
+## Zapamatujte si: geometrický princip
 V tomto znázornění je vidět geometrický princip rozkladu dat $\|\mathbf{y}\|^2 = \|\mathbf{\bar{y}}\|^2 + \|\mathbf{e}\|^2$.
+:::
 
 ::: {.panel-tabset}
 
@@ -203,6 +207,8 @@ Plot.plot({
 
 :::
 
+## Odvození průměru
+
 Provedeme lineárně algebraické úpravy rovnice  
 \begin{align} 
     b_0 \cdot\mathbf{1} &=\mathbf{y} \\
@@ -223,7 +229,10 @@ V našem případě však
   \end{align}
 
 
+::: {.callout-note .zapamatuj}
+## Zapamatujte si: průměr geometricky
 Aritmetický [průměr]{.highlight-term} je tedy číslo, kterým musíme vynásobit vektor **1**, aby vektor $b_0\mathbf{1}$ byl co nejblíže vektoru dat **y**.
+:::
 
 Můžeme tedy sestrojit vektor odchylek našich dat od vektoru průměru 
 
@@ -235,10 +244,15 @@ Vektor $\mathbf{y}$ je tedy rozložen do vektoru do směru vektoru $\mathbf{1}$ 
 
 $$\mathbf{y}=b_0\mathbf{1}+\mathbf{e}$$
 
+::: {.callout-note .zapamatuj}
+## Zapamatujte si: rozklad na dvě složky
 Vektor dat jsme rozložili na dvě složky, složku průměru a složku odchylek.
+:::
 Zaměřme se na velikosti těchto vektorů:Pomocí Pythogorovy věty dostáváme rovnici 
 
 $$\|\mathbf{y}\|^2 = \|b_0\mathbf{1}\|^2 + \|\mathbf{e}\|^2$$
+
+## Rozptyl a směrodatná odchylka
 
 $\|\mathbf{e}\|^2$ vyjadřuje celkovou odchylku dat od vekotru průměrů,  přepočítáno na jedno pozorování dostaneme veličiny zvanou [rozptyl]{.highlight-term} a označovanou jako $var$ nebo $\sigma^2$ a která se tedy rovná $= \frac{\|\mathbf{e}\|^2}{n}$
 
@@ -254,7 +268,8 @@ $$
 
  
 
-## Klíčové poznatky {.unnumbered}
+::: {.callout-important}
+## Klíčové poznatky
 
 |  |  |
 |:---|:---|
@@ -263,3 +278,4 @@ $$
 | Pythagorova věta | $\lVert\mathbf{y}\rVert^2=\lVert b_0\mathbf{1}\rVert^2+\lVert\mathbf{e}\rVert^2$ |
 | rozptyl | $var=\frac{\lVert\mathbf{e}\rVert^2}{n}$ |
 | směrodatná odchylka | $sd=\sqrt{var}$ |
+:::

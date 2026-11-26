@@ -26,6 +26,8 @@ Tato data lze popsat následujícími charakteristikami (zaokrouhlenými na dvě
 |$IQR$          |   2.75|
 |$var, sd$     |   8.89, 2.98  |
 
+### Posun a násobení
+
 Zkusme vytvořit nové soubory dat tak, že nejprve přičteme hodnotu 2 ke každému číslu ($X+2$) a nebo ho vynásobíme ($X\cdot 2$) 
 
 |statistika|$X$|$X+2$|$X\cdot 2$|
@@ -40,9 +42,13 @@ Zkusme vytvořit nové soubory dat tak, že nejprve přičteme hodnotu 2 ke kaž
 |$IQR$          |   2.75|2.75|5.50|
 |$var, sd$     |   8.89, 2.98  |8.89, 2.98  |35.56, 5.96  |
 
+::: {.callout-note .zapamatuj}
+## Zapamatujte si: posun a násobení
 Můžete pozorovat, že při přičtení se míry polohy se všechny posunuly od dva, zatímco míry variability **range, IQR, var, sd** zůstaly stejné. Při násobení se  míry polohy vynásobily dvěma, míry variability **range, iqr, sd** se také vynásobily hodnotou $a=2$, zatímco **var** se vynásobila hodnotou $a^2=4$.
+:::
 
-:::{.callout-note}
+:::{.callout-note .priklad}
+## Příklad: plošné a procentuální změny
 Pokud manažer firmy všem přidá stejnou hodnotu ($x+1000$), všichni si polepší a rozdíly zůstanou stejné. Pokud všem navýší plat o 10% ($x\cdot 1.01)$, všichni si polepší ale také se zvětší rozdíly - *procentuální navýšení příjmů rozevírá nůžky mezi bohatšími a chušími*.
 
 Pokud stát požaduje od všech stejnou částku (např. televizní poplatky), všem se sníží rozpočet stejně $x-200$. Pokud však nastaví platby např procentuálně podle příjmu $x-0.01\cdot x$, budou vyskopříjmoví platit více než nízkopříjmoví - *procentuální snžení je trest za úspěch*.
@@ -50,25 +56,42 @@ Pokud stát požaduje od všech stejnou částku (např. televizní poplatky), v
 
 ## Transformace dat
 
+### Z-skór
+
 Zkusme naše data [standardizovat]{.highlight-term} tak, abychom eliminovali posun a zároveň upravili variabilitu. Cílem je, aby data s rozdílnou polohou a rozdílnou variabilitou  byla porovnateln (např počet vozidel v rodině a celkový roční příjem rodiny). Jednou z tradičních standardizací je převod hodnot $x_i$ na $z-skór$ pomocí vzorce 
 
 $$z_i=\frac{x_i-\bar{x}}{sd}$$ 
 
+::: {.callout-note .zapamatuj}
+## Zapamatujte si: z-skór
 Z skór tedy získáme nejprve posunem dat o průměr a poté vydělením směrodatnou odchylkou. Získané proměnná $z$ pak má průměr nula a směrodatnou odchylku 1. Tato standardizace je vhodná pro data alespoň přibližně symetrická kolem průměru, jinými slovy kdy je průměr blízko mediánu,$\bar{x}-mdn\to 0$. 
+:::
+
+### Robustní standardizace
 
 Variantou odolnou vůči odlehlým hodotám je [robustní standardizace]{.highlight-term}m která každé hodnotě $x_i$ přiřadí hodnotu 
 
 $$x_r=\frac{x_i-mdn}{iqr}$$ 
 
+::: {.callout-note .zapamatuj}
+## Zapamatujte si: robustní standardizace
 Robustní standarizaci tedy získáme posunem dat o medián a vydělením mezikvartilovým rozpětím. Získaná proměnná $x_r$ pak má medán nula a iqr jedna. Rubustní standardizace je vhodná pro data zešikmená, kdy většina hodnot je na jedné straně od průměru, jinými slovy medián a průměr jsou daleko.  
+:::
+
+### Normalizace rozsahu
 
 Jinou bežně používanou trasformací je [normalizace]{.highlight-term} rozsahu, které každé hodnotě $x$ přiřadí hodnotu 
 
 $$x_{n}=\frac{x-min}{range}$$
 
+::: {.callout-note .zapamatuj}
+## Zapamatujte si: normalizace
  Hodnoty tedy nejprve posuneme o minimum a pak vydělíme celkovým rozsahem. Takto Rozsah proměnné $x_n$ bude $(min,max)=(0,1)$, tedy $range=1$. Tato transformace je vhodná a někdy i nutná pro algoritmy, kde by hodnoty nad jedna mohly vrazně ovlivnit schopnost nalezení výsledku.   
+:::
 
 Existují i další transformace, které jsou založené na rozdělení dat, ale těmi se nyní zabývat nebudeme. 
+
+### Srovnání transformací
 
 |statistika     |$X$              |$z(X)$         |$x_r$        |$x_n$        |
 |:--|:--|:--|:--|:--|
@@ -132,7 +155,8 @@ Plot.plot({
 })
 ```
 
-## Klíčové poznatky {.unnumbered}
+::: {.callout-important}
+## Klíčové poznatky
 
 |  |  |
 |:---|:---|
@@ -141,3 +165,4 @@ Plot.plot({
 | z-skór | $z_i=\frac{x_i-\bar{x}}{sd}$, průměr 0 a směrodatná odchylka 1 |
 | robustní standardizace | $x_r=\frac{x_i-mdn}{iqr}$, medián 0 a IQR 1, vhodná pro zešikmená data |
 | normalizace | $x_n=\frac{x-min}{range}$, rozsah $(0,1)$ |
+:::

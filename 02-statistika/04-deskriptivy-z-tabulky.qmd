@@ -86,16 +86,30 @@ Plot.plot({
 
 ## Ukazatele polohy: kvantily z tabulky četností
 
+::: {.callout-note .zapamatuj}
+## Zapamatujte si: kvantil z tabulky
+Kvantil z tabulky je první hodnota, u které kumulativní relativní četnost dosáhne zadané hladiny.
+:::
+
 Pokud budeme hledat kvantily v tabulce, zaměříme se na sloupec *Kumulativní (Fᵢ)* ve kterém hledáme, kdy poprvé dosáhneme dané hodnoty.
 
+::: {.callout-note .priklad}
+## Příklad: kvantily z tabulky četností
 1.  **Dolní kvartil ($Q_1$):** hledáme hodnotu **0,25**. V tabulce vidíme, že pro $x=5$ je $F(5)=0,175$ menší než $0.5$, ale $F(6)=0,300$. Takže $Q_1 = 6$.
 2.  **Medián ($Q_2$):** stručněji: $F(7)= 0,450, F(8)=0.650$ Protože $F(7) < 0.5 < F(8)$, je $Q2=8$.
 3.  **Horní kvartil ($Q_3$):** $F(8)=0.650, F(9)=0.875 \longrightarrow Q_3 = 9$.
 4.  **$Q_3$ pomocí interpolací:** $k=1 + (10-1)\cdot 0.75 = 7.75, F(8)<7.75<F(9)\longrightarrow Q_3= 8+(8-7) \cdot 0.75=8.75$
 
+:::
+
+::: {.callout-caution}
+## Upozornění: různé způsoby výpočtu
 Různé způsoby výpočtu percentilů mohou vést k různým, ale podobným výsledkům. 
+:::
 
 ## Kvantilové ukazatele variability: z tabulky četností
+
+### Vážený průměr
 
 Průměr z tabulky četností můžeme spočítat jako vážený průměr, kde každou hodnotu "vážíme" její četností $n_i$ nebo relativní četností $p_i$.
 
@@ -117,7 +131,10 @@ $$ \bar{x} =\frac{\sum x_i\cdot n_i}{N} = \frac{1\cdot 2 + 2\cdot 3 + 3\cdot 5 +
 nebo pomocí relativních četností 
 $$\bar{x} =\sum x_i\cdot p_i = 1\cdot 0.010 + 2\cdot 0.025 + 3\cdot 0.050 + \dots = 7.56$$
 
+::: {.callout-note .zapamatuj}
+## Zapamatujte si: průměr jako těžiště
 * **Průměr** se chová jako **těžiště**. Ti nespokojení zákazníci na levé straně (známky 1, 2, 3) fungují jako závaží na dlouhém rameni páky. I když je jich málo, svou „vzdáleností“ od středu táhnou průměr doleva.
+:::
 
 ```{ojs}
 //| echo: false
@@ -256,7 +273,8 @@ Plot.plot({
 })
 ```
 
-## Klíčové poznatky {.unnumbered}
+::: {.callout-important}
+## Klíčové poznatky
 
 |  |  |
 |:---|:---|
@@ -265,3 +283,4 @@ Plot.plot({
 | vážený průměr | $\bar{x}=\frac{\sum x_i n_i}{N}=\sum x_i p_i$ |
 | průměr jako těžiště | vzdálené hodnoty táhnou průměr směrem k sobě |
 | rozptyl z relativních četností | $\sigma^2=\sum (x_i-\bar{x})^2\,p_i$ |
+:::
