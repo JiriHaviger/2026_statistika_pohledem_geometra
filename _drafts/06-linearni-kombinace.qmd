@@ -3,7 +3,9 @@ title: "Sčítáme náhodu: součty, průměry a váhy"
 # náhled draftu se stejným motivem jako kniha (paleta JHRules, vzhled bloků)
 format:
   html:
-    theme: [cosmo, ../hag_custom.scss]
+    theme:
+      dark: [cosmo, ../hag_dark.scss, ../hag_custom.scss]
+      light: [cosmo, ../hag_custom.scss]
 execute:
   echo: false
 ---
@@ -172,120 +174,22 @@ V literatuře se stejný vztah píše $E(aX+b)=a\,E(X)+b$ a $\operatorname{Var}(
 
 ## Součet dvou veličin
 
-Doba cesty je součet doby jízdy tramvají a metrem. Průměr součtu je vždy součet průměrů, $\mu_{X+Y}=\mu_X+\mu_Y$, ať jsou veličiny jakkoli závislé. Složitější je otázka, jak se sčítá kolísání. Záleží na tom, zda spolu veličiny souvisejí. Souvislost měří [korelace]{.highlight-term} $\rho$, číslo od $-1$ do $1$: při $\rho=0$ se veličiny navzájem neovlivňují, při $\rho>0$ bývají velké hodnoty jedné spolu s velkými hodnotami druhé, při $\rho<0$ naopak.
-
-::: {.callout-note}
-## Jak číst ukázku
-Šipky jsou směrodatné odchylky $\sigma_X$ a $\sigma_Y$ a úhel mezi nimi odpovídá korelaci, součet je třetí šipka (úhlopříčka). Vedle je simulace dvojic $(X,Y)$ a dole histogram součtu s teoretickou křivkou. Zkuste nejdřív $\rho=0$: šipky svírají pravý úhel. Potom zvyšujte $\rho$: součet je delší, tedy více kolísá. Při $\rho=-1$ jsou šipky proti sobě a součet kolísá nejméně.
-:::
-
-```{ojs}
-//| echo: false
-//| classes: rez-slider-3
-viewof sx6 = Inputs.range([0.5, 3], {step: 0.1, value: 2, label: "σ_X"})
-viewof sy6 = Inputs.range([0.5, 3], {step: 0.1, value: 1.5, label: "σ_Y"})
-viewof rho6 = Inputs.range([-1, 1], {step: 0.05, value: 0, label: "ρ (korelace)"})
-```
-
-```{ojs}
-//| echo: false
-// 500 pevných dvojic nezávislých standardních normálních čísel (stejné při každém spuštění)
-z6 = {
-  const r = d3.randomLcg(11), nrm = d3.randomNormal.source(r)(0, 1);
-  return d3.range(500).map(() => [nrm(), nrm()]);
-}
-```
-
-```{ojs}
-//| echo: false
-//| classes: rez-560
-{
-  const th = Math.acos(rho6);
-  const A = [sx6, 0], B = [sy6 * Math.cos(th), sy6 * Math.sin(th)], S = [A[0] + B[0], A[1] + B[1]];
-  const sS = Math.hypot(S[0], S[1]);                       // σ_{X+Y} z kosinové věty
-  const w2 = Math.max(260, Math.floor((width - 16) / 2));
-  const arrow = (p, col, w) => Plot.link([{x1: 0, y1: 0, x2: p[0], y2: p[1]}], {x1: "x1", y1: "y1", x2: "x2", y2: "y2", stroke: col, strokeWidth: w, markerEnd: "arrow"});
-
-  const vec = Plot.plot({
-    width: w2, style: plotStyle, aspectRatio: 1, marginLeft: 30,
-    x: {domain: [-3.5, 6.5], label: null}, y: {domain: [-0.5, 3.5], label: null},
-    marks: [
-      Plot.link([{x1: A[0], y1: A[1], x2: S[0], y2: S[1]}, {x1: B[0], y1: B[1], x2: S[0], y2: S[1]}],
-                {x1: "x1", y1: "y1", x2: "x2", y2: "y2", stroke: C.contextLight, strokeDasharray: "4,3"}),
-      arrow(A, C.primary, 3), arrow(B, C.context, 3), arrow(S, C.accent, 4),
-      Plot.text([{x: A[0] / 2, y: 0}], {x: "x", y: "y", text: ["σ_X"], dy: 14, fill: C.primaryText, fontWeight: "bold"}),
-      Plot.text([{x: B[0] / 2, y: B[1] / 2}], {x: "x", y: "y", text: ["σ_Y"], dy: -10, dx: -8, fill: C.context, fontWeight: "bold"}),
-      Plot.text([{x: S[0], y: S[1]}], {x: "x", y: "y", text: [`σ_(X+Y) = ${cz6(sS)}`], dy: -12, fill: C.accent, fontWeight: "bold"}),
-      Plot.ruleY([0], {stroke: C.grid})
-    ]
-  });
-
-  // simulace: X = σ_X·z1, Y = σ_Y·(ρ·z1 + √(1−ρ²)·z2)
-  const sim = z6.map(([u, v]) => ({x: sx6 * u, y: sy6 * (rho6 * u + Math.sqrt(1 - rho6 * rho6) * v)}));
-  const scatter = Plot.plot({
-    width: w2, style: plotStyle, aspectRatio: 1, marginLeft: 30,
-    x: {domain: [-9, 9], label: "X"}, y: {domain: [-9, 9], label: "Y"},
-    marks: [
-      Plot.ruleX([0], {stroke: C.grid}), Plot.ruleY([0], {stroke: C.grid}),
-      Plot.dot(sim, {x: "x", y: "y", r: 2, fill: C.primary, fillOpacity: 0.5})
-    ]
-  });
-
-  const sums = sim.map((d) => d.x + d.y), bw = 0.8;
-  const bins = d3.bin().domain([-14, 14]).thresholds(d3.range(-14, 14.001, bw))(sums)
-    .map((b) => ({x1: b.x0, x2: b.x1, h: b.length / (sums.length * bw)}));
-  const curve = d3.range(-14, 14.001, 0.2).map((x) => ({x, y: npdf6(x, sS)}));
-  const hist = Plot.plot({
-    width, height: 200, style: plotStyle,
-    x: {domain: [-14, 14], label: "X + Y"}, y: {axis: null},
-    marks: [
-      Plot.rectY(bins, {x1: "x1", x2: "x2", y: "h", fill: C.primary, fillOpacity: 0.6, stroke: C.bg}),
-      Plot.line(curve, {x: "x", y: "y", stroke: C.accent, strokeWidth: 2}),
-      Plot.ruleY([0], {stroke: C.context})
-    ]
-  });
-  const sdSample = d3.deviation(sums);
-  return html`<div style="display:flex;flex-wrap:wrap;gap:16px">${vec}${scatter}</div>${hist}
-    <div style="font-size:14px;min-height:3.4em">σ<sub>X+Y</sub>² = σ<sub>X</sub>² + σ<sub>Y</sub>² + 2ρσ<sub>X</sub>σ<sub>Y</sub> =
-    ${cz6(sx6 ** 2)} + ${cz6(sy6 ** 2)} + ${cz6(2 * rho6 * sx6 * sy6)} = <b>${cz6(sS * sS)}</b>,
-    σ<sub>X+Y</sub> = <b>${cz6(sS)}</b> (v simulaci ${cz6(sdSample)}).
-    ${rho6 === 0 ? "Při ρ = 0 je to Pythagorova věta." : ""}</div>`;
-}
-```
-
-Co ukázka předvedla, se zapíše dvěma vzorci. Délka šipky $\sigma_{X+Y}$ vychází z kosinové věty, proto ve vzorci vystupuje korelace jako $\cos\theta$.
+Doba cesty do práce je součet doby jízdy tramvají a metrem. Průměr součtu je vždy součet průměrů, ať jsou veličiny jakkoli závislé. U kolísání je to složitější: rozptyly se sčítají u **nekorelovaných** veličin, tedy bez lineární souvislosti (patří mezi ně i nezávislé veličiny), a protože odečtení jedné nejistoty od druhé nejistotu nesníží, sčítají se i při odečítání. Pokud mezi veličinami lineární souvislost je, přibývá ještě člen s kovariancí, který se podrobně vysvětluje v kapitole o [dvou veličinách](056-prst-dve-veliciny.qmd).
 
 ::: {.callout-note .zapamatuj}
 ## Zapamatujte si
-$$\mu_{X+Y}=\mu_X+\mu_Y,\qquad \sigma_{X+Y}^2=\sigma_X^2+\sigma_Y^2+2\rho\,\sigma_X\sigma_Y.$$
-Při $\rho=0$ (nezávislé veličiny) zbyde $\sigma_{X+Y}^2=\sigma_X^2+\sigma_Y^2$, tedy Pythagorova věta: rozptyly se sčítají, směrodatné odchylky ne.
+$$\mu_{X\pm Y}=\mu_X\pm\mu_Y,\qquad \sigma_{X\pm Y}^2=\sigma_X^2+\sigma_Y^2\quad\text{(nekorelované veličiny)}.$$
+Rozptyly se sčítají, směrodatné odchylky ne: $\sigma_{X\pm Y}=\sqrt{\sigma_X^2+\sigma_Y^2}$, tedy Pythagorova věta. U veličin s lineární souvislostí přibývá člen $\pm 2\rho\,\sigma_X\sigma_Y$.
 :::
 
 ::: {.callout-note .priklad}
 ## Příklad: cesta do práce
-Tramvaj jede v průměru $20$ minut ($\sigma=3$), metro $15$ minut ($\sigma=4$), doby jsou nezávislé. Celková doba má průměr $20+15=35$ minut a $\sigma^2=9+16=25$, tedy $\sigma=5$ minut (ne $3+4=7$). Kdyby zpoždění tramvaje zdržovalo i přestup na metro ($\rho>0$), byla by $\sigma$ větší než $5$.
-:::
-
-Koeficient korelace jako míru lineární závislosti zavedl koncem 19. století [Karl Pearson (1857–1936)]{.smallcaps}.
-
-::: {.column-margin .osobnost}
-![](../assets/portrety/pearson.jpg)
-
-**Karl Pearson**
-*1857 – 1936, Londýn*
-
-Britský statistik. Koeficient korelace formuloval v 90. letech 19. století a dodnes se po něm jmenuje.
-<small>Portrét: Wikimedia Commons, volné dílo</small>
+Tramvaj jede v průměru $20$ minut ($\sigma=3$), metro $15$ minut ($\sigma=4$), doby jsou nezávislé. Celková doba má průměr $20+15=35$ minut a $\sigma^2=9+16=25$, tedy $\sigma=5$ minut (ne $3+4=7$). Kdyby zpoždění tramvaje zdržovalo i přestup na metro (kladná souvislost), byla by $\sigma$ větší než $5$.
 :::
 
 ::: {.callout-warning}
-## Pozor: rozptyl rozdílu se také sčítá
-U rozdílu $X-Y$ platí $\mu_{X-Y}=\mu_X-\mu_Y$, ale $\sigma_{X-Y}^2=\sigma_X^2+\sigma_Y^2-2\rho\,\sigma_X\sigma_Y$. U nezávislých veličin se tedy rozptyly **sčítají, i když veličiny odečítáme**. Odečtení jedné nejistoty od druhé nejistotu nesníží.
-:::
-
-::: {.callout-note collapse="true"}
-## Pro zájemce: kovariance
-Výraz $\rho\,\sigma_X\sigma_Y$ se nazývá kovariance, značí $\operatorname{Cov}(X,Y)$ a je to průměr součinů odchylek $(X-\mu_X)(Y-\mu_Y)$. Vzorec pro rozptyl součtu se pak píše $\operatorname{Var}(X+Y)=\operatorname{Var}(X)+\operatorname{Var}(Y)+2\operatorname{Cov}(X,Y)$. Korelace je kovariance dělená $\sigma_X\sigma_Y$, proto leží mezi $-1$ a $1$.
+## Pozor: stačí nekorelovanost, nezávislost není potřeba
+Rozptyly se sčítají, kdykoli je kovariance nulová. Veličiny přitom nemusí být nezávislé. Je-li $X$ rovnoměrně rozloženo na hodnotách $-1$, $0$ a $1$ a $Y=X^2$, je $Y$ veličinou $X$ plně určeno, ale kovariance je nula. Skutečně $\operatorname{Var}(X)=\frac23$, $\operatorname{Var}(Y)=\frac29$ a $\operatorname{Var}(X+Y)=\frac89=\frac23+\frac29$. Kovariance zachycuje jen **lineární** souvislost.
 :::
 
 ## Průměr $n$ nezávislých veličin
@@ -338,7 +242,7 @@ viewof n6 = Inputs.range([1, 200], {step: 1, value: 1, label: "n (velikost prům
 }
 ```
 
-Průměr $n$ nezávislých veličin se stejným $\mu$ a $\sigma$ je lineární kombinace s vahami $\frac1n$. Z pravidel pro součet vychází
+Průměr $n$ nezávislých veličin (stačí nekorelovaných) se stejným $\mu$ a $\sigma$ je lineární kombinace s vahami $\frac1n$. Z pravidel pro součet vychází
 
 ::: {.callout-note .zapamatuj}
 ## Zapamatujte si
@@ -360,12 +264,12 @@ Francouzský matematik. V roce 1810 dokázal první verzi centrální limitní v
 
 ::: {.callout-note collapse="true"}
 ## Pro zájemce: odvození
-Průměr má rozptyl $n\cdot\frac{\sigma^2}{n^2}=\frac{\sigma^2}{n}$, protože každá z $n$ veličin vstupuje s vahou $\frac1n$ (umocněnou na druhou) a rozptyly nezávislých veličin se sčítají.
+Průměr má rozptyl $n\cdot\frac{\sigma^2}{n^2}=\frac{\sigma^2}{n}$, protože každá z $n$ veličin vstupuje s vahou $\frac1n$ (umocněnou na druhou) a rozptyly nekorelovaných veličin (tedy i nezávislých) se sčítají.
 :::
 
 ## Vážený průměr dvou měření
 
-Dvěma přístroji měříme stejnou veličinu, první má chybu $\sigma_1$, druhý $\sigma_2$. Který výsledek použít, nebo jak je zkombinovat? Vážený průměr $Y=c\,X_1+(1-c)\,X_2$ dává větší váhu jednomu z nich.
+Dvěma přístroji měříme stejnou veličinu, první má chybu $\sigma_1$, druhý $\sigma_2$. Který výsledek použít, nebo jak je zkombinovat? Vážený průměr $Y=c\,X_1+(1-c)\,X_2$ dává větší váhu jednomu z nich. Chyby obou přístrojů spolu mohou souviset, což vyjadřuje korelace $\rho$ (viz kapitola o [dvou veličinách](056-prst-dve-veliciny.qmd)); u nekorelovaných (například nezávislých) chyb je $\rho=0$.
 
 ::: {.callout-note}
 ## Jak číst ukázku
@@ -417,11 +321,11 @@ Průměr zůstává stejný. Pro $\rho=0$ jsou nejlepší váhy úměrné $1/\si
 
 ## Obecná lineární kombinace
 
-Pro $Y=c_1X_1+\dots+c_kX_k$ platí vždy, že průměr kombinace je kombinace průměrů. Pro nezávislé veličiny se rozptyly sčítají s čtverci vah.
+Pro $Y=c_1X_1+\dots+c_kX_k$ platí vždy, že průměr kombinace je kombinace průměrů. Pro nekorelované veličiny (tedy i pro nezávislé) se rozptyly sčítají s čtverci vah.
 
 ::: {.callout-note .zapamatuj}
 ## Zapamatujte si
-$$\mu_Y=\sum_i c_i\,\mu_i,\qquad \sigma_Y^2=\sum_i c_i^2\,\sigma_i^2\quad\text{(nezávislé veličiny)}.$$
+$$\mu_Y=\sum_i c_i\,\mu_i,\qquad \sigma_Y^2=\sum_i c_i^2\,\sigma_i^2\quad\text{(nekorelované veličiny)}.$$
 Součet a průměr jsou jen speciální volby vah $c_i$.
 :::
 
@@ -457,7 +361,7 @@ kviz([
   {"zadani": "Cesta do práce: tramvaj trvá v průměru 20 minut (σ = 3), metro 15 minut (σ = 4), doby jsou nezávislé."},
   {"q": "Průměrná doba celé cesty", "options": ["35 minut", "5 minut", "300 minut"], "correct": 0, "why": "Průměr součtu je součet průměrů."},
   {"q": "Směrodatná odchylka celé cesty", "options": ["5 minut", "7 minut", "25 minut"], "correct": 0, "why": "σ² = 9 + 16 = 25, σ = √25 = 5."},
-  {"q": "Doby by byly kladně korelované. Směrodatná odchylka celé cesty by byla", "options": ["větší než 5", "menší než 5", "stejná, 5"], "correct": 0, "why": "Člen 2ρσ_Xσ_Y je kladný."},
+  {"q": "Doby by spolu kladně souvisely (tramvaj se zpozdí a metro také). Směrodatná odchylka celé cesty by byla", "options": ["větší než 5", "menší než 5", "stejná, 5"], "correct": 0, "why": "Kladná souvislost přidává člen 2ρσ_Xσ_Y, takže rozptyl je větší než součet rozptylů."},
   {"q": "Rozptyl rozdílu dob (tramvaj − metro)", "options": ["25", "7", "1"], "correct": 0, "why": "U nezávislých veličin se rozptyly sčítají i při odečítání."},
   {"zadani": "Laboratoř měří koncentraci látky. Jedno měření má směrodatnou odchylku 2 mg/l, měření jsou nezávislá."},
   {"q": "Směrodatná odchylka průměru ze 4 měření", "options": ["1 mg/l", "0,5 mg/l", "2 mg/l"], "correct": 0, "why": "σ / √n = 2 / 2 = 1."},
@@ -472,8 +376,8 @@ kviz([
 ::: {.callout-important}
 ## Klíčové poznatky
 - Posun a násobek: $\mu_Y=a\mu_X+b$, $\sigma_Y=|a|\sigma_X$, $\sigma_Y^2=a^2\sigma_X^2$; posun mění jen polohu, násobek šířku
-- Součet: $\mu_{X+Y}=\mu_X+\mu_Y$ vždy; $\sigma_{X+Y}^2=\sigma_X^2+\sigma_Y^2+2\rho\sigma_X\sigma_Y$, u nezávislých se rozptyly sčítají (i pro rozdíl)
-- Geometricky: směrodatné odchylky jsou délky šipek, korelace je $\cos\theta$, nezávislost je pravý úhel (Pythagorova věta)
+- Součet: $\mu_{X+Y}=\mu_X+\mu_Y$ vždy; u nekorelovaných veličin (tedy i nezávislých) se rozptyly sčítají (i pro rozdíl), $\sigma_{X\pm Y}^2=\sigma_X^2+\sigma_Y^2$, u veličin s lineární souvislostí přibývá člen s kovariancí
+- Geometricky: u nekorelovaných veličin se směrodatné odchylky skládají jako odvěsny pravoúhlého trojúhelníku (Pythagorova věta)
 - Průměr $n$ nezávislých pozorování: $\sigma_{\bar X}=\sigma/\sqrt n$, zvon se zužuje a blíží se normálnímu rozdělení
 - Vážený průměr dvou měření může být přesnější než kterékoli z nich, optimální váhy dávají víc váhy přesnějšímu
 :::

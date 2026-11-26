@@ -78,6 +78,15 @@ Dvě až tři věty o tom, čím se proslavil.
 <small>Portrét není dostupný pod volnou licencí</small>
 ```
 
+## Terminologie: nezávislost, nekorelovanost, souvislost
+
+- **Nezávislé** se píše jen tam, kde platí $P(A\cap B)=P(A)\,P(B)$, u veličin $p(x,y)=p(x)\,p(y)$ (žádná souvislost jakéhokoli tvaru).
+- **Nekorelované** znamená $\rho=0$, tedy $\operatorname{Cov}(X,Y)=0$: žádná **lineární** souvislost. Nezávislé veličiny jsou nekorelované, obráceně ne
+  (příklad $Y=X^2$ se symetrickým $X$). U společně normálních veličin jsou oba pojmy totéž.
+- Vzorce pro rozptyl součtu, rozdílu a průměru ($\operatorname{Var}(X\pm Y)=\operatorname{Var}X+\operatorname{Var}Y$) vyžadují jen **nekorelovanost**. Píše se „nekorelované (tedy i nezávislé)“.
+- Pro obecnou souvislost se používá **souvislost** (bez dalšího přívlastku). Míra souvislosti kategorií je $\chi^2$ a Cramérovo $V$, čísel korelace.
+- Test nezávislosti (kategorie, $\chi^2$) a test korelace ($\rho=0$) se v této části knihy nepočítají. Patří do inferenční statistiky.
+
 ## Kvíz „Otestujte se“
 
 - Technika: `assets/kviz.js`, zápis a rozložení v `bloky-a-tmavy-rezim.md`. Rozložení zadání | odpovědi | výsledek.
