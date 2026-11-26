@@ -4,7 +4,7 @@ title: "Vzorové OJS buňky"
 
 # Vzorové OJS buňky
 
-Vzory pro `ojs_agent` (čte je generátor z `crew/prompts.py`). Všechny tři jsou na jedné stránce,
+Vzory OJS buněk pro psaní ukázek. Všechny tři jsou na jedné stránce,
 proto mají různé přípony názvů proměnných (`1`, `2`, `3`) a import je jen v první buňce.
 Vzory jdou prohlédnout: `quarto preview docs_for_agents/ojs_vzory.qmd`.
 

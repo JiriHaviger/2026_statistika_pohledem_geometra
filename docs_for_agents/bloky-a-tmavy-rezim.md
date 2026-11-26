@@ -26,10 +26,9 @@ třídou přidanou ke stejnému bloku.
 
 ## Soubory
 
-- `hag_custom.scss`: světlá paleta (`$jh-*`, jediný zdroj; kopie v `jhrules.py` a záložní hodnoty v `assets/jhrules.js`) a všechna pravidla
+- `hag_custom.scss`: světlá paleta (`$jh-*`, jediný zdroj; záložní kopie v `assets/jhrules.js`) a všechna pravidla
   včetně bloků. Tmavý režim sem nepatří, ale proměnné `$callout-tint` a `$callout-solid-tint` (podbarvení) lze přepsat.
-- `hag_dark.scss`: tmavý režim (proměnné `$jh-*` zesvětlené pro tmavé pozadí a odvozené proměnné Bootstrapu). Barvy zde **nejsou** v kontrole
-  `crew.style_guide`, ta čte jen `hag_custom.scss`.
+- `hag_dark.scss`: tmavý režim (proměnné `$jh-*` zesvětlené pro tmavé pozadí a odvozené proměnné Bootstrapu). Barvy zde se automaticky nekontrolují.
 - `_quarto.yml`: `theme: dark: [cosmo, hag_dark.scss, hag_custom.scss]`, `light: [cosmo, hag_custom.scss]`.
   **Pořadí je důležité.** Quarto bere u vrstev motivu dřívější soubor jako silnější, proto je `hag_dark.scss` před `hag_custom.scss`.
   Co se v `hag_custom.scss` odvozuje (například `$body-bg: $jh-bg`), se v `hag_dark.scss` musí přepsat znovu.
