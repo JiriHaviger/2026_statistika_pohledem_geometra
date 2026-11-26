@@ -1,0 +1,220 @@
+---
+title: "Když spolu věci souvisejí: společné rozdělení a korelace"
+# náhled draftu se stejným motivem jako kniha (paleta JHRules, vzhled bloků)
+format:
+  html:
+    theme: [cosmo, ../hag_custom.scss]
+execute:
+  echo: false
+---
+
+*Draft k posouzení (návrh kapitoly 5c části Pravděpodobnost, před lineárními kombinacemi).*
+
+Dosud jsme sledovali jednu veličinu. Často nás ale zajímá dvojice: hodiny učení a body z testu, výška a hmotnost, cena a poptávka. Dvojice veličin má vlastní rozdělení a hlavně **souvislost**: když je jedna veličina velká, bývá velká i druhá? Tato kapitola ukazuje, jak se souvislost popíše tabulkou a jak se změří jediným číslem, korelací $\rho$.
+
+```{ojs}
+//| echo: false
+import {C, plotStyle} from "../assets/jhrules.js"
+```
+
+```{ojs}
+//| echo: false
+import {columnWidth, animation, drawText, clamp, ease, makeButton} from "../assets/anim.js"
+```
+
+```{ojs}
+//| echo: false
+// šířka textového sloupce místo vestavěné šířky celé plochy (grafy jinak přetékají doprava)
+width = columnWidth(Generators)
+```
+
+```{ojs}
+//| echo: false
+cz7 = (x, d = 2) => x.toFixed(d).replace(".", ",")
+```
+
+## Společné rozdělení a nezávislost
+
+Test má dvě části, A a B. Veličina $X$ je počet správných odpovědí v části A a $Y$ v části B, obě mohou být $0$, $1$ nebo $2$. [Společné rozdělení]{.highlight-term} je tabulka pravděpodobností všech dvojic hodnot, $p(x,y)=P(X=x \text{ a } Y=y)$. Součty po řádcích a sloupcích dávají rozdělení každé veličiny zvlášť.
+
+::: {.callout-note}
+## Jak číst ukázku
+Políčka tabulky jsou pravděpodobnosti $p(x,y)$ (tmavší políčko je pravděpodobnější), malým písmem pod nimi je součin $p(x)\cdot p(y)$, který by platil, kdyby veličiny byly nezávislé. Posuvník mění souvislost: při nule se obě čísla v každém políčku shodují, s rostoucí souvislostí se pravděpodobnost přesouvá na úhlopříčku, kde jsou obě části zvládnuty stejně dobře. Všimněte si, že součty řádků a sloupců se přitom nemění.
+:::
+
+```{ojs}
+//| echo: false
+//| classes: rez-slider-2
+viewof t7 = Inputs.range([0, 1], {step: 0.05, value: 1, label: "souvislost (0 = nezávislé)"})
+```
+
+```{ojs}
+//| echo: false
+//| classes: rez-300
+{
+  // závislá tabulka D[x][y] a nezávislá tabulka I[x][y] = p(x)·p(y) se stejnými okraji
+  const D = [[0.20, 0.08, 0.02], [0.08, 0.24, 0.08], [0.02, 0.08, 0.20]];
+  const pm = [0.3, 0.4, 0.3];
+  const p = D.map((row, x) => row.map((d, y) => (1 - t7) * pm[x] * pm[y] + t7 * d));
+  const mu = (v) => d3.sum(v, (pr, i) => i * pr);
+  const mx = mu(pm), sx = Math.sqrt(d3.sum(pm, (pr, i) => (i - mx) ** 2 * pr));
+  const cov = d3.sum(p.flatMap((row, x) => row.map((pr, y) => (x - mx) * (y - mx) * pr)));
+  const rho = cov / (sx * sx);
+  const hex = (a) => Math.round(Math.min(1, a) * 255).toString(16).padStart(2, "0");
+  const cell = (x, y) => html`<td style="padding:6px 14px;text-align:center;background:${C.primary}${hex(p[x][y] / 0.3)}">
+      <div style="font-weight:700;font-size:16px">${cz7(p[x][y])}</div>
+      <div style="font-size:11px;color:${C.context}">${cz7(pm[x] * pm[y])}</div></td>`;
+  const head = html`<tr><th></th>${[0, 1, 2].map((x) => html`<th style="padding:4px 14px;text-align:center">X = ${x}</th>`)}<th style="padding:4px 14px;text-align:center;color:${C.context}">P(Y)</th></tr>`;
+  const rows = [2, 1, 0].map((y) => html`<tr><th style="padding:4px 10px">Y = ${y}</th>${[0, 1, 2].map((x) => cell(x, y))}
+    <td style="padding:4px 14px;text-align:center;color:${C.context}">${cz7(0.3 + (y === 1 ? 0.1 : 0))}</td></tr>`);
+  const foot = html`<tr><th style="padding:4px 10px;color:${C.context}">P(X)</th>${pm.map((v) => html`<td style="padding:4px 14px;text-align:center;color:${C.context}">${cz7(v)}</td>`)}<td></td></tr>`;
+  const indep = t7 === 0;
+  // výška popisu je pevná, ať stránka neskáče při tažení posuvníku
+  return html`<table style="border-collapse:separate;border-spacing:3px;font-size:14px">${head}${rows}${foot}</table>
+    <div style="font-size:14px;min-height:3.4em;margin-top:6px">Korelace ρ = <b>${cz7(rho)}</b>.
+    ${indep ? "Veličiny jsou nezávislé: v každém políčku platí p(x, y) = p(x)·p(y)." : "Veličiny jsou závislé: p(x, y) se od součinu p(x)·p(y) liší, například ve středu je " + cz7(p[1][1]) + " místo " + cz7(pm[1] * pm[1]) + "."}</div>`;
+}
+```
+
+Z tabulky se čtou dva základní vztahy. Rozdělení jedné veličiny dostaneme sečtením po řádcích nebo po sloupcích a nezávislost znamená, že se každé políčko rovná součinu okrajů.
+
+::: {.callout-note .zapamatuj}
+## Zapamatujte si
+$$P(X=x)=\sum_y p(x,y),\qquad X\text{ a }Y\text{ jsou nezávislé}\iff p(x,y)=P(X=x)\,P(Y=y)\text{ pro všechna }x,y.$$
+:::
+
+::: {.callout-note .priklad}
+## Příklad: dvě části testu
+Podle tabulky při souvislosti $1$ je $P(X=2 \text{ a } Y=2)=0{,}20$. Kdyby části byly nezávislé, bylo by to $0{,}3\cdot 0{,}3=0{,}09$. Veličiny tedy nezávislé nejsou: kdo zvládl část A, zvládne spíš i část B.
+:::
+
+## Korelace: souhra dvou veličin
+
+Podle tabulky umíme říct, zda jsou veličiny nezávislé, ale ne **jak moc** spolu souvisejí. K tomu slouží [korelace]{.highlight-term} $\rho$, číslo od $-1$ do $1$. Ukážeme ji na skupině studentů: $X$ jsou hodiny učení týdně ($\mu_X=10$, $\sigma_X=3$) a $Y$ body z testu ($\mu_Y=60$, $\sigma_Y=12$). Každý bod v obrázku je jeden student.
+
+::: {.callout-note}
+## Jak číst ukázku
+Přímky vedou přes průměry obou veličin a dělí obrázek na čtyři čtvrtiny. Modrý student je **souhlasný**: leží nad průměrem v obou veličinách, nebo pod průměrem v obou. Šedý student je nesouhlasný: v jedné je nad průměrem a v druhé pod. Zkuste $\rho=0$: modrých a šedých je zhruba stejně. Při $\rho=1$ jsou všichni modří a leží na přímce, při $\rho=-1$ jsou všichni šedí.
+:::
+
+```{ojs}
+//| echo: false
+//| classes: rez-slider-2
+viewof rho7 = Inputs.range([-1, 1], {step: 0.05, value: 0.6, label: "ρ (korelace)"})
+```
+
+```{ojs}
+//| echo: false
+// 300 pevných dvojic nezávislých standardních normálních čísel (stejné při každém spuštění)
+z7 = {
+  const r = d3.randomLcg(21), nrm = d3.randomNormal.source(r)(0, 1);
+  return d3.range(300).map(() => [nrm(), nrm()]);
+}
+```
+
+```{ojs}
+//| echo: false
+//| classes: rez-400
+{
+  const pts = z7.map(([u, v]) => ({x: 10 + 3 * u, y: 60 + 12 * (rho7 * u + Math.sqrt(1 - rho7 * rho7) * v)}));
+  const mx = d3.mean(pts, (d) => d.x), my = d3.mean(pts, (d) => d.y);
+  const sx = Math.sqrt(d3.mean(pts, (d) => (d.x - mx) ** 2)), sy = Math.sqrt(d3.mean(pts, (d) => (d.y - my) ** 2));
+  pts.forEach((d) => { d.zx = (d.x - mx) / sx; d.zy = (d.y - my) / sy; d.same = d.zx * d.zy > 0; });
+  const r = d3.mean(pts, (d) => d.zx * d.zy);
+  const share = d3.mean(pts, (d) => (d.same ? 1 : 0));
+  const plot = Plot.plot({
+    width, height: 340, style: plotStyle, marginLeft: 50,
+    x: {domain: [0, 20], label: "hodiny učení týdně (X)"},
+    y: {domain: [20, 100], label: "body z testu (Y)", grid: true},
+    marks: [
+      Plot.ruleX([10], {stroke: C.context}), Plot.ruleY([60], {stroke: C.context}),
+      Plot.dot(pts, {x: "x", y: "y", r: 3, fill: (d) => d.same ? C.primary : C.context, fillOpacity: 0.65})
+    ]
+  });
+  // výška popisu je pevná, ať stránka neskáče při tažení posuvníku
+  return html`${plot}<div style="font-size:14px;min-height:3.4em">Souhlasných studentů je <b>${cz7(share * 100, 0)} %</b>.
+    Průměr součinů z-skórů <i>z</i><sub>X</sub>·<i>z</i><sub>Y</sub> je <b>${cz7(r)}</b>, což je korelace souboru (zadáno ρ = ${cz7(rho7)}).</div>`;
+}
+```
+
+Souhlasný student má součin z-skórů kladný, nesouhlasný záporný, a korelace je jejich průměr. Z-skór $z=\frac{x-\mu}{\sigma}$ říká, o kolik směrodatných odchylek je hodnota nad průměrem (nebo pod ním).
+
+::: {.callout-note .zapamatuj}
+## Zapamatujte si
+$$z_X=\frac{x-\mu_X}{\sigma_X},\qquad z_Y=\frac{y-\mu_Y}{\sigma_Y},\qquad \rho=\text{průměr součinů } z_X\,z_Y .$$
+Platí $-1\leq\rho\leq 1$. Při $\rho>0$ veličiny rostou spolu, při $\rho<0$ jedna roste, když druhá klesá, $\rho=\pm1$ znamená přesně přímkovou závislost.
+:::
+
+Pojem korelace formuloval koncem 19. století [Francis Galton (1822–1911)]{.smallcaps} při zkoumání vztahu výšky otců a synů. Jeho matematický vzorec upravil [Karl Pearson (1857–1936)]{.smallcaps}.
+
+::: {.column-margin .osobnost}
+![](../assets/portrety/galton.jpg)
+
+**Francis Galton**
+*1822 – 1911, Londýn*
+
+Britský vědec. V roce 1888 popsal korelaci jako míru, s jakou spolu dvě veličiny souvisejí, a zkoumal ji na výškách otců a synů.
+<small>Portrét: Wikimedia Commons, volné dílo</small>
+:::
+
+::: {.callout-warning}
+## Pozor: korelace není příčina
+Student s vysokým $\rho$ mezi hodinami učení a body ukazuje, že se obě veličiny pohybují spolu. Nedokazuje, že učení způsobuje lepší výsledky: může za to třeba motivace nebo předchozí znalosti.
+:::
+
+::: {.callout-warning}
+## Pozor: nulová korelace neznamená nezávislost
+Nezávislé veličiny mají $\rho=0$, ale obráceně to neplatí. Korelace měří jen **přímkovou** souvislost. Je-li $X$ rozloženo symetricky kolem nuly a $Y=X^2$, je $\rho=0$, přestože $Y$ je veličinou $X$ plně určeno.
+:::
+
+::: {.callout-note collapse="true"}
+## Pro zájemce: kovariance a geometrický pohled
+Čitatel korelace, průměr součinů odchylek $(X-\mu_X)(Y-\mu_Y)$, se nazývá kovariance a značí $\operatorname{Cov}(X,Y)$. Platí $\rho=\frac{\operatorname{Cov}(X,Y)}{\sigma_X\sigma_Y}$. Geometricky: odchylky $n$ pozorování od průměru tvoří vektor, jeho délka je $\sigma\sqrt n$ (Pythagorova věta v $n$ rozměrech) a korelace je **kosinus úhlu** mezi vektory odchylek obou veličin. Proto leží mezi $-1$ a $1$ a nekorelované veličiny jsou na sebe kolmé.
+:::
+
+::: {.callout-tip}
+## 💡 Jak na to v Excelu?
+* **Korelace dvou sloupců:** `=CORREL(A1:A100; B1:B100)`
+* **Kovariance:** `=KOVARIANCE.P(A1:A100; B1:B100)`
+* **Marginální pravděpodobnosti** ze společné tabulky: součet řádku `=SUMA(B2:D2)` a součet sloupce `=SUMA(B2:B4)`
+:::
+
+::: {.callout-note .otestujte}
+## Otestujte se
+
+Odpovězte na otázky, výsledek se ukáže hned. Odpověď můžete měnit.
+
+```{ojs}
+//| echo: false
+import {kviz} from "../assets/kviz.js"
+```
+
+```{ojs}
+//| echo: false
+kviz([
+  {"zadani": "Test má dvě části, A a B. Společné rozdělení počtu správných odpovědí X (část A) a Y (část B) je v tabulce.", "tabulka": [["", "Y = 0", "Y = 1", "Y = 2"], ["X = 0", "0,20", "0,08", "0,02"], ["X = 1", "0,08", "0,24", "0,08"], ["X = 2", "0,02", "0,08", "0,20"]]},
+  {"q": "P(X = 2 a Y = 2)", "options": ["0,20", "0,09", "0,30"], "correct": 0, "why": "Je to přímo políčko tabulky."},
+  {"q": "P(X = 1), tedy součet řádku X = 1", "options": ["0,40", "0,24", "0,08"], "correct": 0, "why": "0,08 + 0,24 + 0,08."},
+  {"q": "Jsou X a Y nezávislé?", "options": ["ano", "ne"], "correct": 1, "why": "P(X=0 a Y=0) = 0,20, ale P(X=0)·P(Y=0) = 0,3 · 0,3 = 0,09."},
+  {"q": "Student měl v části A 2 body. Jaká je pravděpodobnost, že měl 2 body i v části B?", "options": ["0,67", "0,20", "0,30"], "correct": 0, "why": "P(Y=2 | X=2) = 0,20 / 0,30."},
+  {"zadani": "Mezi hodinami učení týdně a body z testu je korelace ρ = 0,6."},
+  {"q": "Co to znamená?", "options": ["Kdo se učí víc, mívá spíš víc bodů, ne vždy.", "Každá další hodina učení přidá 0,6 bodu.", "60 % studentů uspělo."], "correct": 0, "why": "Korelace měří souhru, ne velikost změny."},
+  {"q": "Z ρ = 0,6 plyne, že učení způsobuje lepší výsledky.", "options": ["ano", "ne"], "correct": 1, "why": "Korelace nedokazuje příčinu."},
+  {"q": "Mezi zameškanými hodinami a body z testu očekáváte korelaci", "options": ["zápornou", "kladnou", "nulovou"], "correct": 0, "why": "Kdo víc zameškal, mívá spíš méně bodů."},
+  {"q": "Korelace ρ = 0 znamená, že veličiny jsou nezávislé.", "options": ["ano", "ne"], "correct": 1, "why": "Korelace měří jen přímkovou souvislost, Y = X² má ρ = 0 přesto závisí na X."},
+  {"zadani": "Z-skór ukazuje, o kolik směrodatných odchylek je student nad průměrem (kladný) nebo pod ním (záporný). Student A má z-skór +1 v učení a +2 v bodech, student B −1 a −1, student C +1 a −1."},
+  {"q": "Student A přispívá ke korelaci", "options": ["kladně", "záporně"], "correct": 0, "why": "(+1)·(+2) = +2."},
+  {"q": "Student B přispívá ke korelaci", "options": ["kladně", "záporně"], "correct": 0, "why": "(−1)·(−1) = +1: obě veličiny jsou pod průměrem."},
+  {"q": "Student C přispívá ke korelaci", "options": ["kladně", "záporně"], "correct": 1, "why": "(+1)·(−1) = −1."}
+])
+```
+:::
+
+::: {.callout-important}
+## Klíčové poznatky
+- Společné rozdělení je tabulka $p(x,y)$; rozdělení jedné veličiny dostaneme součtem po řádcích nebo sloupcích
+- Nezávislost: $p(x,y)=P(X=x)\,P(Y=y)$ v každém políčku
+- Korelace $\rho$ je průměr součinů z-skórů: souhlasní studenti ji zvyšují, nesouhlasní snižují; $-1\leq\rho\leq1$
+- $\rho=\pm1$ je přesná přímka, $\rho=0$ žádná přímková souvislost (nezávislost z toho ale neplyne)
+- Korelace není příčina
+:::

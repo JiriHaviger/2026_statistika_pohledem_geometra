@@ -1,0 +1,151 @@
+---
+title: "Proč se odchylky umocňují: rozptyl a Pythagorova věta"
+# náhled draftu se stejným motivem jako kniha (paleta JHRules, vzhled bloků)
+format:
+  html:
+    theme: [cosmo, ../hag_custom.scss]
+execute:
+  echo: false
+---
+
+*Draft k posouzení (krátký úvod před kapitolou o rozdělení diskrétní veličiny).*
+
+Jak popsat, o kolik se hodnoty liší od průměru? Nejdřív spočteme **odchylky** $e_i=x_i-m$ každé hodnoty od průměru $m$. Zkusíme je sečíst nebo zprůměrovat, jenže vyjde vždy nula: odchylky nad průměrem a pod ním se vzájemně ruší. Řešení dává Pythagorova věta ze základní školy.
+
+```{ojs}
+//| echo: false
+import {C, plotStyle} from "../assets/jhrules.js"
+```
+
+```{ojs}
+//| echo: false
+import {columnWidth, animation, drawText, clamp, ease, makeButton} from "../assets/anim.js"
+```
+
+```{ojs}
+//| echo: false
+// šířka textového sloupce místo vestavěné šířky celé plochy (grafy jinak přetékají doprava)
+width = columnWidth(Generators)
+```
+
+```{ojs}
+//| echo: false
+cz8 = (x, d = 2) => x.toFixed(d).replace(".", ",")
+```
+
+## Dvě hodnoty jako bod v rovině
+
+Začneme nejmenším možným souborem, dvěma hodnotami $x_1$ a $x_2$. Dvojici lze nakreslit jako bod v rovině, vodorovně $x_1$ a svisle $x_2$. Dvojice se stejnými hodnotami leží na úhlopříčce a na ní leží i průměr $m=\frac{x_1+x_2}{2}$.
+
+::: {.callout-note}
+## Jak číst ukázku
+Šedá tečka je průměr, modrý bod je dvojice hodnot. Odchylky $e_1$ a $e_2$ jsou vodorovná a svislá strana modrého pravoúhlého trojúhelníku, oranžová přepona je vzdálenost dvojice od průměru. Zkuste posunout obě hodnoty o stejné číslo: trojúhelník se jen posune a vzdálenost se nezmění. Potom hodnoty oddalte: přepona roste.
+:::
+
+```{ojs}
+//| echo: false
+//| classes: rez-slider-2
+viewof x1u = Inputs.range([0, 10], {step: 0.5, value: 2, label: "první hodnota x₁"})
+viewof x2u = Inputs.range([0, 10], {step: 0.5, value: 8, label: "druhá hodnota x₂"})
+```
+
+```{ojs}
+//| echo: false
+//| classes: rez-420
+{
+  const m = (x1u + x2u) / 2, e1 = x1u - m, e2 = x2u - m;
+  const d = Math.hypot(e1, e2);
+  const w = Math.min(width, 460);
+  const seg = (xa, ya, xb, yb, col, sw) => Plot.link([{xa, ya, xb, yb}], {x1: "xa", y1: "ya", x2: "xb", y2: "yb", stroke: col, strokeWidth: sw});
+  const plot = Plot.plot({
+    width: w, height: w, style: plotStyle, marginLeft: 40,
+    x: {domain: [0, 10], label: "x₁", grid: true}, y: {domain: [0, 10], label: "x₂", grid: true},
+    marks: [
+      Plot.line([[0, 0], [10, 10]], {stroke: C.context, strokeDasharray: "5,4"}),
+      seg(m, m, x1u, m, C.primary, 3),          // vodorovná odvěsna: odchylka e₁
+      seg(x1u, m, x1u, x2u, C.primary, 3),      // svislá odvěsna: odchylka e₂
+      seg(m, m, x1u, x2u, C.accent, 4),         // přepona: vzdálenost od průměru
+      Plot.dot([{x: m, y: m}], {x: "x", y: "y", r: 6, fill: C.context}),
+      Plot.dot([{x: x1u, y: x2u}], {x: "x", y: "y", r: 7, fill: C.primary})
+    ]
+  });
+  // výška popisu je pevná, ať stránka neskáče při tažení posuvníků
+  return html`${plot}<div style="font-size:14px;min-height:6.6em">Průměr <i>m</i> = ${cz8(m, 2)},
+    odchylky <i>e</i><sub>1</sub> = ${cz8(e1)} a <i>e</i><sub>2</sub> = ${cz8(e2)}, jejich součet <b>${cz8(e1 + e2)}</b>.<br>
+    Vzdálenost <i>d</i> = √(<i>e</i><sub>1</sub>² + <i>e</i><sub>2</sub>²) = <b>${cz8(d)}</b>,
+    rozptyl σ² = (<i>e</i><sub>1</sub>² + <i>e</i><sub>2</sub>²)/2 = <b>${cz8(d * d / 2)}</b>,
+    směrodatná odchylka σ = <b>${cz8(Math.sqrt(d * d / 2))}</b>.</div>`;
+}
+```
+
+Odchylky mají vždy opačná znaménka a jejich součet je nula, proto se k měření rozptýlení nehodí. Vzdálenost od průměru ale určuje Pythagorova věta, a ta pracuje s **druhými mocninami** odchylek. Odtud se bere rozptyl: je to druhá mocnina vzdálenosti, přepočtená na jedno pozorování.
+
+::: {.callout-note .zapamatuj}
+## Zapamatujte si
+$$d^2=e_1^2+e_2^2,\qquad \sigma^2=\frac{e_1^2+e_2^2}{2},\qquad \sigma=\sqrt{\sigma^2}.$$
+Odchylky se umocňují, aby se nerušily a aby šly sčítat jako strany pravoúhlého trojúhelníku. Pro $n$ hodnot platí $\sigma^2=\frac{e_1^2+\dots+e_n^2}{n}$. Směrodatná odchylka $\sigma$ je odmocnina z rozptylu, tedy typická vzdálenost hodnoty od průměru, ve stejných jednotkách jako data.
+:::
+
+::: {.callout-note .priklad}
+## Příklad: dvě zkoušky
+Dva studenti získali v testu $2$ a $8$ bodů. Průměr je $m=5$, odchylky $e_1=-3$ a $e_2=+3$, jejich součet je $0$. Čtverce odchylek jsou $9$ a $9$, rozptyl $\sigma^2=\frac{18}{2}=9$ a směrodatná odchylka $\sigma=3$ body. Vzdálenost dvojice od průměru je $d=\sqrt{18}\doteq 4{,}24$.
+:::
+
+Pojem rozptyl (variance) zavedl v roce 1918 [Ronald Fisher (1890–1962)]{.smallcaps}.
+
+::: {.column-margin .osobnost}
+![](../assets/portrety/fisher.jpg)
+
+**Ronald Aylmer Fisher**
+*1890 – 1962, Londýn*
+
+Britský statistik a genetik. Termín *variance* (rozptyl) použil v roce 1918 a nad ním postavil analýzu rozptylu.
+<small>Portrét: Wikimedia Commons, volné dílo</small>
+:::
+
+::: {.callout-note collapse="true"}
+## Pro zájemce: více než dvě hodnoty
+Soubor $n$ hodnot je bod v $n$ rozměrech a průměr leží na přímce, kde jsou všechny hodnoty stejné. Vzdálenost bodu od této přímky se počítá stejnou Pythagorovou větou, $d^2=e_1^2+\dots+e_n^2$. Rozptyl je $d^2/n$, směrodatná odchylka $d/\sqrt n$.
+:::
+
+::: {.callout-tip}
+## 💡 Jak na to v Excelu?
+* **Rozptyl souboru:** `=VAR.P(A1:A2)`, směrodatná odchylka `=SMODCH.P(A1:A2)`
+* **Odchylky od průměru:** `=A1-PRŮMĚR($A$1:$A$2)` a jejich součet `=SUMA(B1:B2)` vyjde nula
+:::
+
+::: {.callout-note .otestujte}
+## Otestujte se
+
+Odpovězte na otázky, výsledek se ukáže hned. Odpověď můžete měnit.
+
+```{ojs}
+//| echo: false
+import {kviz} from "../assets/kviz.js"
+```
+
+```{ojs}
+//| echo: false
+kviz([
+  {"zadani": "Dva studenti získali v testu 1 a 9 bodů."},
+  {"q": "Průměr", "options": ["5", "4", "9"], "correct": 0, "why": "(1 + 9) / 2."},
+  {"q": "Součet odchylek od průměru", "options": ["0", "8", "16"], "correct": 0, "why": "(−4) + 4. Odchylky nad a pod průměrem se ruší."},
+  {"q": "Rozptyl σ²", "options": ["16", "8", "4"], "correct": 0, "why": "(16 + 16) / 2."},
+  {"q": "Směrodatná odchylka σ", "options": ["4", "16", "2"], "correct": 0, "why": "Odmocnina z rozptylu 16."},
+  {"q": "Vzdálenost dvojice od průměru (přepona)", "options": ["5,66", "8", "4"], "correct": 0, "why": "√(16 + 16) = √32 ≈ 5,66."},
+  {"zadani": "Oba studenti dostanou bonus 10 bodů, tedy obě hodnoty se zvětší o 10."},
+  {"q": "Jak se změní rozptyl?", "options": ["nezmění se", "vzroste", "klesne"], "correct": 0, "why": "Posun mění průměr, ale ne odchylky od něj."},
+  {"zadani": "Místo toho se obě hodnoty zdvojnásobí na 2 a 18 bodů."},
+  {"q": "Směrodatná odchylka σ", "options": ["zdvojnásobí se", "nezmění se", "zčtyřnásobí se"], "correct": 0, "why": "Odchylky ±4 se zdvojnásobí na ±8, σ = 8. Rozptyl by se zčtyřnásobil."}
+])
+```
+:::
+
+::: {.callout-important}
+## Klíčové poznatky
+- Odchylky od průměru se vždy sečtou na nulu, proto se k měření rozptýlení neberou přímo
+- Vzdálenost bodu od průměru určuje Pythagorova věta, tedy součet čtverců odchylek
+- Rozptyl $\sigma^2=\frac{e_1^2+\dots+e_n^2}{n}$ je druhá mocnina vzdálenosti na jedno pozorování
+- Směrodatná odchylka $\sigma$ je typická vzdálenost od průměru ve stejných jednotkách jako data
+- Posun hodnot rozptyl nemění, násobení $a$ násobí $\sigma$ číslem $|a|$ a rozptyl číslem $a^2$
+:::
