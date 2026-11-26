@@ -245,6 +245,62 @@ Student s vysokým $\rho$ mezi hodinami učení a body ukazuje, že se obě veli
 Nezávislé veličiny mají $\rho=0$, ale obráceně to neplatí. Korelace měří jen **přímkovou** souvislost. Je-li $X$ rozloženo symetricky kolem nuly a $Y=X^2$, je $\rho=0$, přestože $Y$ je veličinou $X$ plně určeno. Rozlišujeme proto dva pojmy: veličiny jsou **nekorelované**, když nemají žádnou lineární souvislost ($\rho=0$), a **nezávislé**, když nemají žádnou souvislost vůbec. Nezávislé veličiny jsou vždy nekorelované, obráceně to platí jen výjimečně, například u dvojice s normálním rozdělením.
 :::
 
+Samotné číslo $\rho$ nestačí: stejnou korelaci mohou mít soubory, které vypadají zcela jinak. Anglický statistik [Francis Anscombe (1918–2001)]{.smallcaps} to v roce 1973 ukázal na čtyřech malých souborech po jedenácti bodech, které mají stejné průměry, rozptyly, korelaci i regresní přímku, a přitom se tvarem liší.
+
+::: {.callout-note}
+## Jak číst ukázku
+Tabulka pod grafy ukazuje, že všechny čtyři soubory I až IV mají stejná čísla. Oranžová přímka je přímka, která body nejlépe proloží (regresní přímka), a je ve všech čtyřech stejná. Soubor I je obvyklá přímková souvislost. Ve II je souvislost zakřivená, takže přímka ji vystihuje špatně. Ve III leží body skoro na přímce a jediný odlehlý bod změnil její sklon. Ve IV mají všechny body stejné X kromě jednoho, který sám vytváří celou korelaci. U každého grafu zvažte, zda by vás číslo $\rho=0{,}82$ vedlo ke správnému závěru.
+:::
+
+```{ojs}
+//| echo: false
+//| classes: rez-560
+{
+  const x1 = [10, 8, 13, 9, 11, 14, 6, 4, 12, 7, 5];
+  const sets = [
+    {name: "I", x: x1, y: [8.04, 6.95, 7.58, 8.81, 8.33, 9.96, 7.24, 4.26, 10.84, 4.82, 5.68]},
+    {name: "II", x: x1, y: [9.14, 8.14, 8.74, 8.77, 9.26, 8.10, 6.13, 3.10, 9.13, 7.26, 4.74]},
+    {name: "III", x: x1, y: [7.46, 6.77, 12.74, 7.11, 7.81, 8.84, 6.08, 5.39, 8.15, 6.42, 5.73]},
+    {name: "IV", x: [8, 8, 8, 8, 8, 8, 8, 19, 8, 8, 8], y: [6.58, 5.76, 7.71, 8.84, 8.47, 7.04, 5.25, 12.50, 5.56, 7.91, 6.89]}
+  ];
+  // statistiky se počítají z dat, aby nemohly nesouhlasit s grafem
+  const stats = (s) => {
+    const mx = d3.mean(s.x), my = d3.mean(s.y), vx = d3.variance(s.x), vy = d3.variance(s.y);
+    const cov = d3.sum(s.x, (v, i) => (v - mx) * (s.y[i] - my)) / (s.x.length - 1);
+    const b = cov / vx;
+    return {mx, my, vx, vy, r: cov / Math.sqrt(vx * vy), b, a: my - b * mx};
+  };
+  const w2 = Math.max(260, Math.floor((width - 16) / 2));
+  const panel = (s) => {
+    const st = stats(s);
+    return Plot.plot({
+      width: w2, height: 240, style: plotStyle, marginLeft: 40,
+      x: {domain: [3, 20], label: "X"}, y: {domain: [2, 14], label: "Y", grid: true},
+      marks: [
+        Plot.line([3, 20].map((x) => ({x, y: st.a + st.b * x})), {x: "x", y: "y", stroke: C.accent, strokeWidth: 2}),
+        Plot.dot(s.x.map((x, i) => ({x, y: s.y[i]})), {x: "x", y: "y", r: 4, fill: C.primary}),
+        Plot.text([{x: 3.4, y: 13.2, t: `${s.name}: ρ = ${cz7(st.r)}`}], {x: "x", y: "y", text: "t", textAnchor: "start", fontWeight: "bold", fill: C.text})
+      ]
+    });
+  };
+  const rows = [
+    ["průměr X", (t) => cz7(t.mx, 1)], ["průměr Y", (t) => cz7(t.my, 1)],
+    ["rozptyl X", (t) => cz7(t.vx, 1)], ["rozptyl Y", (t) => cz7(t.vy, 1)],
+    ["korelace ρ", (t) => cz7(t.r)], ["přímka Y = a + b·X", (t) => `${cz7(t.a, 1)} + ${cz7(t.b, 2)}·X`]
+  ];
+  const all = sets.map(stats);
+  const table = html`<table style="border-collapse:collapse;font-size:14px;margin-top:8px">
+    <tr><th></th>${sets.map((s) => html`<th style="padding:3px 14px;text-align:center">${s.name}</th>`)}</tr>
+    ${rows.map(([lab, f]) => html`<tr><td style="padding:3px 14px 3px 0">${lab}</td>${all.map((t) => html`<td style="padding:3px 14px;text-align:center">${f(t)}</td>`)}</tr>`)}</table>`;
+  return html`<div style="display:flex;flex-wrap:wrap;gap:16px">${sets.map(panel)}</div>${table}`;
+}
+```
+
+::: {.callout-warning}
+## Pozor: korelace nestačí, nakreslete graf
+Průměry, rozptyly, korelace i přímka jsou ve všech čtyřech souborech stejné, ale jen soubor I odpovídá obvyklé představě „přímková souvislost s náhodným kolísáním“. Ve II je souvislost zakřivená, ve III jeden odlehlý bod změnil sklon přímky a ve IV vytváří celou korelaci jediný bod. Před výpočtem korelace proto vždy nakreslete bodový graf.
+:::
+
 ## Kovariance a rozptyl součtu
 
 Korelace vznikla jako průměr součinů z-skórů. Kdybychom neděleli směrodatnými odchylkami, dostaneme průměr součinů odchylek od průměrů, $(x-\mu_X)(y-\mu_Y)$, a ten se jmenuje [kovariance]{.highlight-term} $\operatorname{Cov}(X,Y)$. Je to čitatel korelace, $\rho=\frac{\operatorname{Cov}(X,Y)}{\sigma_X\sigma_Y}$. Kovariance je v jednotkách obou veličin (hodiny krát body), proto se pro srovnání používá korelace. Velký význam má tam, kde se veličiny **sčítají nebo odečítají**: ovlivňuje rozptyl součtu a rozdílu.
@@ -373,7 +429,10 @@ kviz([
   {"q": "Rozptyl součtu Var(X + Y)", "options": ["1,92", "1,2", "0,48"], "correct": 0, "why": "0,6 + 0,6 + 2 · 0,36 = 1,92."},
   {"q": "Rozptyl rozdílu Var(X − Y)", "options": ["0,48", "1,2", "0"], "correct": 0, "why": "0,6 + 0,6 − 2 · 0,36 = 0,48."},
   {"q": "Kdyby X a Y byly nezávislé, Var(X + Y) by bylo", "options": ["1,2", "1,92", "0,6"], "correct": 0, "why": "Kovariance je nula: 0,6 + 0,6."},
-  {"q": "Rozptyl rozdílu dvou nezávislých veličin je rozdíl jejich rozptylů.", "options": ["ano", "ne"], "correct": 1, "why": "Je to jejich součet. Odečtení jedné nejistoty od druhé nejistotu nesníží."}
+  {"q": "Rozptyl rozdílu dvou nezávislých veličin je rozdíl jejich rozptylů.", "options": ["ano", "ne"], "correct": 1, "why": "Je to jejich součet. Odečtení jedné nejistoty od druhé nejistotu nesníží."},
+  {"zadani": "Čtyři soubory dvojic (Anscombeho kvartet) mají stejné průměry, rozptyly i korelaci ρ = 0,82."},
+  {"q": "Vypadají všechny čtyři bodové grafy podobně?", "options": ["ano", "ne"], "correct": 1, "why": "Jeden soubor je zakřivený, jeden má odlehlý bod a v jednom vytváří korelaci jediný bod. Čísla jsou stejná, tvar jiný."},
+  {"q": "Co je nejlepší udělat dřív, než korelaci spočítáte?", "options": ["nakreslit bodový graf", "spočítat ještě medián", "zvětšit soubor"], "correct": 0, "why": "Graf ukáže zakřivení a odlehlé body, které jedno číslo skryje."}
 ])
 ```
 :::
@@ -385,6 +444,7 @@ kviz([
 - Korelace $\rho$ je průměr součinů z-skórů: souhlasní studenti ji zvyšují, nesouhlasní snižují; $-1\leq\rho\leq1$
 - $\rho=\pm1$ je přesná přímka, $\rho=0$ žádná přímková souvislost (nezávislost z toho ale neplyne)
 - Korelace není příčina
+- Stejná korelace může patřit velmi odlišným souborům (Anscombeho kvartet): před výpočtem korelace vždy nakreslete graf
 - U kategorií se souvislost měří pomocí $\chi^2=\sum\frac{(O-E)^2}{E}$ s očekávanými četnostmi $E=\frac{r_i c_j}{n}$; $\chi^2$ roste s velikostí souboru, proto se síla souvislosti porovnává pomocí Cramérova $V\in\langle 0,1\rangle$
 - Kovariance $\operatorname{Cov}(X,Y)$ je čitatel korelace a mění rozptyl součtu a rozdílu: $\operatorname{Var}(X\pm Y)=\operatorname{Var}(X)+\operatorname{Var}(Y)\pm2\operatorname{Cov}(X,Y)$
 - Rozptyly se neodečítají, u nekorelovaných (tedy i nezávislých) veličin se sčítají i pro rozdíl
